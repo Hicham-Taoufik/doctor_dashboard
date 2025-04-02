@@ -7,14 +7,12 @@ let aiData = {};
 let mediaRecorder;
 let audioChunks = [];
 
-// ✅ On load
 window.onload = () => {
   const urlParams = new URLSearchParams(window.location.search);
   currentIPP = urlParams.get('ipp');
   if (currentIPP) loadPatient(currentIPP);
 };
 
-// ✅ Load patient info
 function loadPatient(ipp) {
   fetch(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`, {
     headers: { Authorization: TOKEN }
@@ -22,113 +20,113 @@ function loadPatient(ipp) {
     .then(res => res.json())
     .then(data => {
       document.getElementById("patientInfo").innerHTML = `
-        <h3>👤 ${data.prenom} ${data.nom}</h3>
-        <p><strong>IPP:</strong> ${data.ipp}</p>
-        <p><strong>CIN:</strong> ${data.cin}</p>
-        <p><strong>Téléphone:</strong> ${data.telephone}</p>
-        <p><strong>Adresse:</strong> ${data.adresse}</p>
-        <p><strong>Mutuelle:</strong> ${data.mutuelle || 'Aucune'}</p>`;
+        <strong>Nom:</strong> ${data.prenom} ${data.nom}<br>
+        <strong>IPP:</strong> ${data.ipp}<br>
+        <strong>CIN:</strong> ${data.cin}<br>
+        <strong>Téléphone:</strong> ${data.telephone}<br>
+        <strong>Adresse:</strong> ${data.adresse}<br>
+        <strong>Mutuelle:</strong> ${data.mutuelle || 'Aucune'}
+      `;
     });
 }
 
-// ✅ Start recording
-function startRecording() {
+function startRecording(field) {
+  audioChunks = [];
   navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
     mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
-    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
     mediaRecorder.start();
-    alert('🎤 Enregistrement en cours... Cliquez pour arrêter.');
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    document.getElementById(`${field}Status`).innerText = '🎙️ Enregistrement...';
   });
 }
 
-// ✅ Stop + transcribe diagnostic
-function stopAndTranscribeDiagnosis() {
-  mediaRecorder.stop();
-  mediaRecorder.onstop = () => {
-    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-    const formData = new FormData();
-    formData.append('audio', blob, 'diagnostic.webm');
-
-    fetch(`${BASE_URL}/webhook/transcribe-diagnosis`, {
-      method: 'POST',
-      headers: { Authorization: TOKEN },
-      body: formData
-    })
-      .then(res => res.json())
-      .then(data => {
-        const transcript = Array.isArray(data) ? data[0].transcript : data.transcript || data.text;
-        document.getElementById("diagnosticInput").value = transcript;
-      })
-      .catch(err => alert("❌ Erreur de transcription"));
-  };
+function stopRecording(field) {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunks, { type: 'audio/webm' });
+      sendAudioToAI(blob, field);
+      document.getElementById(`${field}Status`).innerText = '⏳ Transcription...';
+    };
+  }
 }
 
-// ✅ Stop + transcribe prescription
-function stopAndTranscribePrescription() {
-  mediaRecorder.stop();
-  mediaRecorder.onstop = () => {
-    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-    const formData = new FormData();
-    formData.append('audio', blob, 'prescription.webm');
+function sendAudioToAI(blob, field) {
+  const endpoint = field === 'diagnosis' ? `${BASE_URL}/webhook/transcribe-diagnosis` : `${BASE_URL}/webhook/transcribe-prescription`;
+  const formData = new FormData();
+  formData.append("audio", blob, `${field}.webm`);
 
-    fetch(`${BASE_URL}/webhook/transcribe-prescription`, {
-      method: 'POST',
-      headers: { Authorization: TOKEN },
-      body: formData
-    })
-      .then(res => res.json())
-      .then(data => {
-        const transcript = Array.isArray(data) ? data[0].transcript : data.transcript || data.text;
-        document.getElementById("prescriptionInput").value = transcript;
-      })
-      .catch(err => alert("❌ Erreur de transcription"));
-  };
-}
-
-// ✅ Submit diagnostic
-function submitDiagnostic() {
-  const diagnostic = document.getElementById("diagnosticInput").value.trim();
-  if (!diagnostic) return alert("Veuillez entrer un diagnostic.");
-
-  fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
-    body: JSON.stringify({ ipp: currentIPP, diagnostic })
+  fetch(endpoint, {
+    method: "POST",
+    headers: { Authorization: TOKEN },
+    body: formData
   })
-    .then(() => document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.');
+    .then(res => res.json())
+    .then(data => {
+      const text = Array.isArray(data) ? data[0]?.text || data[0]?.transcript : data?.text || data?.transcript;
+      if (!text) {
+        document.getElementById(`${field}Status`).innerText = "⚠️ Transcription vide.";
+        return;
+      }
+      if (field === 'diagnosis') {
+        document.getElementById("diagnosticInput").value = text;
+      } else {
+        document.getElementById("prescriptionInput").value = text;
+      }
+      document.getElementById(`${field}Status`).innerText = "✅ Transcription terminée.";
+    })
+    .catch(err => {
+      console.error("Erreur transcription:", err);
+      document.getElementById(`${field}Status`).innerText = "❌ Erreur de transcription.";
+    });
 }
 
-// ✅ Submit prescription (to AI)
-function submitPrescription() {
-  const prescription = document.getElementById("prescriptionInput").value.trim();
-  if (!prescription) return alert("Veuillez écrire une prescription.");
+function submitDiagnostic() {
+  const diag = document.getElementById("diagnosticInput").value;
+  if (!diag) return alert("Entrez un diagnostic");
+  fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: TOKEN },
+    body: JSON.stringify({ ipp: currentIPP, diagnostic: diag })
+  })
+    .then(() => document.getElementById("diagMessage").innerText = "✅ Diagnostic enregistré.");
+}
 
+function submitPrescription() {
+  const prescription = document.getElementById("prescriptionInput").value;
+  if (!prescription) return alert("Entrez une prescription");
   fetch(`${BASE_URL}/webhook/doctor-submit-prescription`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: TOKEN },
     body: JSON.stringify({ ipp: currentIPP, prescription })
   })
     .then(res => res.json())
     .then(data => {
       aiData = data.suggestion;
-      document.getElementById("aiSuggestion").style.display = 'block';
-      document.getElementById("suggestionInfo").innerHTML = `
-        <p><strong>Médicament:</strong> ${aiData.medicament}</p>
-        <p><strong>Du:</strong> ${aiData.start_date} <strong>au</strong> ${aiData.end_date}</p>
-        <p><strong>Horaires:</strong> ${Object.entries(aiData.schedule).filter(([_, v]) => v).map(([k]) => k).join(', ')}</p>
+      document.getElementById("aiSuggestion").innerHTML = `
+        <h3>💡 Suggestion IA</h3>
+        <label>Médicament:</label>
+        <input id="medicament" value="${aiData.medicament}" />
+
+        <label>Date de début:</label>
+        <input type="date" id="start_date" value="${aiData.start_date}" />
+
+        <label>Date de fin:</label>
+        <input type="date" id="end_date" value="${aiData.end_date}" />
+
+        <label>Horaires :</label><br/>
+        <label><input type="checkbox" id="matin" ${aiData.schedule.matin ? 'checked' : ''}/> Matin</label>
+        <label><input type="checkbox" id="apres_midi" ${aiData.schedule.apres_midi ? 'checked' : ''}/> Après-midi</label>
+        <label><input type="checkbox" id="soir" ${aiData.schedule.soir ? 'checked' : ''}/> Soir</label>
+        <label><input type="checkbox" id="nuit" ${aiData.schedule.nuit ? 'checked' : ''}/> Nuit</label>
+
+        <br><br>
+        <button onclick="validatePrescription()">✅ Valider la prescription</button>
+        <p id="validationMessage"></p>
       `;
-      document.getElementById("medicament").value = aiData.medicament;
-      document.getElementById("start_date").value = aiData.start_date;
-      document.getElementById("end_date").value = aiData.end_date;
-      document.getElementById("matin").checked = aiData.schedule.matin;
-      document.getElementById("apres_midi").checked = aiData.schedule.apres_midi;
-      document.getElementById("soir").checked = aiData.schedule.soir;
-      document.getElementById("nuit").checked = aiData.schedule.nuit;
     });
 }
 
-// ✅ Final validation
 function validatePrescription() {
   const medicament = document.getElementById("medicament").value;
   const start_date = document.getElementById("start_date").value;
@@ -141,8 +139,8 @@ function validatePrescription() {
   };
 
   fetch(`${BASE_URL}/webhook/doctor-validate-prescription`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: TOKEN },
     body: JSON.stringify({
       ipp: currentIPP,
       final_prescription: document.getElementById("prescriptionInput").value,
@@ -152,5 +150,5 @@ function validatePrescription() {
       medicament_name: medicament
     })
   })
-    .then(() => document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.');
+    .then(() => document.getElementById("validationMessage").innerText = "✅ Prescription enregistrée.");
 }

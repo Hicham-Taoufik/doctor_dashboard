@@ -50,6 +50,7 @@
       <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..." rows="4"></textarea>
       <button onclick="submitDiagnostic()">Enregistrer le diagnostic</button>
       <p id="diagMessage"></p>
+      <button onclick="startRecording('diagnostic')">🎙️ Enregistrer le diagnostic</button>
     </section>
 
     <!-- Prescription -->
@@ -57,7 +58,7 @@
       <h2>💊 Rédiger une prescription</h2>
       <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
       <button onclick="submitPrescription()">Soumettre à l'IA</button>
-
+      
       <!-- Suggestion + Edition/Validation -->
       <div id="aiSuggestion" class="card" style="display: none;">
         <h4>🧠 Suggestion IA</h4>
@@ -78,15 +79,19 @@
         <br /><br />
         <button onclick="validatePrescription()">✅ Valider et enregistrer</button>
         <p id="validationMessage"></p>
+        <button onclick="startRecording('prescription')">🎙️ Enregistrer la prescription</button>
       </div>
     </section>
   </div>
 
   <script>
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // ton vrai token ici
+    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // replace with your real token
     let currentIPP = null;
     let aiData = {};
+    let mediaRecorder;
+    let recordedChunks = [];
+    let currentField = null;
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -111,8 +116,7 @@
     }
 
     function submitDiagnostic() {
-      const diagnostic = document.getElementById("diagnosticInput").value.trim();
-      if (!diagnostic) return alert("Veuillez entrer un diagnostic.");
+      const diagnostic = document.getElementById("diagnosticInput").value;
       fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
@@ -124,8 +128,7 @@
     }
 
     function submitPrescription() {
-      const prescription = document.getElementById("prescriptionInput").value.trim();
-      if (!prescription) return alert("Veuillez écrire une prescription.");
+      const prescription = document.getElementById("prescriptionInput").value;
       fetch(`${BASE_URL}/webhook/doctor-submit-prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
@@ -160,6 +163,7 @@
         soir: document.getElementById("soir").checked,
         nuit: document.getElementById("nuit").checked
       };
+
       fetch(`${BASE_URL}/webhook/doctor-validate-prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
@@ -175,6 +179,54 @@
       .then(() => {
         document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.';
       });
+    }
+
+    // Function to start audio recording
+    function startRecording(field) {
+      currentField = field;
+      recordedChunks = [];
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.start();
+          alert("🎤 Enregistrement en cours... Cliquez à nouveau pour arrêter.");
+
+          mediaRecorder.ondataavailable = event => {
+            if (event.data.size > 0) recordedChunks.push(event.data);
+          };
+
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+            transcribeAudio(audioBlob);
+          };
+        })
+        .catch(err => {
+          console.error("Erreur d'enregistrement audio:", err);
+          alert("Impossible d'accéder au microphone.");
+        });
+    }
+
+    // Function to transcribe audio
+    function transcribeAudio(blob) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64Audio = reader.result.split(',')[1];
+        fetch(`${BASE_URL}/webhook/audio-transcription`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
+          body: JSON.stringify({ audio_base64: base64Audio })
+        })
+        .then(res => res.json())
+        .then(data => {
+          const text = data.transcription || '';
+          document.getElementById(currentField === 'diagnostic' ? 'diagnosticInput' : 'prescriptionInput').value = text;
+        })
+        .catch(err => {
+          console.error("Erreur de transcription:", err);
+          alert("Transcription échouée.");
+        });
+      };
+      reader.readAsDataURL(blob);
     }
   </script>
 </body>

@@ -7,55 +7,41 @@
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 20px;
-      background: #f4f6f8;
-      color: #333;
+    .flex-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
     }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 40px;
-      color: #007BFF;
+    .half-width {
+      flex: 1;
+      min-width: 300px;
     }
-
-    .section {
-      background: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 30px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    }
-
     .card {
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
       padding: 15px;
-      background: #f9fafb;
-      border-left: 4px solid #007BFF;
       border-radius: 8px;
       margin-top: 10px;
     }
-
     input, textarea {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
     }
-
+    .section h2 {
+      margin-bottom: 10px;
+    }
     button {
-      margin-top: 10px;
-      padding: 10px 20px;
-      background: #007BFF;
-      border: none;
+      background-color: #007BFF;
       color: white;
-      font-weight: bold;
+      padding: 10px 20px;
       border-radius: 6px;
       cursor: pointer;
+      border: none;
+      font-weight: bold;
     }
-
     button:hover {
-      background: #0056b3;
+      background-color: #0056b3;
     }
   </style>
 </head>
@@ -75,12 +61,8 @@
       <h2>🩻 Ajouter un diagnostic</h2>
       <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..." rows="4"></textarea>
       <button onclick="submitDiagnostic()">Enregistrer le diagnostic</button>
+      <button id="recordAudioButton">🎙️ Enregistrer Audio</button>
       <p id="diagMessage"></p>
-
-      <!-- Audio Input for Diagnosis -->
-      <label for="audioFile">Téléchargez un fichier audio :</label>
-      <input type="file" id="audioFile" accept="audio/*" />
-      <button id="recordAudioButton">Enregistrer un audio</button>
     </section>
 
     <!-- Prescription -->
@@ -88,8 +70,9 @@
       <h2>💊 Rédiger une prescription</h2>
       <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
       <button onclick="submitPrescription()">Soumettre à l'IA</button>
+      <button id="recordAudioButtonPrescription">🎙️ Enregistrer Audio (Prescription)</button>
 
-      <!-- Suggestion + Editing -->
+      <!-- Suggestion + Edition/Validation -->
       <div id="aiSuggestion" class="card" style="display: none;">
         <h4>🧠 Suggestion IA</h4>
         <div id="suggestionInfo"></div>
@@ -113,16 +96,10 @@
     </section>
   </div>
 
-  <!-- Transcription Result -->
-  <section class="section">
-    <h2>📑 Transcription Résultat</h2>
-    <div id="transcriptionResult" class="card"></div>
-  </section>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/recordrtc/5.6.1/RecordRTC.min.js"></script>
   <script>
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
     const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA';
+
     let currentIPP = null;
     let aiData = {};
     let audioBlob = null;
@@ -133,6 +110,7 @@
       if (currentIPP) loadPatient(currentIPP);
     };
 
+    // Load patient info
     function loadPatient(ipp) {
       fetch(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`, {
         headers: { Authorization: TOKEN }
@@ -146,20 +124,14 @@
             <p><strong>Téléphone:</strong> ${data.telephone}</p>
             <p><strong>Adresse:</strong> ${data.adresse}</p>
             <p><strong>Mutuelle:</strong> ${data.mutuelle || 'Aucune'}</p>`;
-        });
+        })
+        .catch(err => console.error("Erreur chargement patient:", err));
     }
 
-    // Handle File Upload for Audio
-    document.getElementById('audioFile').addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        audioBlob = file;
-      }
-    });
-
-    // Start/Stop recording audio
+    // Start/Stop Audio Recording
     let mediaRecorder;
     let audioChunks = [];
+
     document.getElementById('recordAudioButton').addEventListener('click', () => {
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
@@ -181,6 +153,27 @@
       }
     });
 
+    document.getElementById('recordAudioButtonPrescription').addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      } else {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then((stream) => {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (event) => {
+              audioChunks.push(event.data);
+            };
+            mediaRecorder.onstop = () => {
+              audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+              audioChunks = [];
+              console.log("Prescription audio recording stopped and stored.");
+            };
+            mediaRecorder.start();
+          })
+          .catch((error) => console.error('Audio recording failed:', error));
+      }
+    });
+
     // Submit Audio for Transcription
     function submitAudioForTranscription() {
       if (!audioBlob) return alert("Veuillez d'abord enregistrer ou télécharger un fichier audio.");
@@ -195,7 +188,8 @@
       })
         .then(response => response.json())
         .then(data => {
-          document.getElementById('transcriptionResult').innerText = data.transcribedText || 'Transcription failed.';
+          const transcribedText = data.transcribedText || 'Transcription failed.';
+          document.getElementById('diagnosticInput').value = transcribedText;
         })
         .catch((error) => console.error("Erreur transcription:", error));
     }

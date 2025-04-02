@@ -7,38 +7,55 @@
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
-    .flex-row {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f6f8;
+      color: #333;
     }
-    .half-width {
-      flex: 1;
-      min-width: 300px;
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #007BFF;
     }
+
+    .section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
     .card {
-      background-color: #f9f9f9;
-      border: 1px solid #ddd;
       padding: 15px;
+      background: #f9fafb;
+      border-left: 4px solid #007BFF;
       border-radius: 8px;
       margin-top: 10px;
     }
+
     input, textarea {
       width: 100%;
       padding: 8px;
       margin-top: 5px;
     }
-    .mic-button {
-      background-color: #007BFF;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
+
+    button {
       margin-top: 10px;
+      padding: 10px 20px;
+      background: #007BFF;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
     }
-    .mic-button:hover {
-      background-color: #0056b3;
+
+    button:hover {
+      background: #0056b3;
     }
   </style>
 </head>
@@ -58,11 +75,12 @@
       <h2>🩻 Ajouter un diagnostic</h2>
       <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..." rows="4"></textarea>
       <button onclick="submitDiagnostic()">Enregistrer le diagnostic</button>
+      <p id="diagMessage"></p>
 
-      <!-- Mic buttons for diagnostic -->
-      <button class="mic-button" onclick="startRecording('diagnostic')">🎙️ Démarrer l'enregistrement</button>
-      <button class="mic-button" onclick="stopRecording('diagnostic')">❌ Arrêter l'enregistrement</button>
-      <p id="diagnosticMessage"></p>
+      <!-- Audio Input for Diagnosis -->
+      <label for="audioFile">Téléchargez un fichier audio :</label>
+      <input type="file" id="audioFile" accept="audio/*" />
+      <button id="recordAudioButton">Enregistrer un audio</button>
     </section>
 
     <!-- Prescription -->
@@ -71,11 +89,7 @@
       <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
       <button onclick="submitPrescription()">Soumettre à l'IA</button>
 
-      <!-- Mic buttons for prescription -->
-      <button class="mic-button" onclick="startRecording('prescription')">🎙️ Démarrer l'enregistrement</button>
-      <button class="mic-button" onclick="stopRecording('prescription')">❌ Arrêter l'enregistrement</button>
-
-      <!-- Suggestion + Edition/Validation -->
+      <!-- Suggestion + Editing -->
       <div id="aiSuggestion" class="card" style="display: none;">
         <h4>🧠 Suggestion IA</h4>
         <div id="suggestionInfo"></div>
@@ -99,90 +113,129 @@
     </section>
   </div>
 
+  <!-- Transcription Result -->
+  <section class="section">
+    <h2>📑 Transcription Résultat</h2>
+    <div id="transcriptionResult" class="card"></div>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/recordrtc/5.6.1/RecordRTC.min.js"></script>
   <script>
-    let recorder = null;
+    const BASE_URL = 'https://workflows.aphelionxinnovations.com';
+    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA';
+    let currentIPP = null;
+    let aiData = {};
     let audioBlob = null;
-    let diagnosticAudioBlob = null;
-    let prescriptionAudioBlob = null;
 
-    // Start recording for either diagnostic or prescription
-    function startRecording(type) {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      currentIPP = urlParams.get('ipp');
+      if (currentIPP) loadPatient(currentIPP);
+    };
+
+    function loadPatient(ipp) {
+      fetch(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`, {
+        headers: { Authorization: TOKEN }
+      })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("patientInfo").innerHTML = `
+            <h3>👤 ${data.prenom} ${data.nom}</h3>
+            <p><strong>IPP:</strong> ${data.ipp}</p>
+            <p><strong>CIN:</strong> ${data.cin}</p>
+            <p><strong>Téléphone:</strong> ${data.telephone}</p>
+            <p><strong>Adresse:</strong> ${data.adresse}</p>
+            <p><strong>Mutuelle:</strong> ${data.mutuelle || 'Aucune'}</p>`;
+        });
+    }
+
+    // Handle File Upload for Audio
+    document.getElementById('audioFile').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        audioBlob = file;
+      }
+    });
+
+    // Start/Stop recording audio
+    let mediaRecorder;
+    let audioChunks = [];
+    document.getElementById('recordAudioButton').addEventListener('click', () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      } else {
         navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(stream => {
-            recorder = new MediaRecorder(stream);
-            recorder.start();
-            let chunks = [];
-
-            recorder.ondataavailable = function(e) {
-              chunks.push(e.data);
+          .then((stream) => {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = (event) => {
+              audioChunks.push(event.data);
             };
-
-            recorder.onstop = function() {
-              if (type === 'diagnostic') {
-                diagnosticAudioBlob = new Blob(chunks, { type: 'audio/wav' });
-                const audioUrl = URL.createObjectURL(diagnosticAudioBlob);
-                const audioElement = new Audio(audioUrl);
-                audioElement.play();
-              } else if (type === 'prescription') {
-                prescriptionAudioBlob = new Blob(chunks, { type: 'audio/wav' });
-                const audioUrl = URL.createObjectURL(prescriptionAudioBlob);
-                const audioElement = new Audio(audioUrl);
-                audioElement.play();
-              }
+            mediaRecorder.onstop = () => {
+              audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+              audioChunks = [];
+              console.log("Audio recording stopped and stored.");
             };
-
-            // Handle recording
-            alert(`Recording ${type} started...`);
+            mediaRecorder.start();
           })
-          .catch(err => {
-            console.error("Error accessing microphone:", err);
-          });
+          .catch((error) => console.error('Audio recording failed:', error));
       }
+    });
+
+    // Submit Audio for Transcription
+    function submitAudioForTranscription() {
+      if (!audioBlob) return alert("Veuillez d'abord enregistrer ou télécharger un fichier audio.");
+
+      const formData = new FormData();
+      formData.append('audio', audioBlob);
+
+      fetch(`${BASE_URL}/webhook/transcribe-diagnosis`, {
+        method: 'POST',
+        headers: { 'Authorization': TOKEN },
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('transcriptionResult').innerText = data.transcribedText || 'Transcription failed.';
+        })
+        .catch((error) => console.error("Erreur transcription:", error));
     }
 
-    // Stop recording for either diagnostic or prescription
-    function stopRecording(type) {
-      if (recorder) {
-        recorder.stop();
-        alert(`${type.charAt(0).toUpperCase() + type.slice(1)} recording stopped.`);
-      }
-    }
-
-    // Submit diagnostic data
+    // Submit Diagnostic
     function submitDiagnostic() {
       const diagnostic = document.getElementById("diagnosticInput").value.trim();
+      if (!diagnostic) return alert("Veuillez entrer un diagnostic.");
       fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
         body: JSON.stringify({ ipp: currentIPP, diagnostic })
       })
-      .then(() => {
-        document.getElementById("diagnosticMessage").innerText = '✅ Diagnostic enregistré.';
-      });
+        .then(() => document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.')
+        .catch((err) => console.error("Erreur enregistrement diagnostic:", err));
     }
 
-    // Submit prescription data
+    // Submit Prescription
     function submitPrescription() {
       const prescription = document.getElementById("prescriptionInput").value.trim();
+      if (!prescription) return alert("Veuillez écrire une prescription.");
       fetch(`${BASE_URL}/webhook/doctor-submit-prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
         body: JSON.stringify({ ipp: currentIPP, prescription })
       })
-      .then(res => res.json())
-      .then(data => {
-        aiData = data.suggestion;
-        document.getElementById("aiSuggestion").style.display = 'block';
-        document.getElementById("suggestionInfo").innerHTML = `
-          <p><strong>Médicament:</strong> ${aiData.medicament}</p>
-          <p><strong>Du:</strong> ${aiData.start_date} <strong>au</strong> ${aiData.end_date}</p>
-          <p><strong>Horaires:</strong> ${Object.entries(aiData.schedule).filter(([_, v]) => v).map(([k]) => k).join(', ')}</p>
-        `;
-      });
+        .then(res => res.json())
+        .then(data => {
+          aiData = data.suggestion;
+          document.getElementById("aiSuggestion").style.display = 'block';
+          document.getElementById("suggestionInfo").innerHTML = `
+            <p><strong>Médicament suggéré:</strong> ${aiData.medicament}</p>
+            <p><strong>Du:</strong> ${aiData.start_date} <strong>au</strong> ${aiData.end_date}</p>
+            <p><strong>Horaires suggérés:</strong> ${Object.entries(aiData.schedule).filter(([_, v]) => v).map(([k]) => k).join(', ')}</p>
+          `;
+        })
+        .catch(err => console.error("Erreur suggestion IA:", err));
     }
 
-    // Validate prescription after AI suggestion
+    // Validate Prescription
     function validatePrescription() {
       const medicament = document.getElementById("medicament").value;
       const start_date = document.getElementById("start_date").value;
@@ -193,7 +246,6 @@
         soir: document.getElementById("soir").checked,
         nuit: document.getElementById("nuit").checked,
       };
-
       fetch(`${BASE_URL}/webhook/doctor-validate-prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
@@ -206,9 +258,8 @@
           medicament_name: medicament
         })
       })
-      .then(() => {
-        document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.';
-      });
+        .then(() => document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.')
+        .catch((err) => console.error("Erreur validation prescription:", err));
     }
   </script>
 </body>

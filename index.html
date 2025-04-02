@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Médecin</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <h1>🩺 Dashboard du Médecin</h1>
+
+  <!-- Patient Info -->
+  <section class="section">
+    <h2>📋 Informations du patient</h2>
+    <div id="patientInfo" class="card"></div>
+  </section>
+
+  <!-- Historique -->
+  <section class="section">
+    <h2>📖 Historique médical</h2>
+    <div id="patientHistory" class="card"></div>
+  </section>
+
+  <!-- Diagnostic -->
+  <section class="section">
+    <h2>🩻 Ajouter un diagnostic</h2>
+    <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..." rows="4"></textarea>
+    <button onclick="submitDiagnostic()">Enregistrer le diagnostic</button>
+    <p id="diagMessage"></p>
+  </section>
+
+  <!-- Prescription libre -->
+  <section class="section">
+    <h2>💊 Rédiger une prescription</h2>
+    <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
+    <button onclick="submitPrescription()">Soumettre à l'IA</button>
+    <div id="aiSuggestion" class="card"></div>
+  </section>
+
+  <!-- Validation prescription -->
+  <section class="section">
+    <h2>✅ Valider la prescription</h2>
+    <button onclick="validatePrescription()">Valider et enregistrer</button>
+    <p id="validationMessage"></p>
+  </section>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

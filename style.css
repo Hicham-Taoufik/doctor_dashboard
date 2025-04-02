@@ -1,0 +1,53 @@
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 20px;
+  background: #f4f6f8;
+  color: #333;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 40px;
+  color: #007BFF;
+}
+
+.section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card {
+  padding: 15px;
+  background: #f9fafb;
+  border-left: 4px solid #007BFF;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+textarea {
+  width: 100%;
+  padding: 10px;
+  font-size: 15px;
+  margin-top: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #007BFF;
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0056b3;
+}

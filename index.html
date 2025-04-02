@@ -157,33 +157,38 @@
       }
     }
 
-    function sendAudioToAI(blob, field) {
-      const endpoint = field === 'diagnosis'
-        ? `${BASE_URL}/webhook/transcribe-diagnosis`
-        : `${BASE_URL}/webhook/transcribe-prescription`;
+function sendAudioToAI(blob, field) {
+  const endpoint = field === 'diagnosis'
+    ? `${BASE_URL}/webhook/transcribe-diagnosis`
+    : `${BASE_URL}/webhook/transcribe-prescription`;
 
-      const formData = new FormData();
-      formData.append("audio", blob, `${field}.webm`);
+  const formData = new FormData();
+  formData.append("audio", blob, `${field}.webm`);
 
-      fetch(endpoint, {
-        method: "POST",
-        headers: { Authorization: TOKEN },
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        const text = data.text || "";
-        if (field === 'diagnosis') {
-          document.getElementById("diagnosticInput").value = text;
-        } else {
-          document.getElementById("prescriptionInput").value = text;
-        }
-        document.getElementById(`${field}Status`).innerText = "✅ Transcription terminée.";
-      })
-      .catch(err => {
-        document.getElementById(`${field}Status`).innerText = "❌ Erreur de transcription.";
-      });
+  fetch(endpoint, {
+    method: "POST",
+    headers: { Authorization: TOKEN },
+    body: formData
+  })
+  .then(res => res.json())
+  .then(data => {
+    // ✅ Corrected extraction
+    const text = Array.isArray(data) ? data[0].text : data.text || "";
+
+    if (field === 'diagnosis') {
+      document.getElementById("diagnosticInput").value = text;
+    } else {
+      document.getElementById("prescriptionInput").value = text;
     }
+
+    document.getElementById(`${field}Status`).innerText = "✅ Transcription terminée.";
+  })
+  .catch(err => {
+    document.getElementById(`${field}Status`).innerText = "❌ Erreur de transcription.";
+    console.error("Erreur transcription:", err);
+  });
+}
+
 
     function submitDiagnostic() {
       const diag = document.getElementById("diagnosticInput").value;

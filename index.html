@@ -6,6 +6,17 @@
   <title>Dashboard - Médecin</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    .flex-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .half-width {
+      flex: 1;
+      min-width: 300px;
+    }
+  </style>
 </head>
 <body>
   <h1>🩺 Dashboard du Médecin</h1>
@@ -16,27 +27,24 @@
     <div id="patientInfo" class="card"></div>
   </section>
 
-  <!-- Historique -->
-  <section class="section">
-    <h2>📖 Historique médical</h2>
-    <div id="patientHistory" class="card"></div>
-  </section>
+  <!-- Diagnostic + Prescription Side by Side -->
+  <div class="flex-row">
+    <!-- Diagnostic -->
+    <section class="section half-width">
+      <h2>🩻 Ajouter un diagnostic</h2>
+      <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..." rows="4"></textarea>
+      <button onclick="submitDiagnostic()">Enregistrer le diagnostic</button>
+      <p id="diagMessage"></p>
+    </section>
 
-  <!-- Diagnostic -->
-  <section class="section">
-    <h2>🩻 Ajouter un diagnostic</h2>
-    <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..." rows="4"></textarea>
-    <button onclick="submitDiagnostic()">Enregistrer le diagnostic</button>
-    <p id="diagMessage"></p>
-  </section>
-
-  <!-- Prescription libre -->
-  <section class="section">
-    <h2>💊 Rédiger une prescription</h2>
-    <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
-    <button onclick="submitPrescription()">Soumettre à l'IA</button>
-    <div id="aiSuggestion" class="card"></div>
-  </section>
+    <!-- Prescription libre -->
+    <section class="section half-width">
+      <h2>💊 Rédiger une prescription</h2>
+      <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
+      <button onclick="submitPrescription()">Soumettre à l'IA</button>
+      <div id="aiSuggestion" class="card"></div>
+    </section>
+  </div>
 
   <!-- Validation prescription -->
   <section class="section">
@@ -45,6 +53,95 @@
     <p id="validationMessage"></p>
   </section>
 
-  <script src="script.js" defer></script>
+  <script>
+    const BASE_URL = 'https://workflows.aphelionxinnovations.com';
+    const TOKEN = 'Bearer YOUR_JWT_TOKEN_HERE'; // Replace with your real token
+    let currentIPP = null;
+    let aiData = {};
+
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      currentIPP = urlParams.get('ipp');
+      if (currentIPP) {
+        loadPatient(currentIPP);
+      }
+    };
+
+    function loadPatient(ipp) {
+      fetch(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`, {
+        headers: { Authorization: TOKEN }
+      })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("patientInfo").innerHTML = `
+            <h3>👤 ${data.prenom} ${data.nom}</h3>
+            <p><strong>IPP:</strong> ${data.ipp}</p>
+            <p><strong>CIN:</strong> ${data.cin}</p>
+            <p><strong>Téléphone:</strong> ${data.telephone}</p>
+            <p><strong>Adresse:</strong> ${data.adresse}</p>
+            <p><strong>Mutuelle:</strong> ${data.mutuelle || 'Aucune'}</p>`;
+        });
+    }
+
+    function submitDiagnostic() {
+      const diagnostic = document.getElementById("diagnosticInput").value;
+      fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: TOKEN
+        },
+        body: JSON.stringify({ ipp: currentIPP, diagnostic })
+      })
+        .then(res => res.json())
+        .then(() => {
+          document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.';
+        });
+    }
+
+    function submitPrescription() {
+      const prescription = document.getElementById("prescriptionInput").value;
+      fetch(`${BASE_URL}/webhook/doctor-submit-prescription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: TOKEN
+        },
+        body: JSON.stringify({ ipp: currentIPP, prescription })
+      })
+        .then(res => res.json())
+        .then(data => {
+          aiData = data.suggestion;
+          document.getElementById("aiSuggestion").innerHTML = `
+            <h4>🧠 Suggestion IA</h4>
+            <p><strong>Médicament:</strong> ${aiData.medicament}</p>
+            <p><strong>Du:</strong> ${aiData.start_date} <strong>au</strong> ${aiData.end_date}</p>
+            <p><strong>Horaires:</strong> ${['matin', 'apres_midi', 'soir', 'nuit'].filter(p => aiData.schedule[p]).join(', ')}</p>
+          `;
+        });
+    }
+
+    function validatePrescription() {
+      fetch(`${BASE_URL}/webhook/doctor-validate-prescription`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: TOKEN
+        },
+        body: JSON.stringify({
+          ipp: currentIPP,
+          final_prescription: document.getElementById("prescriptionInput").value,
+          start_date: aiData.start_date,
+          end_date: aiData.end_date,
+          schedule: aiData.schedule,
+          medicament_name: aiData.medicament
+        })
+      })
+        .then(res => res.json())
+        .then(() => {
+          document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.';
+        });
+    }
+  </script>
 </body>
 </html>

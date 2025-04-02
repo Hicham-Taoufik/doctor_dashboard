@@ -1,8 +1,13 @@
 const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // use your real token
+const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA';
 
 let currentIPP = null;
 let aiData = {};
+let recorder = null;
+let audioBlob = null;
+let timerInterval = null;
+let seconds = 0;
+let recordingTime = 30;  // Default to 30 seconds
 
 window.onload = () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -15,18 +20,6 @@ window.onload = () => {
     console.error('IPP not found in URL.');
   }
 };
-
-// Function to display the loading modal
-function showLoadingModal() {
-  const loadingModal = document.getElementById("loadingModal");
-  loadingModal.style.display = "block";
-}
-
-// Function to hide the loading modal
-function hideLoadingModal() {
-  const loadingModal = document.getElementById("loadingModal");
-  loadingModal.style.display = "none";
-}
 
 function loadPatient(ipp) {
   fetch(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`, {
@@ -42,7 +35,50 @@ function loadPatient(ipp) {
         <p><strong>Adresse:</strong> ${data.adresse}</p>
         <p><strong>Mutuelle:</strong> ${data.mutuelle || 'Aucune'}</p>`;
     })
-    .catch(err => console.error("Erreur lors du chargement du patient:", err));
+    .catch(err => console.error("Error loading patient:", err));
+}
+
+function startRecording() {
+  recordingTime = document.getElementById("recordTime").value || 30; // Get custom recording time
+
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        recorder = new MediaRecorder(stream);
+        recorder.start();
+        console.log("Recording started...");
+        let chunks = [];
+        recorder.ondataavailable = function(e) {
+          chunks.push(e.data);
+        };
+        recorder.onstop = function() {
+          audioBlob = new Blob(chunks, { type: 'audio/wav' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audioElement = new Audio(audioUrl);
+          audioElement.play();
+        };
+
+        // Start the timer
+        timerInterval = setInterval(() => {
+          seconds++;
+          document.getElementById("timer").innerText = seconds;
+          if (seconds >= recordingTime) {
+            stopRecording();
+          }
+        }, 1000);
+      })
+      .catch(err => {
+        console.error("Error accessing microphone:", err);
+      });
+  }
+}
+
+function stopRecording() {
+  if (recorder) {
+    recorder.stop();
+    console.log("Recording stopped.");
+    clearInterval(timerInterval); // Stop the timer
+  }
 }
 
 function submitDiagnostic() {
@@ -52,27 +88,16 @@ function submitDiagnostic() {
     return;
   }
 
-  // Show loading modal
-  showLoadingModal();
-
   fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: TOKEN
-    },
+    headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
     body: JSON.stringify({ ipp: currentIPP, diagnostic })
   })
     .then(res => res.json())
     .then(() => {
       document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.';
-      // Hide the loading modal
-      hideLoadingModal();
     })
-    .catch(err => {
-      console.error("Erreur lors de l'enregistrement du diagnostic:", err);
-      hideLoadingModal();
-    });
+    .catch(err => console.error("Error submitting diagnostic:", err));
 }
 
 function submitPrescription() {
@@ -82,15 +107,9 @@ function submitPrescription() {
     return;
   }
 
-  // Show loading modal
-  showLoadingModal();
-
   fetch(`${BASE_URL}/webhook/doctor-submit-prescription`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: TOKEN
-    },
+    headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
     body: JSON.stringify({ ipp: currentIPP, prescription })
   })
     .then(res => res.json())
@@ -114,7 +133,7 @@ function submitPrescription() {
 
         <label>Médicament:</label>
         <input id="medicament" value="${aiData.medicament}" />
-        
+
         <label>Date début:</label>
         <input type="date" id="start_date" value="${aiData.start_date}" />
 
@@ -132,20 +151,11 @@ function submitPrescription() {
         <button onclick="validatePrescription()">✅ Valider et enregistrer</button>
         <p id="validationMessage"></p>
       `;
-      hideLoadingModal();
     })
-    .catch(err => {
-      console.error("Erreur suggestion IA:", err);
-      hideLoadingModal();
-    });
+    .catch(err => console.error("Error suggestion IA:", err));
 }
 
 function validatePrescription() {
-  if (!aiData || !document.getElementById("medicament")) {
-    alert("Soumettez d'abord une prescription à l'IA.");
-    return;
-  }
-
   const medicament = document.getElementById("medicament").value;
   const start_date = document.getElementById("start_date").value;
   const end_date = document.getElementById("end_date").value;
@@ -153,7 +163,7 @@ function validatePrescription() {
     matin: document.getElementById("matin").checked,
     apres_midi: document.getElementById("apres_midi").checked,
     soir: document.getElementById("soir").checked,
-    nuit: document.getElementById("nuit").checked,
+    nuit: document.getElementById("nuit").checked
   };
 
   fetch(`${BASE_URL}/webhook/doctor-validate-prescription`, {
@@ -171,10 +181,6 @@ function validatePrescription() {
     .then(res => res.json())
     .then(() => {
       document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.';
-      hideLoadingModal();
     })
-    .catch(err => {
-      console.error("Erreur validation prescription:", err);
-      hideLoadingModal();
-    });
+    .catch(err => console.error("Error validating prescription:", err));
 }

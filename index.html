@@ -28,9 +28,6 @@
       padding: 8px;
       margin-top: 5px;
     }
-    .section h2 {
-      margin-bottom: 10px;
-    }
     .mic-button {
       background-color: #007BFF;
       color: white;
@@ -42,11 +39,6 @@
     }
     .mic-button:hover {
       background-color: #0056b3;
-    }
-    .timer {
-      font-size: 20px;
-      color: #28a745;
-      margin-top: 10px;
     }
   </style>
 </head>
@@ -66,7 +58,11 @@
       <h2>🩻 Ajouter un diagnostic</h2>
       <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..." rows="4"></textarea>
       <button onclick="submitDiagnostic()">Enregistrer le diagnostic</button>
-      <p id="diagMessage"></p>
+
+      <!-- Mic buttons for diagnostic -->
+      <button class="mic-button" onclick="startRecording('diagnostic')">🎙️ Démarrer l'enregistrement</button>
+      <button class="mic-button" onclick="stopRecording('diagnostic')">❌ Arrêter l'enregistrement</button>
+      <p id="diagnosticMessage"></p>
     </section>
 
     <!-- Prescription -->
@@ -74,6 +70,10 @@
       <h2>💊 Rédiger une prescription</h2>
       <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
       <button onclick="submitPrescription()">Soumettre à l'IA</button>
+
+      <!-- Mic buttons for prescription -->
+      <button class="mic-button" onclick="startRecording('prescription')">🎙️ Démarrer l'enregistrement</button>
+      <button class="mic-button" onclick="stopRecording('prescription')">❌ Arrêter l'enregistrement</button>
 
       <!-- Suggestion + Edition/Validation -->
       <div id="aiSuggestion" class="card" style="display: none;">
@@ -99,75 +99,72 @@
     </section>
   </div>
 
-  <!-- Mic Button -->
-  <section class="section">
-    <h2>🎤 Enregistrer un diagnostic ou une prescription</h2>
-    <button class="mic-button" onclick="startRecording()">🎙️ Démarrer l'enregistrement</button>
-    <button class="mic-button" onclick="stopRecording()">❌ Arrêter l'enregistrement</button>
-    <p class="timer" id="timer">0</p>
-  </section>
-
   <script>
     let recorder = null;
     let audioBlob = null;
-    let timerInterval = null;
-    let seconds = 0;
-    let recordingTime = 30; // Default 30 seconds
+    let diagnosticAudioBlob = null;
+    let prescriptionAudioBlob = null;
 
-    function startRecording() {
+    // Start recording for either diagnostic or prescription
+    function startRecording(type) {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         navigator.mediaDevices.getUserMedia({ audio: true })
           .then(stream => {
             recorder = new MediaRecorder(stream);
             recorder.start();
             let chunks = [];
+
             recorder.ondataavailable = function(e) {
               chunks.push(e.data);
             };
+
             recorder.onstop = function() {
-              audioBlob = new Blob(chunks, { type: 'audio/wav' });
-              const audioUrl = URL.createObjectURL(audioBlob);
-              const audioElement = new Audio(audioUrl);
-              audioElement.play();
+              if (type === 'diagnostic') {
+                diagnosticAudioBlob = new Blob(chunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(diagnosticAudioBlob);
+                const audioElement = new Audio(audioUrl);
+                audioElement.play();
+              } else if (type === 'prescription') {
+                prescriptionAudioBlob = new Blob(chunks, { type: 'audio/wav' });
+                const audioUrl = URL.createObjectURL(prescriptionAudioBlob);
+                const audioElement = new Audio(audioUrl);
+                audioElement.play();
+              }
             };
 
-            // Start timer
-            timerInterval = setInterval(() => {
-              seconds++;
-              document.getElementById("timer").innerText = seconds;
-              if (seconds >= recordingTime) {
-                stopRecording();
-              }
-            }, 1000);
+            // Handle recording
+            alert(`Recording ${type} started...`);
           })
-          .catch(err => console.error("Error accessing microphone:", err));
+          .catch(err => {
+            console.error("Error accessing microphone:", err);
+          });
       }
     }
 
-    function stopRecording() {
+    // Stop recording for either diagnostic or prescription
+    function stopRecording(type) {
       if (recorder) {
         recorder.stop();
-        clearInterval(timerInterval); // Stop the timer
-        console.log("Recording stopped.");
+        alert(`${type.charAt(0).toUpperCase() + type.slice(1)} recording stopped.`);
       }
     }
 
+    // Submit diagnostic data
     function submitDiagnostic() {
       const diagnostic = document.getElementById("diagnosticInput").value.trim();
-      if (!diagnostic) return alert("Veuillez entrer un diagnostic.");
       fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
         body: JSON.stringify({ ipp: currentIPP, diagnostic })
       })
       .then(() => {
-        document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.';
+        document.getElementById("diagnosticMessage").innerText = '✅ Diagnostic enregistré.';
       });
     }
 
+    // Submit prescription data
     function submitPrescription() {
       const prescription = document.getElementById("prescriptionInput").value.trim();
-      if (!prescription) return alert("Veuillez écrire une prescription.");
       fetch(`${BASE_URL}/webhook/doctor-submit-prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
@@ -176,7 +173,6 @@
       .then(res => res.json())
       .then(data => {
         aiData = data.suggestion;
-
         document.getElementById("aiSuggestion").style.display = 'block';
         document.getElementById("suggestionInfo").innerHTML = `
           <p><strong>Médicament:</strong> ${aiData.medicament}</p>
@@ -186,6 +182,7 @@
       });
     }
 
+    // Validate prescription after AI suggestion
     function validatePrescription() {
       const medicament = document.getElementById("medicament").value;
       const start_date = document.getElementById("start_date").value;
@@ -194,7 +191,7 @@
         matin: document.getElementById("matin").checked,
         apres_midi: document.getElementById("apres_midi").checked,
         soir: document.getElementById("soir").checked,
-        nuit: document.getElementById("nuit").checked
+        nuit: document.getElementById("nuit").checked,
       };
 
       fetch(`${BASE_URL}/webhook/doctor-validate-prescription`, {

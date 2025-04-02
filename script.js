@@ -1,6 +1,5 @@
 const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA';
-
+const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // Use your real token
 
 let currentIPP = null;
 let aiData = {};
@@ -8,7 +7,7 @@ let aiData = {};
 window.onload = () => {
   const urlParams = new URLSearchParams(window.location.search);
   currentIPP = urlParams.get('ipp');
-  console.log('Extracted IPP:', currentIPP);
+  console.log('Extracted IPP:', currentIPP); // ✅ Debug IPP from URL
 
   if (currentIPP) {
     loadPatient(currentIPP);
@@ -24,7 +23,7 @@ function loadPatient(ipp) {
     .then(res => res.json())
     .then(data => {
       if (!data || !data.nom) {
-        console.error('Patient non trouvé:', data);
+        console.error('Invalid data received:', data);
         return;
       }
       document.getElementById("patientInfo").innerHTML = `
@@ -35,7 +34,7 @@ function loadPatient(ipp) {
         <p><strong>Adresse:</strong> ${data.adresse}</p>
         <p><strong>Mutuelle:</strong> ${data.mutuelle || 'Aucune'}</p>`;
     })
-    .catch(err => console.error("Erreur chargement patient:", err));
+    .catch(err => console.error("Erreur lors du chargement du patient:", err));
 }
 
 function submitDiagnostic() {
@@ -57,7 +56,7 @@ function submitDiagnostic() {
     .then(() => {
       document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.';
     })
-    .catch(err => console.error("Erreur enregistrement diagnostic:", err));
+    .catch(err => console.error("Erreur lors de l'enregistrement du diagnostic:", err));
 }
 
 function submitPrescription() {
@@ -136,10 +135,7 @@ function validatePrescription() {
 
   fetch(`${BASE_URL}/webhook/doctor-validate-prescription`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: TOKEN
-    },
+    headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
     body: JSON.stringify({
       ipp: currentIPP,
       final_prescription: document.getElementById("prescriptionInput").value,

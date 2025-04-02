@@ -48,6 +48,11 @@
       flex: 1;
       min-width: 300px;
     }
+    .status {
+      font-size: 14px;
+      color: red;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -66,8 +71,9 @@
       <h2>🩻 Diagnostic</h2>
       <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..."></textarea>
       <div>
-        <button onclick="startRecording('diagnosis')">🎙️ Démarrer</button>
+        <button id="startDiagnosisBtn" onclick="startRecording('diagnosis')">🎙️ Démarrer</button>
         <button onclick="stopRecording('diagnosis')">🛑 Arrêter et Transcrire</button>
+        <span id="diagnosisStatus" class="status"></span>
       </div>
       <button onclick="submitDiagnostic()">✅ Enregistrer le diagnostic</button>
       <p id="diagMessage"></p>
@@ -77,8 +83,9 @@
       <h2>💊 Prescription</h2>
       <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3x/j pendant 5j..."></textarea>
       <div>
-        <button onclick="startRecording('prescription')">🎙️ Démarrer</button>
+        <button id="startPrescriptionBtn" onclick="startRecording('prescription')">🎙️ Démarrer</button>
         <button onclick="stopRecording('prescription')">🛑 Arrêter et Transcrire</button>
+        <span id="prescriptionStatus" class="status"></span>
       </div>
       <button onclick="submitPrescription()">🤖 Soumettre à l'IA</button>
       <div id="aiSuggestion"></div>
@@ -87,7 +94,7 @@
 
   <script>
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // Your real token here
+    const TOKEN = 'Bearer ey...'; // Replace with real token
     let currentIPP = null;
     let aiData = {};
     let mediaRecorder;
@@ -120,6 +127,8 @@
     function startRecording(field) {
       currentField = field;
       audioChunks = [];
+      const status = document.getElementById(`${field}Status`);
+      status.innerText = "🎤 Enregistrement...";
 
       navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
         mediaRecorder = new MediaRecorder(stream);
@@ -130,9 +139,12 @@
         };
 
         mediaRecorder.onstop = () => {
-          const blob = new Blob(audioChunks, { type: 'audio/wav' });
+          const blob = new Blob(audioChunks, { type: 'audio/webm' });
           sendAudioToAI(blob, field);
+          status.innerText = "⏳ Transcription en cours...";
         };
+
+        document.getElementById(`start${capitalize(field)}Btn`).disabled = true;
       }).catch(err => {
         alert("Erreur micro: " + err.message);
       });
@@ -141,6 +153,7 @@
     function stopRecording(field) {
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
+        document.getElementById(`start${capitalize(field)}Btn`).disabled = false;
       }
     }
 
@@ -150,7 +163,7 @@
         : `${BASE_URL}/webhook/transcribe-prescription`;
 
       const formData = new FormData();
-      formData.append("audio", blob, `${field}.wav`);
+      formData.append("audio", blob, `${field}.webm`);
 
       fetch(endpoint, {
         method: "POST",
@@ -159,12 +172,16 @@
       })
       .then(res => res.json())
       .then(data => {
-        const text = data.transcribedText || "";
+        const text = data.text || ""; // ✅ Fix here
         if (field === 'diagnosis') {
           document.getElementById("diagnosticInput").value = text;
         } else {
           document.getElementById("prescriptionInput").value = text;
         }
+        document.getElementById(`${field}Status`).innerText = "✅ Transcription terminée.";
+      })
+      .catch(err => {
+        document.getElementById(`${field}Status`).innerText = "❌ Erreur de transcription.";
       });
     }
 
@@ -196,6 +213,10 @@
           <p><strong>💡 IA Suggestion:</strong> ${aiData.medicament} du ${aiData.start_date} au ${aiData.end_date} à ${Object.entries(aiData.schedule).filter(([_, v]) => v).map(([k]) => k).join(', ')}</p>
         `;
       });
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
     }
   </script>
 

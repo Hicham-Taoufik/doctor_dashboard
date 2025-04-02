@@ -108,6 +108,22 @@
       font-size: 16px;
       font-weight: bold;
     }
+
+    /* Microphone button style */
+    .mic-button {
+      background: #28a745;
+      color: white;
+      padding: 8px 20px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .mic-button:hover {
+      background: #218838;
+    }
   </style>
 </head>
 <body>
@@ -126,6 +142,8 @@
       <h2>🩻 Ajouter un diagnostic</h2>
       <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..." rows="4"></textarea>
       <button onclick="submitDiagnostic()">Enregistrer le diagnostic</button>
+      <!-- Microphone for Diagnostic -->
+      <button class="mic-button" onclick="startRecording('diagnostic')">🎤 Enregistrer le diagnostic</button>
       <p id="diagMessage"></p>
     </section>
 
@@ -134,6 +152,9 @@
       <h2>💊 Rédiger une prescription</h2>
       <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
       <button onclick="submitPrescription()">Soumettre à l'IA</button>
+
+      <!-- Microphone for Prescription -->
+      <button class="mic-button" onclick="startRecording('prescription')">🎤 Enregistrer la prescription</button>
 
       <!-- Suggestion + Edition/Validation -->
       <div id="aiSuggestion" class="card" style="display: none;">
@@ -173,17 +194,13 @@
 
     let currentIPP = null;
     let aiData = {};
+    let recorder = null;
+    let audioBlob = null;
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
       currentIPP = urlParams.get('ipp');
-      console.log('Extracted IPP:', currentIPP);
-
-      if (currentIPP) {
-        loadPatient(currentIPP);
-      } else {
-        console.error('IPP not found in URL.');
-      }
+      if (currentIPP) loadPatient(currentIPP);
     };
 
     // Function to show loading modal
@@ -198,6 +215,7 @@
       loadingModal.style.display = "none";
     }
 
+    // Function to load patient data
     function loadPatient(ipp) {
       fetch(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`, {
         headers: { Authorization: TOKEN }
@@ -215,6 +233,41 @@
         .catch(err => console.error("Erreur lors du chargement du patient:", err));
     }
 
+    // Function to start recording audio
+    function startRecording(type) {
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => {
+            recorder = new MediaRecorder(stream);
+            recorder.start();
+            console.log("Recording started...");
+            let chunks = [];
+            recorder.ondataavailable = function(e) {
+              chunks.push(e.data);
+            };
+            recorder.onstop = function() {
+              audioBlob = new Blob(chunks, { type: 'audio/wav' });
+              const audioUrl = URL.createObjectURL(audioBlob);
+              const audioElement = new Audio(audioUrl);
+              audioElement.play();
+              if (type === 'diagnostic') {
+                document.getElementById("diagnosticInput").value = "Audio enregistré.";
+              } else if (type === 'prescription') {
+                document.getElementById("prescriptionInput").value = "Audio enregistré.";
+              }
+            };
+            setTimeout(() => {
+              recorder.stop();
+              console.log("Recording stopped.");
+            }, 5000); // Automatically stop after 5 seconds
+          })
+          .catch(err => {
+            console.error("Error accessing microphone:", err);
+          });
+      }
+    }
+
+    // Submit diagnostic to the server
     function submitDiagnostic() {
       const diagnostic = document.getElementById("diagnosticInput").value.trim();
       if (!diagnostic) {
@@ -245,6 +298,7 @@
         });
     }
 
+    // Submit prescription to the server
     function submitPrescription() {
       const prescription = document.getElementById("prescriptionInput").value.trim();
       if (!prescription) {

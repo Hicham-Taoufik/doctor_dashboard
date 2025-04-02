@@ -1,5 +1,5 @@
 const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // Replace with your real token
+const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA';
 let currentIPP = null;
 let aiData = {};
 
@@ -8,7 +8,6 @@ window.onload = () => {
   currentIPP = urlParams.get('ipp');
   if (currentIPP) {
     loadPatient(currentIPP);
-    loadHistory(currentIPP);
   }
 };
 
@@ -28,23 +27,6 @@ function loadPatient(ipp) {
     });
 }
 
-function loadHistory(ipp) {
-  fetch(`${BASE_URL}/webhook/patient-history?ipp=${ipp}`, {
-    headers: { Authorization: TOKEN }
-  })
-    .then(res => res.json())
-    .then(data => {
-      let html = '';
-      (data.diagnostics || []).forEach(d => {
-        html += `<p><strong>🩻</strong> ${d.diagnostic} - ${new Date(d.date_consultation).toLocaleDateString()}</p>`;
-      });
-      (data.prescriptions || []).forEach(p => {
-        html += `<p><strong>💊</strong> ${p.prescription_text} (${p.start_date} → ${p.end_date})</p>`;
-      });
-      document.getElementById("patientHistory").innerHTML = html || 'Aucun historique.';
-    });
-}
-
 function submitDiagnostic() {
   const diagnostic = document.getElementById("diagnosticInput").value;
   fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
@@ -58,7 +40,6 @@ function submitDiagnostic() {
     .then(res => res.json())
     .then(() => {
       document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.';
-      loadHistory(currentIPP);
     });
 }
 
@@ -103,6 +84,5 @@ function validatePrescription() {
     .then(res => res.json())
     .then(() => {
       document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.';
-      loadHistory(currentIPP);
     });
 }

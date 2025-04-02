@@ -7,29 +7,106 @@
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
   <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background: #f4f6f8;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      color: #007BFF;
+    }
+
+    .section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .card {
+      padding: 15px;
+      background: #f9fafb;
+      border-left: 4px solid #007BFF;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 15px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #007BFF;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
     .flex-row {
       display: flex;
       gap: 20px;
       flex-wrap: wrap;
     }
+
     .half-width {
       flex: 1;
       min-width: 300px;
     }
-    .card {
-      background-color: #f9f9f9;
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 8px;
-      margin-top: 10px;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-    }
+
     .section h2 {
       margin-bottom: 10px;
+    }
+
+    /* Style for the Loading Modal */
+    #loadingModal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      text-align: center;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #loadingModal .content {
+      display: inline-block;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    #loadingModal .content img {
+      width: 50px;
+      height: 50px;
+    }
+
+    #loadingModal .content p {
+      font-size: 16px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -50,7 +127,6 @@
       <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..." rows="4"></textarea>
       <button onclick="submitDiagnostic()">Enregistrer le diagnostic</button>
       <p id="diagMessage"></p>
-      <button onclick="startRecording('diagnostic')">🎙️ Enregistrer le diagnostic</button>
     </section>
 
     <!-- Prescription -->
@@ -58,7 +134,7 @@
       <h2>💊 Rédiger une prescription</h2>
       <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
       <button onclick="submitPrescription()">Soumettre à l'IA</button>
-      
+
       <!-- Suggestion + Edition/Validation -->
       <div id="aiSuggestion" class="card" style="display: none;">
         <h4>🧠 Suggestion IA</h4>
@@ -79,78 +155,143 @@
         <br /><br />
         <button onclick="validatePrescription()">✅ Valider et enregistrer</button>
         <p id="validationMessage"></p>
-        <button onclick="startRecording('prescription')">🎙️ Enregistrer la prescription</button>
       </div>
     </section>
   </div>
 
+  <!-- Loading Modal -->
+  <div id="loadingModal">
+    <div class="content">
+      <img src="https://loading.io/spinners/rolling/lg.curve-bars-spinner.gif" alt="loading" />
+      <p>Enregistrement en cours... Cliquez à nouveau pour arrêter.</p>
+    </div>
+  </div>
+
   <script>
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // replace with your real token
+    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // ton vrai token ici
+
     let currentIPP = null;
     let aiData = {};
-    let mediaRecorder;
-    let recordedChunks = [];
-    let currentField = null;
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
       currentIPP = urlParams.get('ipp');
-      if (currentIPP) loadPatient(currentIPP);
+      console.log('Extracted IPP:', currentIPP);
+
+      if (currentIPP) {
+        loadPatient(currentIPP);
+      } else {
+        console.error('IPP not found in URL.');
+      }
     };
+
+    // Function to show loading modal
+    function showLoadingModal() {
+      const loadingModal = document.getElementById("loadingModal");
+      loadingModal.style.display = "block";
+    }
+
+    // Function to hide loading modal
+    function hideLoadingModal() {
+      const loadingModal = document.getElementById("loadingModal");
+      loadingModal.style.display = "none";
+    }
 
     function loadPatient(ipp) {
       fetch(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`, {
         headers: { Authorization: TOKEN }
       })
-      .then(res => res.json())
-      .then(data => {
-        document.getElementById("patientInfo").innerHTML = `
-          <h3>👤 ${data.prenom} ${data.nom}</h3>
-          <p><strong>IPP:</strong> ${data.ipp}</p>
-          <p><strong>CIN:</strong> ${data.cin}</p>
-          <p><strong>Téléphone:</strong> ${data.telephone}</p>
-          <p><strong>Adresse:</strong> ${data.adresse}</p>
-          <p><strong>Mutuelle:</strong> ${data.mutuelle || 'Aucune'}</p>`;
-      });
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("patientInfo").innerHTML = `
+            <h3>👤 ${data.prenom} ${data.nom}</h3>
+            <p><strong>IPP:</strong> ${data.ipp}</p>
+            <p><strong>CIN:</strong> ${data.cin}</p>
+            <p><strong>Téléphone:</strong> ${data.telephone}</p>
+            <p><strong>Adresse:</strong> ${data.adresse}</p>
+            <p><strong>Mutuelle:</strong> ${data.mutuelle || 'Aucune'}</p>`;
+        })
+        .catch(err => console.error("Erreur lors du chargement du patient:", err));
     }
 
     function submitDiagnostic() {
-      const diagnostic = document.getElementById("diagnosticInput").value;
+      const diagnostic = document.getElementById("diagnosticInput").value.trim();
+      if (!diagnostic) {
+        document.getElementById("diagMessage").innerText = "❗ Veuillez écrire un diagnostic.";
+        return;
+      }
+
+      // Show loading modal
+      showLoadingModal();
+
       fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: TOKEN
+        },
         body: JSON.stringify({ ipp: currentIPP, diagnostic })
       })
-      .then(() => {
-        document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.';
-      });
+        .then(res => res.json())
+        .then(() => {
+          document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.';
+          // Hide loading modal
+          hideLoadingModal();
+        })
+        .catch(err => {
+          console.error("Erreur lors de l'enregistrement du diagnostic:", err);
+          hideLoadingModal();
+        });
     }
 
     function submitPrescription() {
-      const prescription = document.getElementById("prescriptionInput").value;
+      const prescription = document.getElementById("prescriptionInput").value.trim();
+      if (!prescription) {
+        alert("Veuillez écrire une prescription avant de la soumettre à l'IA.");
+        return;
+      }
+
+      // Show loading modal
+      showLoadingModal();
+
       fetch(`${BASE_URL}/webhook/doctor-submit-prescription`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: TOKEN
+        },
         body: JSON.stringify({ ipp: currentIPP, prescription })
       })
-      .then(res => res.json())
-      .then(data => {
-        aiData = data.suggestion;
-        document.getElementById("aiSuggestion").style.display = 'block';
-        document.getElementById("suggestionInfo").innerHTML = `
-          <p><strong>Médicament:</strong> ${aiData.medicament}</p>
-          <p><strong>Du:</strong> ${aiData.start_date} <strong>au</strong> ${aiData.end_date}</p>
-          <p><strong>Horaires:</strong> ${Object.entries(aiData.schedule).filter(([_, v]) => v).map(([k]) => k).join(', ')}</p>
-        `;
-        document.getElementById("medicament").value = aiData.medicament;
-        document.getElementById("start_date").value = aiData.start_date;
-        document.getElementById("end_date").value = aiData.end_date;
-        document.getElementById("matin").checked = aiData.schedule.matin;
-        document.getElementById("apres_midi").checked = aiData.schedule.apres_midi;
-        document.getElementById("soir").checked = aiData.schedule.soir;
-        document.getElementById("nuit").checked = aiData.schedule.nuit;
-      });
+        .then(res => res.json())
+        .then(data => {
+          aiData = data.suggestion;
+
+          const renderCheckbox = (id, label) => `
+            <label style="margin-right: 10px;">
+              <input type="checkbox" id="${id}" ${aiData.schedule[id] ? 'checked' : ''}/> ${label}
+            </label>`;
+
+          document.getElementById("aiSuggestion").style.display = 'block';
+          document.getElementById("suggestionInfo").innerHTML = `
+            <p><strong>Médicament suggéré:</strong> ${aiData.medicament}</p>
+            <p><strong>Du:</strong> ${aiData.start_date} <strong>au</strong> ${aiData.end_date}</p>
+            <p><strong>Horaires suggérés:</strong> ${Object.entries(aiData.schedule).filter(([_, v]) => v).map(([k]) => k).join(', ')}</p>
+          `;
+          document.getElementById("medicament").value = aiData.medicament;
+          document.getElementById("start_date").value = aiData.start_date;
+          document.getElementById("end_date").value = aiData.end_date;
+          document.getElementById("matin").checked = aiData.schedule.matin;
+          document.getElementById("apres_midi").checked = aiData.schedule.apres_midi;
+          document.getElementById("soir").checked = aiData.schedule.soir;
+          document.getElementById("nuit").checked = aiData.schedule.nuit;
+
+          hideLoadingModal();
+        })
+        .catch(err => {
+          console.error("Erreur suggestion IA:", err);
+          hideLoadingModal();
+        });
     }
 
     function validatePrescription() {
@@ -176,57 +317,15 @@
           medicament_name: medicament
         })
       })
-      .then(() => {
-        document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.';
-      });
-    }
-
-    // Function to start audio recording
-    function startRecording(field) {
-      currentField = field;
-      recordedChunks = [];
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          mediaRecorder = new MediaRecorder(stream);
-          mediaRecorder.start();
-          alert("🎤 Enregistrement en cours... Cliquez à nouveau pour arrêter.");
-
-          mediaRecorder.ondataavailable = event => {
-            if (event.data.size > 0) recordedChunks.push(event.data);
-          };
-
-          mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
-            transcribeAudio(audioBlob);
-          };
-        })
-        .catch(err => {
-          console.error("Erreur d'enregistrement audio:", err);
-          alert("Impossible d'accéder au microphone.");
-        });
-    }
-
-    // Function to transcribe audio
-    function transcribeAudio(blob) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64Audio = reader.result.split(',')[1];
-        fetch(`${BASE_URL}/webhook/audio-transcription`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
-          body: JSON.stringify({ audio_base64: base64Audio })
-        })
         .then(res => res.json())
-        .then(data => {
-          const text = data.transcription || '';
-          document.getElementById(currentField === 'diagnostic' ? 'diagnosticInput' : 'prescriptionInput').value = text;
+        .then(() => {
+          document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.';
+          hideLoadingModal();
         })
         .catch(err => {
-          console.error("Erreur de transcription:", err);
-          alert("Transcription échouée.");
+          console.error("Erreur validation prescription:", err);
+          hideLoadingModal();
         });
-      };
-      reader.readAsDataURL(blob);
     }
   </script>
 </body>

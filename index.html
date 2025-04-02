@@ -68,11 +68,11 @@
   <!-- Diagnostic & Prescription -->
   <div class="flex-row">
     <section class="section half">
-      <h2>🩻 Diagnostic</h2>
+      <h2>🦠 Diagnostic</h2>
       <textarea id="diagnosticInput" placeholder="Écrire le diagnostic..."></textarea>
       <div>
-        <button id="startDiagnosisBtn" onclick="startRecording('diagnosis')">🎙️ Démarrer</button>
-        <button onclick="stopRecording('diagnosis')">🛑 Arrêter et Transcrire</button>
+        <button id="startDiagnosisBtn" onclick="startRecording('diagnosis')">🎤 Démarrer</button>
+        <button onclick="stopRecording('diagnosis')">😑 Arrêter et Transcrire</button>
         <span id="diagnosisStatus" class="status"></span>
       </div>
       <button onclick="submitDiagnostic()">✅ Enregistrer le diagnostic</button>
@@ -80,11 +80,11 @@
     </section>
 
     <section class="section half">
-      <h2>💊 Prescription</h2>
+      <h2>💼 Prescription</h2>
       <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3x/j pendant 5j..."></textarea>
       <div>
-        <button id="startPrescriptionBtn" onclick="startRecording('prescription')">🎙️ Démarrer</button>
-        <button onclick="stopRecording('prescription')">🛑 Arrêter et Transcrire</button>
+        <button id="startPrescriptionBtn" onclick="startRecording('prescription')">🎤 Démarrer</button>
+        <button onclick="stopRecording('prescription')">😑 Arrêter et Transcrire</button>
         <span id="prescriptionStatus" class="status"></span>
       </div>
       <button onclick="submitPrescription()">🤖 Soumettre à l'IA</button>
@@ -94,7 +94,7 @@
 
   <script>
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // Replace with real token
+    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Replace with real token
     let currentIPP = null;
     let aiData = {};
     let mediaRecorder;
@@ -172,7 +172,7 @@
       })
       .then(res => res.json())
       .then(data => {
-        const text = data.text || ""; // ✅ Fix here
+        const text = data.text || "";
         if (field === 'diagnosis') {
           document.getElementById("diagnosticInput").value = text;
         } else {

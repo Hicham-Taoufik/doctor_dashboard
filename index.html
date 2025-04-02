@@ -28,6 +28,9 @@
       padding: 8px;
       margin-top: 5px;
     }
+    .section h2 {
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -39,7 +42,7 @@
     <div id="patientInfo" class="card"></div>
   </section>
 
-  <!-- Diagnostic + Prescription Side by Side -->
+  <!-- Diagnostic + Prescription -->
   <div class="flex-row">
     <!-- Diagnostic -->
     <section class="section half-width">
@@ -49,26 +52,39 @@
       <p id="diagMessage"></p>
     </section>
 
-    <!-- Prescription libre -->
+    <!-- Prescription -->
     <section class="section half-width">
       <h2>💊 Rédiger une prescription</h2>
       <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 3 fois par jour pendant 5 jours..." rows="4"></textarea>
       <button onclick="submitPrescription()">Soumettre à l'IA</button>
-      <div id="aiSuggestion" class="card"></div>
+
+      <!-- Suggestion + Edition/Validation -->
+      <div id="aiSuggestion" class="card" style="display: none;">
+        <h4>🧠 Suggestion IA</h4>
+        <div id="suggestionInfo"></div>
+        <hr />
+        <h4>✏️ Modifier & valider</h4>
+        <label>Médicament:</label>
+        <input id="medicament" />
+        <label>Date début:</label>
+        <input type="date" id="start_date" />
+        <label>Date fin:</label>
+        <input type="date" id="end_date" />
+        <label>Horaires:</label><br />
+        <label><input type="checkbox" id="matin" /> Matin</label>
+        <label><input type="checkbox" id="apres_midi" /> Après-midi</label>
+        <label><input type="checkbox" id="soir" /> Soir</label>
+        <label><input type="checkbox" id="nuit" /> Nuit</label>
+        <br /><br />
+        <button onclick="validatePrescription()">✅ Valider et enregistrer</button>
+        <p id="validationMessage"></p>
+      </div>
     </section>
   </div>
 
-  <!-- Validation prescription -->
-  <section class="section">
-    <h2>✅ Valider la prescription</h2>
-    <div id="editablePrescription" class="card"></div>
-    <button onclick="validatePrescription()">Valider et enregistrer</button>
-    <p id="validationMessage"></p>
-  </section>
-
   <script>
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // use your real token
+    const TOKEN = 'Bearer eyJhbGciOiJI...'; // ton vrai token ici
     let currentIPP = null;
     let aiData = {};
 
@@ -95,20 +111,21 @@
     }
 
     function submitDiagnostic() {
-      const diagnostic = document.getElementById("diagnosticInput").value;
+      const diagnostic = document.getElementById("diagnosticInput").value.trim();
+      if (!diagnostic) return alert("Veuillez entrer un diagnostic.");
       fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
         body: JSON.stringify({ ipp: currentIPP, diagnostic })
       })
-      .then(res => res.json())
       .then(() => {
         document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.';
       });
     }
 
     function submitPrescription() {
-      const prescription = document.getElementById("prescriptionInput").value;
+      const prescription = document.getElementById("prescriptionInput").value.trim();
+      if (!prescription) return alert("Veuillez écrire une prescription.");
       fetch(`${BASE_URL}/webhook/doctor-submit-prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
@@ -117,28 +134,19 @@
       .then(res => res.json())
       .then(data => {
         aiData = data.suggestion;
-        document.getElementById("aiSuggestion").innerHTML = `
-          <h4>🧠 Suggestion IA</h4>
+        document.getElementById("aiSuggestion").style.display = 'block';
+        document.getElementById("suggestionInfo").innerHTML = `
           <p><strong>Médicament:</strong> ${aiData.medicament}</p>
           <p><strong>Du:</strong> ${aiData.start_date} <strong>au</strong> ${aiData.end_date}</p>
-          <p><strong>Horaires:</strong> ${Object.entries(aiData.schedule)
-            .filter(([_, v]) => v)
-            .map(([k]) => k)
-            .join(', ')}</p>`;
-
-        document.getElementById("editablePrescription").innerHTML = `
-          <label>Médicament:</label>
-          <input id="medicament" value="${aiData.medicament}" />
-          <label>Date début:</label>
-          <input type="date" id="start_date" value="${aiData.start_date}" />
-          <label>Date fin:</label>
-          <input type="date" id="end_date" value="${aiData.end_date}" />
-          <label>Horaires:</label><br/>
-          <label><input type="checkbox" id="matin" ${aiData.schedule.matin ? 'checked' : ''}/> Matin</label>
-          <label><input type="checkbox" id="apres_midi" ${aiData.schedule.apres_midi ? 'checked' : ''}/> Après-midi</label>
-          <label><input type="checkbox" id="soir" ${aiData.schedule.soir ? 'checked' : ''}/> Soir</label>
-          <label><input type="checkbox" id="nuit" ${aiData.schedule.nuit ? 'checked' : ''}/> Nuit</label>
+          <p><strong>Horaires:</strong> ${Object.entries(aiData.schedule).filter(([_, v]) => v).map(([k]) => k).join(', ')}</p>
         `;
+        document.getElementById("medicament").value = aiData.medicament;
+        document.getElementById("start_date").value = aiData.start_date;
+        document.getElementById("end_date").value = aiData.end_date;
+        document.getElementById("matin").checked = aiData.schedule.matin;
+        document.getElementById("apres_midi").checked = aiData.schedule.apres_midi;
+        document.getElementById("soir").checked = aiData.schedule.soir;
+        document.getElementById("nuit").checked = aiData.schedule.nuit;
       });
     }
 
@@ -152,7 +160,6 @@
         soir: document.getElementById("soir").checked,
         nuit: document.getElementById("nuit").checked
       };
-
       fetch(`${BASE_URL}/webhook/doctor-validate-prescription`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: TOKEN },
@@ -165,7 +172,6 @@
           medicament_name: medicament
         })
       })
-      .then(res => res.json())
       .then(() => {
         document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.';
       });

@@ -59,13 +59,11 @@
 
   <h1>🩺 Dashboard du Médecin</h1>
 
-  <!-- Patient Info -->
   <section class="section">
     <h2>📋 Informations du patient</h2>
     <div id="patientInfo"></div>
   </section>
 
-  <!-- Diagnostic & Prescription -->
   <div class="flex-row">
     <section class="section half">
       <h2>🦠 Diagnostic</h2>
@@ -94,12 +92,11 @@
 
   <script>
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-    const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // Replace with real token
+    const TOKEN = 'Bearer YOUR_REAL_TOKEN_HERE';
     let currentIPP = null;
     let aiData = {};
     let mediaRecorder;
     let audioChunks = [];
-    let currentField = null;
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -125,10 +122,8 @@
     }
 
     function startRecording(field) {
-      currentField = field;
       audioChunks = [];
-      const status = document.getElementById(`${field}Status`);
-      status.innerText = "🎤 Enregistrement...";
+      document.getElementById(`${field}Status`).innerText = "🎤 Enregistrement...";
 
       navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
         mediaRecorder = new MediaRecorder(stream);
@@ -141,13 +136,11 @@
         mediaRecorder.onstop = () => {
           const blob = new Blob(audioChunks, { type: 'audio/webm' });
           sendAudioToAI(blob, field);
-          status.innerText = "⏳ Transcription en cours...";
+          document.getElementById(`${field}Status`).innerText = "⏳ Transcription en cours...";
         };
 
         document.getElementById(`start${capitalize(field)}Btn`).disabled = true;
-      }).catch(err => {
-        alert("Erreur micro: " + err.message);
-      });
+      }).catch(err => alert("Erreur micro: " + err.message));
     }
 
     function stopRecording(field) {
@@ -157,38 +150,41 @@
       }
     }
 
-function sendAudioToAI(blob, field) {
-  const endpoint = field === 'diagnosis'
-    ? `${BASE_URL}/webhook/transcribe-diagnosis`
-    : `${BASE_URL}/webhook/transcribe-prescription`;
+    function sendAudioToAI(blob, field) {
+      const endpoint = field === 'diagnosis'
+        ? `${BASE_URL}/webhook/transcribe-diagnosis`
+        : `${BASE_URL}/webhook/transcribe-prescription`;
 
-  const formData = new FormData();
-  formData.append("audio", blob, `${field}.webm`);
+      const formData = new FormData();
+      formData.append("audio", blob, `${field}.webm`);
 
-  fetch(endpoint, {
-    method: "POST",
-    headers: { Authorization: TOKEN },
-    body: formData
-  })
-  .then(res => res.json())
-  .then(data => {
-    // ✅ Corrected extraction
-    const text = Array.isArray(data) ? data[0].text : data.text || "";
+      fetch(endpoint, {
+        method: "POST",
+        headers: { Authorization: TOKEN },
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        const text = Array.isArray(data)
+          ? data[0]?.text || data[0]?.transcript || ''
+          : data?.text || data?.transcript || '';
 
-    if (field === 'diagnosis') {
-      document.getElementById("diagnosticInput").value = text;
-    } else {
-      document.getElementById("prescriptionInput").value = text;
+        if (!text) {
+          document.getElementById(`${field}Status`).innerText = "⚠️ Transcription vide.";
+          return;
+        }
+
+        document.getElementById(
+          field === 'diagnosis' ? "diagnosticInput" : "prescriptionInput"
+        ).value = text;
+
+        document.getElementById(`${field}Status`).innerText = "✅ Transcription terminée.";
+      })
+      .catch(err => {
+        console.error("Transcription error:", err);
+        document.getElementById(`${field}Status`).innerText = "❌ Erreur de transcription.";
+      });
     }
-
-    document.getElementById(`${field}Status`).innerText = "✅ Transcription terminée.";
-  })
-  .catch(err => {
-    document.getElementById(`${field}Status`).innerText = "❌ Erreur de transcription.";
-    console.error("Erreur transcription:", err);
-  });
-}
-
 
     function submitDiagnostic() {
       const diag = document.getElementById("diagnosticInput").value;
@@ -198,9 +194,7 @@ function sendAudioToAI(blob, field) {
         headers: { "Content-Type": "application/json", Authorization: TOKEN },
         body: JSON.stringify({ ipp: currentIPP, diagnostic: diag })
       })
-      .then(() => {
-        document.getElementById("diagMessage").innerText = "✅ Diagnostic enregistré.";
-      });
+      .then(() => document.getElementById("diagMessage").innerText = "✅ Diagnostic enregistré.");
     }
 
     function submitPrescription() {

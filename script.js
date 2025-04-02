@@ -1,5 +1,5 @@
 const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // Use your real token
+const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA'; // use your real token
 
 let currentIPP = null;
 let aiData = {};
@@ -7,7 +7,7 @@ let aiData = {};
 window.onload = () => {
   const urlParams = new URLSearchParams(window.location.search);
   currentIPP = urlParams.get('ipp');
-  console.log('Extracted IPP:', currentIPP); // ✅ Debug IPP from URL
+  console.log('Extracted IPP:', currentIPP);
 
   if (currentIPP) {
     loadPatient(currentIPP);
@@ -16,16 +16,24 @@ window.onload = () => {
   }
 };
 
+// Function to display the loading modal
+function showLoadingModal() {
+  const loadingModal = document.getElementById("loadingModal");
+  loadingModal.style.display = "block";
+}
+
+// Function to hide the loading modal
+function hideLoadingModal() {
+  const loadingModal = document.getElementById("loadingModal");
+  loadingModal.style.display = "none";
+}
+
 function loadPatient(ipp) {
   fetch(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`, {
     headers: { Authorization: TOKEN }
   })
     .then(res => res.json())
     .then(data => {
-      if (!data || !data.nom) {
-        console.error('Invalid data received:', data);
-        return;
-      }
       document.getElementById("patientInfo").innerHTML = `
         <h3>👤 ${data.prenom} ${data.nom}</h3>
         <p><strong>IPP:</strong> ${data.ipp}</p>
@@ -44,6 +52,9 @@ function submitDiagnostic() {
     return;
   }
 
+  // Show loading modal
+  showLoadingModal();
+
   fetch(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
     method: 'POST',
     headers: {
@@ -55,8 +66,13 @@ function submitDiagnostic() {
     .then(res => res.json())
     .then(() => {
       document.getElementById("diagMessage").innerText = '✅ Diagnostic enregistré.';
+      // Hide the loading modal
+      hideLoadingModal();
     })
-    .catch(err => console.error("Erreur lors de l'enregistrement du diagnostic:", err));
+    .catch(err => {
+      console.error("Erreur lors de l'enregistrement du diagnostic:", err);
+      hideLoadingModal();
+    });
 }
 
 function submitPrescription() {
@@ -65,6 +81,9 @@ function submitPrescription() {
     alert("Veuillez écrire une prescription avant de la soumettre à l'IA.");
     return;
   }
+
+  // Show loading modal
+  showLoadingModal();
 
   fetch(`${BASE_URL}/webhook/doctor-submit-prescription`, {
     method: 'POST',
@@ -113,8 +132,12 @@ function submitPrescription() {
         <button onclick="validatePrescription()">✅ Valider et enregistrer</button>
         <p id="validationMessage"></p>
       `;
+      hideLoadingModal();
     })
-    .catch(err => console.error("Erreur suggestion IA:", err));
+    .catch(err => {
+      console.error("Erreur suggestion IA:", err);
+      hideLoadingModal();
+    });
 }
 
 function validatePrescription() {
@@ -148,6 +171,10 @@ function validatePrescription() {
     .then(res => res.json())
     .then(() => {
       document.getElementById("validationMessage").innerText = '✅ Prescription enregistrée.';
+      hideLoadingModal();
     })
-    .catch(err => console.error("Erreur validation prescription:", err));
+    .catch(err => {
+      console.error("Erreur validation prescription:", err);
+      hideLoadingModal();
+    });
 }

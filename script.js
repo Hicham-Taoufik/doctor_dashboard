@@ -1,5 +1,6 @@
 const BASE_URL = 'https://workflows.aphelionxinnovations.com';
 const TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlkIjoiZmJmMmI1ZjctZTc3ZS00ZGZmLWJlN2UtN2ZlOGVkZmViZmY1IiwiZmlyc3ROYW1lIjoiTW91c3NhIiwibGFzdE5hbWUiOiJTYWlkaSIsInVzZXJuYW1lIjoic2FpZGkiLCJlbWFpbCI6Im1vdXNzYS5zYWlkaS4wMUBnbXppbC5jb20iLCJwYXNzd29yZCI6ImFkbWluMTIzNCIsInJvbGUiOiJBZG1pbiIsImlhdCI6MTc0Mjk1MjMyNn0.1s_IWO-h-AKwkP0LIX8mcjdeLRwsRtgbqAchIJSRVEA';
+
 let currentIPP = null;
 let aiData = {};
 let audioBlob = null;
@@ -10,7 +11,7 @@ window.onload = () => {
   if (currentIPP) loadPatient(currentIPP);
 };
 
-// Load patient data from API
+// Load patient data
 function loadPatient(ipp) {
   fetch(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`, {
     headers: { Authorization: TOKEN }
@@ -27,14 +28,6 @@ function loadPatient(ipp) {
     })
     .catch(err => console.error("Erreur chargement patient:", err));
 }
-
-// Handle file upload for audio
-document.getElementById('audioFile').addEventListener('change', (event) => {
-  const file = event.target.files[0];
-  if (file) {
-    audioBlob = file;
-  }
-});
 
 // Start/Stop recording audio
 let mediaRecorder;
@@ -60,7 +53,7 @@ document.getElementById('recordAudioButton').addEventListener('click', () => {
   }
 });
 
-// Submit audio for transcription
+// Send audio to AI for transcription
 function submitAudioForTranscription() {
   if (!audioBlob) return alert("Veuillez d'abord enregistrer ou télécharger un fichier audio.");
 
@@ -74,7 +67,11 @@ function submitAudioForTranscription() {
   })
     .then(response => response.json())
     .then(data => {
-      document.getElementById('transcriptionResult').innerText = data.transcribedText || 'Transcription failed.';
+      // Fill the corresponding text area with transcribed text
+      const transcribedText = data.transcribedText || 'Transcription failed.';
+      document.getElementById('diagnosticInput').value = transcribedText; // for diagnostic
+      // If you want to use this for prescription, replace the ID
+      // document.getElementById('prescriptionInput').value = transcribedText; // for prescription
     })
     .catch((error) => console.error("Erreur transcription:", error));
 }

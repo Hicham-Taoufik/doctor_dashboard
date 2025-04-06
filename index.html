@@ -72,14 +72,27 @@
     </div>
 
     <div class="card">
-      <div class="card-header">
-        <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations du Patient </h2>
-        <div class="card-actions"> <i class="fas fa-user"></i> </div>
-      </div>
-      <div class="card-body">
-        <div id="patientInfo" class="patient-info">Chargement des informations...</div>
-      </div>
+      <div class="card-header"> <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations du Patient </h2> <div class="card-actions"> <i class="fas fa-user"></i> </div> </div>
+      <div class="card-body"> <div id="patientInfo" class="patient-info">Chargement des informations...</div> </div>
     </div>
+
+     <!-- ADDED: QR Scanner Section HTML -->
+     <div class="card no-print">
+         <div class="card-header"> <h2 class="card-title"> <i class="fas fa-qrcode"></i> Scanner Patient </h2> <div class="card-actions"> <i class="fas fa-camera"></i> </div> </div>
+          <div class="card-body">
+            <div class="qr-scanner-section">
+                <div class="btn-group">
+                    <button id="scanQrButton" class="btn btn-outline"> <i class="fas fa-qrcode"></i> Scanner QR </button>
+                </div>
+                <div id="scanner-container" style="display: none; position: relative; max-width: 300px; margin-top: 15px; border: 1px solid var(--gray-300); border-radius: var(--border-radius); overflow: hidden;">
+                   <video id="scanner-video" style="display: block; width: 100%; height: auto;" playsinline></video>
+                </div>
+                <div id="scanResult" class="message" style="margin-top: 10px;"></div>
+            </div>
+         </div>
+     </div>
+     <!-- END: QR Scanner Section HTML -->
+
 
     <div class="flex-row">
       <div class="flex-col">
@@ -117,216 +130,84 @@
 
   </div>
 
+  <!-- ADDED: jsQR Library (adjust path if needed) -->
+  <script src="./jsQR.js"></script>
+
   <script>
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
     // *** ADD ABSOLUTE URL for the Login Page ***
-    const LOGIN_PAGE_URL = 'https://hicham-taoufik.github.io/login/'; // Assuming login is hosted here
+    const LOGIN_PAGE_URL = 'https://hicham-taoufik.github.io/login/'; // Corrected absolute path
+    // *** ADD QR Target Base URL (MUST MATCH RECEPTION) ***
+    const QR_TARGET_BASE_URL = 'app://medilink/patient'; // Or 'https://yourclinic.com/app/view' - CHOOSE
 
     let currentIPP = null;
     let mediaRecorder;
     let audioChunks = [];
-    let recordingField = null; // Store which field is being recorded
+    let recordingField = null;
     let aiData = {};
 
-    // --- fetchWithAuth Helper Function ---
-    function fetchWithAuth(url, options = {}) {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-            console.error('Doctor: Auth token not found. Redirecting to login.');
-            alert('Session expirée ou non connecté. Veuillez vous reconnecter.');
-            window.location.href = LOGIN_PAGE_URL; // Use absolute URL
-            return Promise.reject(new Error('Authentication token not found.'));
-        }
-        const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
-        if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; }
-        else if (options.body instanceof FormData) { delete headers['Content-Type']; }
-        return fetch(url, { ...options, headers: headers })
-            .then(response => {
-                if (response.status === 401 || response.status === 403) {
-                    console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); alert('Session expirée ou invalide. Veuillez vous reconnecter.');
-                    window.location.href = LOGIN_PAGE_URL; // Use absolute URL
-                    throw new Error(`Authentication failed: ${response.status}`);
-                }
-                if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); }
-                return response;
-            });
-    }
+    // --- fetchWithAuth Helper Function --- (Already Corrected with LOGIN_PAGE_URL)
+    function fetchWithAuth(url, options = {}) { const token = localStorage.getItem('authToken'); if (!token) { console.error('Doctor: Auth token not found. Redirecting to login.'); alert('Session expirée ou non connecté. Veuillez vous reconnecter.'); window.location.href = LOGIN_PAGE_URL; return Promise.reject(new Error('Authentication token not found.')); } const headers = { ...options.headers, 'Authorization': `Bearer ${token}` }; if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; } else if (options.body instanceof FormData) { delete headers['Content-Type']; } return fetch(url, { ...options, headers: headers }) .then(response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); alert('Session expirée ou invalide. Veuillez vous reconnecter.'); window.location.href = LOGIN_PAGE_URL; throw new Error(`Authentication failed: ${response.status}`); } if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); } return response; }); }
 
-    // --- Logout Function ---
-    function logout() {
-        localStorage.removeItem('authToken');
-        alert('Vous avez été déconnecté.');
-        window.location.href = LOGIN_PAGE_URL; // Use absolute URL
-    }
+    // --- Logout Function --- (Already Corrected with LOGIN_PAGE_URL)
+    function logout() { localStorage.removeItem('authToken'); alert('Vous avez été déconnecté.'); window.location.href = LOGIN_PAGE_URL; }
 
-    // --- window.onload Check ---
-    window.onload = () => {
-       if (!localStorage.getItem('authToken')) {
-           console.log("Doctor Dash: No auth token found, redirecting to login.");
-           window.location.href = LOGIN_PAGE_URL; // Use absolute URL
-           return; // Stop execution
-       }
-       // If token exists, make body visible and proceed
-       document.body.classList.add('loaded');
-       console.log("Doctor dashboard loaded with valid token.");
+    // --- window.onload Check --- (Already Corrected with LOGIN_PAGE_URL)
+    window.onload = () => { if (!localStorage.getItem('authToken')) { console.log("Doctor Dash: No auth token found, redirecting to login."); window.location.href = LOGIN_PAGE_URL; return; } document.body.classList.add('loaded'); console.log("Doctor dashboard loaded with valid token."); const urlParams = new URLSearchParams(window.location.search); currentIPP = urlParams.get("ipp"); if (currentIPP) { loadPatient(currentIPP); } else { document.getElementById("patientInfo").innerHTML = '<div class="message message-warning" style="display:block; grid-column: 1/-1;">Aucun patient sélectionné (IPP manquant).</div>'; } };
 
-      const urlParams = new URLSearchParams(window.location.search);
-      currentIPP = urlParams.get("ipp");
-      if (currentIPP) {
-          loadPatient(currentIPP);
-      } else {
-           document.getElementById("patientInfo").innerHTML = '<div class="message message-warning" style="display:block; grid-column: 1/-1;">Aucun patient sélectionné (IPP manquant).</div>';
-      }
-    };
+    // --- Load Patient Function --- (Uses fetchWithAuth)
+    function loadPatient(ipp) { const patientInfoContainer = document.getElementById("patientInfo"); patientInfoContainer.innerHTML = 'Chargement...'; fetchWithAuth(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`).then(res => res.json()).then(data => { if (typeof data !== 'object' || data === null) { throw new Error("Réponse invalide."); } patientInfoContainer.innerHTML = `<div class="info-group"><div class="info-label">Nom</div><div class="info-value">${data.nom||'N/A'}</div></div><div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${data.prenom||'N/A'}</div></div><div class="info-group"><div class="info-label">CIN</div><div class="info-value">${data.cin||'N/A'}</div></div><div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${data.telephone||'N/A'}</div></div><div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${data.adresse||'N/A'}</div></div><div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${data.mutuelle||'Aucune'}</div></div>`; }).catch(error => { if (!error.message.startsWith('Auth')) { patientInfoContainer.innerHTML = `<div class="message message-error" style="display:block; grid-column: 1 / -1;">Erreur chargement: ${error.message}</div>`; } console.error("Error loading patient:", error); }); }
 
-    // --- Load Patient Function ---
-    function loadPatient(ipp) {
-      const patientInfoContainer = document.getElementById("patientInfo");
-      patientInfoContainer.innerHTML = 'Chargement...';
-      fetchWithAuth(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`)
-        .then(res => res.json())
-        .then(data => {
-          if (typeof data !== 'object' || data === null) { throw new Error("Réponse invalide."); }
-          patientInfoContainer.innerHTML = `
-            <div class="info-group"><div class="info-label">Nom</div><div class="info-value">${data.nom||'N/A'}</div></div>
-            <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${data.prenom||'N/A'}</div></div>
-            <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${data.cin||'N/A'}</div></div>
-            <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${data.telephone||'N/A'}</div></div>
-            <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${data.adresse||'N/A'}</div></div>
-            <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${data.mutuelle||'Aucune'}</div></div>`;
-        })
-        .catch(error => { if (!error.message.startsWith('Auth')) { patientInfoContainer.innerHTML = `<div class="message message-error" style="display:block; grid-column: 1 / -1;">Erreur chargement: ${error.message}</div>`; } console.error("Error loading patient:", error); });
-    }
+    // --- Audio Recording Functions --- (No changes needed)
+    function startRecording(field) { if (mediaRecorder && mediaRecorder.state === 'recording') return; audioChunks = []; recordingField = field; const statusEl = document.getElementById(`${field}Status`); statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Démarrage...'; statusEl.style.display = 'inline-flex'; navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => { mediaRecorder = new MediaRecorder(stream); mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); }; mediaRecorder.onstop = handleRecordingStop; mediaRecorder.onerror = (event) => { console.error(`Recorder Error: ${event.error}`); const statusEl = document.getElementById(`${recordingField}Status`); if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Erreur Rec.'; recordingField = null; }; mediaRecorder.start(); statusEl.innerHTML = '<i class="fas fa-microphone-alt fa-beat"></i> Enregistrement...'; }).catch(error => { console.error("Mic Error:", error); statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur micro'; alert("Erreur accès microphone: " + error.message); recordingField = null; }); }
+    function stopRecording(field) { if (mediaRecorder && mediaRecorder.state === 'recording') { mediaRecorder.stop(); } else { const statusEl = document.getElementById(`${field}Status`); if(statusEl) statusEl.innerHTML = ''; } }
+    function handleRecordingStop() { console.log(`Recording stopped for ${recordingField}. Chunks: ${audioChunks.length}`); const statusEl = document.getElementById(`${recordingField}Status`); if (audioChunks.length === 0) { console.warn("No audio data."); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; recordingField = null; return; } const blob = new Blob(audioChunks, { type: 'audio/webm' }); if(statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Transcription...'; sendAudioToAI(blob, recordingField); audioChunks = []; recordingField = null; }
 
-    // --- Audio Recording Functions ---
-    function startRecording(field) {
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-           console.warn("Recording already in progress.");
-           return;
-      }
-      audioChunks = [];
-      recordingField = field; // Store the field being recorded
-      const statusEl = document.getElementById(`${field}Status`);
-      statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Démarrage...'; statusEl.style.display = 'inline-flex';
+    // --- Send Audio Function --- (Uses fetchWithAuth)
+    function sendAudioToAI(blob, field) { if (!field) return; const endpoint = field === 'diagnosis' ? `${BASE_URL}/webhook/transcribe-diagnosis` : `${BASE_URL}/webhook/transcribe-prescription`; const formData = new FormData(); formData.append("audio", blob, `${field}.webm`); const statusEl = document.getElementById(`${field}Status`); if(statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Envoi...'; fetchWithAuth(endpoint, { method: "POST", body: formData }).then(res => res.json()).then(data => { let text = ''; if (Array.isArray(data) && data.length > 0) { text = data[0]?.text || data[0]?.transcript || ''; } else if (typeof data === 'object' && data !== null) { text = data.text || data.transcript || ''; } if (!text) { console.warn("Transcription empty:", data); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; return; } document.getElementById(field === 'diagnosis' ? 'diagnosticInput' : 'prescriptionInput').value = text; if(statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> Terminé'; }).catch(error => { if (!error.message.startsWith('Auth')) { if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Erreur Transc.'; } console.error("Transcription error:", error); }); }
 
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-            mediaRecorder.onstop = handleRecordingStop; // Use named handler
-            mediaRecorder.onerror = (event) => {
-                console.error(`Recorder Error: ${event.error}`);
-                const statusEl = document.getElementById(`${recordingField}Status`);
-                if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Erreur Rec.';
-                recordingField = null; // Reset field on error
-            };
-            mediaRecorder.start();
-            statusEl.innerHTML = '<i class="fas fa-microphone-alt fa-beat"></i> Enregistrement...'; // Use a different icon
-        })
-        .catch(error => {
-            console.error("Mic Error:", error);
-            statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur micro';
-            alert("Erreur accès microphone: " + error.message);
-            recordingField = null; // Reset field
-        });
-    }
+    // --- Form Submission Functions --- (Use fetchWithAuth)
+    function submitDiagnostic() { const diagnostic = document.getElementById("diagnosticInput").value; if (!diagnostic || !currentIPP) { showMessage("diagMessage", `Diagnostic vide ${!currentIPP ? 'ou patient non sélectionné' : ''}.`, "warning"); return; } showMessage("diagMessage", "", ""); fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-diagnostic`, { method: "POST", body: JSON.stringify({ ipp: currentIPP, diagnostic }) }).then(response => response.ok ? response.json().catch(()=>({})) : response.text().then(text => { throw new Error(text||`Erreur ${response.status}`)}) ).then(() => { showMessage("diagMessage", "<i class='fas fa-check-circle'></i> Diagnostic enregistré.", "success"); }).catch(error => { if (!error.message.startsWith('Auth')) { showMessage("diagMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur: ${error.message}`, "error"); } console.error("Error submitting diagnostic:", error); }); }
+    function submitPrescription() { const prescription = document.getElementById("prescriptionInput").value; if (!prescription || !currentIPP) { showMessage("validationMessage", `Prescription vide ${!currentIPP ? 'ou patient non sélectionné' : ''}.`, "warning"); document.getElementById("aiSuggestion").style.display = "none"; return; } showMessage("validationMessage", "", ""); document.getElementById("aiSuggestion").style.display = "none"; fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-prescription`, { method: "POST", body: JSON.stringify({ ipp: currentIPP, prescription }) }).then(res => res.json()).then(data => { console.log("AI Suggestion Raw:", JSON.stringify(data, null, 2)); if (data && data.success === true && data.suggestion) { aiData = data.suggestion; document.getElementById("aiSuggestion").style.display = "block"; document.getElementById("medicament").value = aiData.medicament || ''; const convertDate = (d) => {if(!d||typeof d !=='string'||!/^\d{2}\/\d{2}\/\d{4}$/.test(d)){console.warn(`Invalid date format:"${d}"`);return ''};const p=d.split('/');if(p.length!==3)return '';const day=parseInt(p[0],10),mo=parseInt(p[1],10),yr=parseInt(p[2],10);if(isNaN(day)||isNaN(mo)||isNaN(yr)||day<1||day>31||mo<1||mo>12||yr<1900)return '';return `${yr}-${String(mo).padStart(2,'0')}-${String(day).padStart(2,'0')}`}; document.getElementById("start_date").value = convertDate(aiData.start_date); document.getElementById("end_date").value = convertDate(aiData.end_date); if (aiData.schedule) { document.getElementById("matin").checked = !!aiData.schedule.matin; document.getElementById("apres_midi").checked = !!aiData.schedule.apres_midi; document.getElementById("soir").checked = !!aiData.schedule.soir; document.getElementById("nuit").checked = !!aiData.schedule.nuit; } else { /* clear checkboxes */ } document.getElementById("aiSuggestion").scrollIntoView({ behavior: 'smooth' }); } else { console.error("Invalid AI suggestion structure:", data); showMessage("validationMessage", "<i class='fas fa-exclamation-triangle'></i> Réponse IA invalide.", "error"); } }).catch(error => { if (!error.message.startsWith('Auth')) { showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur IA: ${error.message}`, "error"); } console.error("Error submitting prescription:", error); document.getElementById("aiSuggestion").style.display = "none"; }); }
+    function validatePrescription() { const medicament = document.getElementById("medicament").value; const start_date = document.getElementById("start_date").value; const end_date = document.getElementById("end_date").value; if (!medicament || !start_date || !end_date || !currentIPP) { showMessage("validationMessage", `Champs requis manquants ${!currentIPP ? 'ou patient non sélectionné' : ''}.`, "warning"); return; } showMessage("validationMessage", "", ""); const schedule = { matin: document.getElementById("matin").checked, apres_midi: document.getElementById("apres_midi").checked, soir: document.getElementById("soir").checked, nuit: document.getElementById("nuit").checked }; const convertDateToAPI = (d) => {if(!d||!/^\d{4}-\d{2}-\d{2}$/.test(d)){console.warn(`Invalid YYYY-MM-DD:"${d}"`);return ''};const p=d.split('-');if(p.length!==3)return '';return `${p[2]}/${p[1]}/${p[0]}`}; const apiStartDate = convertDateToAPI(start_date); const apiEndDate = convertDateToAPI(end_date); fetchWithAuth(`${BASE_URL}/webhook/doctor-validate-prescription`, { method: "POST", body: JSON.stringify({ ipp: currentIPP, final_prescription: document.getElementById("prescriptionInput").value, start_date: apiStartDate, end_date: apiEndDate, schedule, medicament_name: medicament }) }).then(response => response.ok ? response.json().catch(()=>({})) : response.text().then(text => { throw new Error(text||`Erreur ${response.status}`)}) ).then(() => { showMessage("validationMessage", "<i class='fas fa-check-circle'></i> Prescription validée.", "success"); }).catch(error => { if (!error.message.startsWith('Auth')) { showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur validation: ${error.message}`, "error"); } console.error("Error validating prescription:", error); }); }
 
-    function stopRecording(field) { // Pass field to potentially stop specific recorder if needed
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            console.log(`Stopping recording for ${recordingField}`);
-            mediaRecorder.stop(); // This will trigger the onstop handler
-        } else {
-            console.log("Not recording or recorder not ready.");
-             // Clear status if stop is clicked when not recording
-             const statusEl = document.getElementById(`${field}Status`);
-             if(statusEl) statusEl.innerHTML = '';
-        }
-    }
-
-    function handleRecordingStop() {
-        console.log(`Recording stopped for ${recordingField}. Chunks: ${audioChunks.length}`);
-        const statusEl = document.getElementById(`${recordingField}Status`);
-
-        if (audioChunks.length === 0) {
-            console.warn("No audio data recorded.");
-            if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide';
-            recordingField = null; // Reset field
-            return;
-        }
-
-        const blob = new Blob(audioChunks, { type: 'audio/webm' });
-        if(statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Transcription...';
-        sendAudioToAI(blob, recordingField); // Send the data
-        audioChunks = []; // Clear chunks
-        recordingField = null; // Reset field after processing starts
-         // Optional: re-enable start button here if needed, although usually done in start/stop logic
-    }
-
-    // --- Send Audio Function ---
-    function sendAudioToAI(blob, field) {
-        if (!field) { console.error("Field missing for audio submission"); return; }
-        const endpoint = field === 'diagnosis' ? `${BASE_URL}/webhook/transcribe-diagnosis` : `${BASE_URL}/webhook/transcribe-prescription`;
-        const formData = new FormData(); formData.append("audio", blob, `${field}.webm`);
-        const statusEl = document.getElementById(`${field}Status`);
-        if(statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Envoi...';
-
-        fetchWithAuth(endpoint, { method: "POST", body: formData })
-          .then(res => res.json())
-          .then(data => {
-              let text = ''; if (Array.isArray(data) && data.length > 0) { text = data[0]?.text || data[0]?.transcript || ''; } else if (typeof data === 'object' && data !== null) { text = data.text || data.transcript || ''; }
-              if (!text) { console.warn("Transcription empty:", data); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; return; }
-              document.getElementById(field === 'diagnosis' ? 'diagnosticInput' : 'prescriptionInput').value = text;
-              if(statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> Terminé';
-          })
-          .catch(error => { if (!error.message.startsWith('Auth')) { if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Erreur Transc.'; } console.error("Transcription error:", error); });
-    }
-
-    // --- Form Submission Functions ---
-    function submitDiagnostic() {
-        const diagnostic = document.getElementById("diagnosticInput").value;
-        if (!diagnostic || !currentIPP) { showMessage("diagMessage", `Diagnostic vide ${!currentIPP ? 'ou patient non sélectionné' : ''}.`, "warning"); return; }
-        showMessage("diagMessage", "", "");
-        fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-diagnostic`, { method: "POST", body: JSON.stringify({ ipp: currentIPP, diagnostic }) })
-            .then(response => response.ok ? response.json().catch(()=>({})) : response.text().then(text => { throw new Error(text||`Erreur ${response.status}`)}) ) // Handle potential empty JSON response on success
-            .then(() => { showMessage("diagMessage", "<i class='fas fa-check-circle'></i> Diagnostic enregistré.", "success"); })
-            .catch(error => { if (!error.message.startsWith('Auth')) { showMessage("diagMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur: ${error.message}`, "error"); } console.error("Error submitting diagnostic:", error); });
-    }
-
-    function submitPrescription() {
-        const prescription = document.getElementById("prescriptionInput").value;
-        if (!prescription || !currentIPP) { showMessage("validationMessage", `Prescription vide ${!currentIPP ? 'ou patient non sélectionné' : ''}.`, "warning"); document.getElementById("aiSuggestion").style.display = "none"; return; }
-        showMessage("validationMessage", "", ""); document.getElementById("aiSuggestion").style.display = "none";
-        fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-prescription`, { method: "POST", body: JSON.stringify({ ipp: currentIPP, prescription }) })
-            .then(res => res.json())
-            .then(data => {
-                console.log("AI Suggestion Raw:", JSON.stringify(data, null, 2));
-                if (data && data.success === true && data.suggestion) {
-                    aiData = data.suggestion; document.getElementById("aiSuggestion").style.display = "block";
-                    document.getElementById("medicament").value = aiData.medicament || '';
-                    const convertDate = (d) => {if(!d||typeof d !=='string'||!/^\d{2}\/\d{2}\/\d{4}$/.test(d)){console.warn(`Invalid date format:"${d}"`);return ''};const p=d.split('/');if(p.length!==3)return '';const day=parseInt(p[0],10),mo=parseInt(p[1],10),yr=parseInt(p[2],10);if(isNaN(day)||isNaN(mo)||isNaN(yr)||day<1||day>31||mo<1||mo>12||yr<1900)return '';return `${yr}-${String(mo).padStart(2,'0')}-${String(day).padStart(2,'0')}`}; // DD/MM/YYYY -> YYYY-MM-DD
-                    document.getElementById("start_date").value = convertDate(aiData.start_date); document.getElementById("end_date").value = convertDate(aiData.end_date);
-                    if (aiData.schedule) { document.getElementById("matin").checked = !!aiData.schedule.matin; document.getElementById("apres_midi").checked = !!aiData.schedule.apres_midi; document.getElementById("soir").checked = !!aiData.schedule.soir; document.getElementById("nuit").checked = !!aiData.schedule.nuit; } else { /* clear checkboxes */ }
-                    document.getElementById("aiSuggestion").scrollIntoView({ behavior: 'smooth' });
-                } else { console.error("Invalid AI suggestion structure:", data); showMessage("validationMessage", "<i class='fas fa-exclamation-triangle'></i> Réponse IA invalide.", "error"); }
-            })
-            .catch(error => { if (!error.message.startsWith('Auth')) { showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur IA: ${error.message}`, "error"); } console.error("Error submitting prescription:", error); document.getElementById("aiSuggestion").style.display = "none"; });
-    }
-
-    function validatePrescription() {
-        const medicament = document.getElementById("medicament").value; const start_date = document.getElementById("start_date").value; const end_date = document.getElementById("end_date").value;
-        if (!medicament || !start_date || !end_date || !currentIPP) { showMessage("validationMessage", `Champs requis manquants ${!currentIPP ? 'ou patient non sélectionné' : ''}.`, "warning"); return; }
-        showMessage("validationMessage", "", "");
-        const schedule = { matin: document.getElementById("matin").checked, apres_midi: document.getElementById("apres_midi").checked, soir: document.getElementById("soir").checked, nuit: document.getElementById("nuit").checked };
-        const convertDateToAPI = (d) => {if(!d||!/^\d{4}-\d{2}-\d{2}$/.test(d)){console.warn(`Invalid YYYY-MM-DD:"${d}"`);return ''};const p=d.split('-');if(p.length!==3)return '';return `${p[2]}/${p[1]}/${p[0]}`}; // YYYY-MM-DD -> DD/MM/YYYY
-        const apiStartDate = convertDateToAPI(start_date); const apiEndDate = convertDateToAPI(end_date);
-        fetchWithAuth(`${BASE_URL}/webhook/doctor-validate-prescription`, { method: "POST", body: JSON.stringify({ ipp: currentIPP, final_prescription: document.getElementById("prescriptionInput").value, start_date: apiStartDate, end_date: apiEndDate, schedule, medicament_name: medicament }) })
-            .then(response => response.ok ? response.json().catch(()=>({})) : response.text().then(text => { throw new Error(text||`Erreur ${response.status}`)}) )
-            .then(() => { showMessage("validationMessage", "<i class='fas fa-check-circle'></i> Prescription validée.", "success"); })
-            .catch(error => { if (!error.message.startsWith('Auth')) { showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur validation: ${error.message}`, "error"); } console.error("Error validating prescription:", error); });
-    }
-
-    // --- Show Message Function ---
+    // --- Show Message Function --- (No changes needed)
     function showMessage(elementId, message, type) { const messageElement = document.getElementById(elementId); if (!messageElement) { console.error(`Msg Element "${elementId}" not found.`); return; } messageElement.innerHTML = message || ""; messageElement.style.display = message ? "block" : "none"; messageElement.className = "message"; if (type === "success") messageElement.classList.add("message-success"); else if (type === "warning") messageElement.classList.add("message-warning"); else if (type === "error") messageElement.classList.add("message-error"); if (type === "success" && message) { setTimeout(() => { if (messageElement.classList.contains("message-success") && messageElement.innerHTML === message) { messageElement.style.display = "none"; } }, 5000); } }
+
+
+    // --- START QR SCANNER CODE ---
+    const QR_TARGET_BASE_URL_SCAN = QR_TARGET_BASE_URL; // Use the same constant defined above
+    const scanButton = document.getElementById('scanQrButton');
+    const scannerContainer = document.getElementById('scanner-container');
+    const video = document.getElementById('scanner-video');
+    const scanResultDiv = document.getElementById("scanResult");
+    let scanning = false;
+    let currentStream = null;
+
+    if (scanButton) {
+         scanButton.onclick = async () => {
+            if (!scanning) {
+                try {
+                    showMessage('scanResult', '', '');
+                    scannerContainer.style.display = 'block';
+                    currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                    video.srcObject = currentStream; await video.play();
+                    scanButton.innerHTML = '<i class="fas fa-stop-circle"></i> Arrêter Scan';
+                    scanButton.classList.replace('btn-outline','btn-danger');
+                    scanning = true; requestAnimationFrame(tick);
+                } catch (err) { console.error("Cam Err:", err); showMessage('scanResult', `<i class="fas fa-exclamation-triangle"></i> Err Cam: ${err.message}`, 'error'); stopScanner(); }
+            } else { stopScanner(); }
+        };
+    } else { console.warn("Scan button not found."); }
+
+    function stopScanner() { if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); } video.srcObject = null; scannerContainer.style.display = 'none'; if(scanButton) {scanButton.innerHTML = '<i class="fas fa-qrcode"></i> Scanner QR'; scanButton.classList.replace('btn-danger','btn-outline');} scanning = false; currentStream = null; }
+
+    function tick() { if (!scanning || !video || video.readyState !== video.HAVE_ENOUGH_DATA) { if (scanning) requestAnimationFrame(tick); return; } const tempCanvasElement = document.createElement('canvas'); tempCanvasElement.height = video.videoHeight; tempCanvasElement.width = video.videoWidth; const tempCanvas = tempCanvasElement.getContext("2d"); tempCanvas.drawImage(video, 0, 0, tempCanvasElement.width, tempCanvasElement.height); const imageData = tempCanvas.getImageData(0, 0, tempCanvasElement.width, tempCanvasElement.height); const code = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" }); if (code) { console.log("QR Found:", code.data); stopScanner(); processScannedQrCode(code.data); } else { requestAnimationFrame(tick); } }
+
+    function processScannedQrCode(scannedUrl) { showMessage('scanResult', `Code détecté: Scan en cours...`, 'info'); try { const url = new URL(scannedUrl); let urlBasePart = ''; if (url.protocol === 'app:') { urlBasePart = url.protocol + '//' + url.hostname + url.pathname; } else { urlBasePart = url.origin + url.pathname; } console.log(`Compare Scan Base: "${urlBasePart}" vs Expected: "${QR_TARGET_BASE_URL_SCAN}"`); if (scannedUrl.startsWith(QR_TARGET_BASE_URL_SCAN)) { const ipp = url.searchParams.get('ipp'); if (ipp) { console.log("Extracted IPP:", ipp); showMessage('scanResult', `<i class="fas fa-check-circle"></i> Patient IPP ${ipp} trouvé. Chargement...`, 'success'); loadPatientIntoCurrentDashboard(ipp); } else { showMessage('scanResult', `<i class="fas fa-exclamation-triangle"></i> Erreur: IPP manquant.`, 'error'); } } else { showMessage('scanResult', `<i class="fas fa-times-circle"></i> Erreur: QR Code non reconnu.`, 'error'); } } catch (e) { showMessage('scanResult', `<i class="fas fa-times-circle"></i> Erreur: Format QR invalide.`, 'error'); console.error("Error parsing scanned URL:", e); } }
+
+    function loadPatientIntoCurrentDashboard(ipp) { console.log(`Loading patient ${ipp} into Doctor dashboard`); currentIPP = ipp; const newUrl = new URL(window.location); newUrl.searchParams.set('ipp', ipp); window.history.pushState({ ipp: ipp }, '', newUrl); loadPatient(ipp); if(document.getElementById('diagnosticInput')) document.getElementById('diagnosticInput').value = ''; if(document.getElementById('prescriptionInput')) document.getElementById('prescriptionInput').value = ''; if(document.getElementById('diagMessage')) showMessage('diagMessage','',''); if(document.getElementById('validationMessage')) showMessage('validationMessage','',''); if(document.getElementById('aiSuggestion')) document.getElementById('aiSuggestion').style.display = 'none'; setTimeout(() => { showMessage('scanResult', '', ''); }, 3000); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    // --- END QR SCANNER CODE ---
 
   </script>
 </body>

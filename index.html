@@ -2,105 +2,129 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Dashboard - Médecin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
   <style>
-    /* --- CSS remains exactly the same --- */
-    :root {
-      --primary: #5d74f2; --primary-light: #ebeffe; --success: #31c971; --success-light: #e0fbea; --warning: #ffb648; --warning-light: #fff8ec; --danger: #ff5a5a; --danger-light: #ffeded; --gray-100: #f9fafb; --gray-200: #f1f3f9; --gray-300: #e5e7eb; --gray-400: #d1d5db; --gray-500: #9ca3af; --gray-600: #6b7280; --gray-700: #4b5563; --gray-800: #374151; --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.04); --border-radius: 8px;
-    }
+    /* --- CSS --- */
+    :root { --primary: #5d74f2; --primary-light: #ebeffe; --success: #31c971; --success-light: #e0fbea; --warning: #ffb648; --warning-light: #fff8ec; --danger: #ff5a5a; --danger-light: #ffeded; --gray-100: #f9fafb; --gray-200: #f1f3f9; --gray-300: #e5e7eb; --gray-400: #d1d5db; --gray-500: #9ca3af; --gray-600: #6b7280; --gray-700: #4b5563; --gray-800: #374151; --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.04); --border-radius: 8px; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #f9fafb; color: var(--gray-800); line-height: 1.5; min-height: 100vh; padding: 0; visibility: hidden; /* Hide initially */ }
+    body { font-family: 'Inter', sans-serif; background: var(--gray-100); color: var(--gray-800); line-height: 1.5; min-height: 100vh; padding: 0; visibility: hidden; /* Hide initially */ }
     body.loaded { visibility: visible; /* Show when JS confirms auth */ }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-    .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-bottom: 30px; }
-    .header-title { color: var(--primary); font-size: 1.5rem; font-weight: 600; }
-    .logo { color: var(--primary); font-weight: 700; font-size: 1.1rem; display: flex; align-items: center; }
-    .logo i { margin-right: 8px; }
-    .card { background: white; border-radius: var(--border-radius); box-shadow: var(--shadow-md); overflow: hidden; margin-bottom: 25px; }
-    .card-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--gray-200); }
+    /* Header Styles */
+    .header { display: flex; align-items: center; padding: 15px 0; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; border-bottom: 1px solid var(--gray-200); }
+    .header-main-content { display: flex; align-items: center; gap: 10px; flex-grow: 1; }
+    .logo { display: flex; align-items: center; }
+    .logo-img { height: 35px; width: auto; margin-right: 10px;} /* Added margin */
+    .header-title { color: var(--primary); font-size: 1.3rem; font-weight: 600; margin: 0; }
+    .header-logout { flex-shrink: 0; margin-left: auto; /* Pushes button right */ }
+    .logout-btn { padding: 5px 10px; font-size: 0.8rem; border-radius: var(--border-radius); }
+    /* Card Styles */
+    .card { background: white; border-radius: var(--border-radius); box-shadow: var(--shadow-md); overflow: hidden; margin-bottom: 20px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--gray-200); }
     .card-title { font-size: 1rem; font-weight: 600; color: var(--gray-800); display: flex; align-items: center; }
     .card-title i { margin-right: 10px; color: var(--primary); }
-    .card-actions { color: white; background: var(--primary); border-radius: var(--border-radius); width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
-    .card-body { padding: 20px; }
-    .patient-info { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
+    .card-actions { color: white; background: var(--primary); border-radius: var(--border-radius); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; }
+    .card-body { padding: 16px; }
+    /* Patient Info */
+    .patient-info { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
     .info-group { margin-bottom: 5px; }
     .info-label { font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px; }
-    .info-value { font-size: 0.9rem; color: var(--gray-800); font-weight: 500; }
+    .info-value { font-size: 0.85rem; color: var(--gray-800); font-weight: 500; word-break: break-word; }
+    /* Layout */
     .flex-row { display: flex; gap: 25px; margin-bottom: 25px; flex-wrap: wrap; }
     .flex-col { flex: 1; min-width: 320px; }
+    /* Form Elements */
     label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--gray-600); }
     textarea, input[type="text"], input[type="date"] { width: 100%; padding: 10px 12px; font-size: 0.9rem; border-radius: var(--border-radius); border: 1px solid var(--gray-300); background: white; transition: all 0.2s ease; font-family: 'Inter', sans-serif; appearance: none; -webkit-appearance: none; -moz-appearance: none; position: relative; }
     input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.6; cursor: pointer; }
     textarea:focus, input[type="text"]:focus, input[type="date"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(93, 116, 242, 0.1); }
     textarea { resize: vertical; min-height: 120px; }
     .input-group { margin-bottom: 15px; }
-    .btn-group { display: flex; gap: 10px; margin-top: 15px; }
-    .btn { padding: 8px 16px; font-size: 0.85rem; font-weight: 500; border-radius: var(--border-radius); border: none; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; }
+    /* Buttons */
+    .btn-group { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;}
+    .btn { padding: 8px 14px; font-size: 0.85rem; font-weight: 500; border-radius: var(--border-radius); border: none; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; width: auto; }
     .btn i { margin-right: 6px; }
     .btn-primary { background: var(--primary); color: white; } .btn-primary:hover { background: #4a62d8; }
+    .btn-danger { background-color: var(--danger); border-color: var(--danger); color: white; } .btn-danger:hover { background-color: #d3483e; border-color: #d3483e;}
     .btn-outline { background: white; color: var(--primary); border: 1px solid var(--gray-300); } .btn-outline:hover { border-color: var(--primary); background: var(--primary-light); }
     .btn-success { background: var(--success); color: white; } .btn-success:hover { background: #28a960; }
-    .btn:disabled { background-color: var(--gray-300); cursor: not-allowed; }
+    .btn:disabled { background-color: var(--gray-300); cursor: not-allowed; opacity: 0.7; }
+    /* Status & Messages */
     .status { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--gray-600); background: var(--gray-200); margin-left: 10px; }
-    .checkbox-wrapper { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; }
-    .checkbox-item { display: flex; align-items: center; }
-    .checkbox-item input[type="checkbox"] { margin-right: 6px; }
-    .ai-suggestion { background: var(--primary-light); border-radius: var(--border-radius); padding: 15px; margin-top: 20px; }
-    .ai-suggestion h3 { font-size: 0.95rem; margin-bottom: 15px; color: var(--primary); display: flex; align-items: center; }
-    .ai-suggestion h3 i { margin-right: 8px; }
-    .message { padding: 10px; border-radius: 6px; margin-top: 15px; font-size: 0.85rem; font-weight: 500; display: none; }
+    .message { padding: 10px; border-radius: 6px; margin-top: 12px; font-size: 0.85rem; font-weight: 500; display: none; word-break: break-word; }
     .message-success { background: var(--success-light); color: var(--success); }
     .message-warning { background: var(--warning-light); color: var(--warning); }
     .message-error { background: var(--danger-light); color: var(--danger); }
-    .message-info { background: var(--primary-light); color: var(--primary); } /* Added info style */
-    .no-print { /* Class to hide elements during printing */ @media print { display: none !important; } }
+    .message-info { background: var(--primary-light); color: var(--primary); border-left: 4px solid var(--primary);}
+    /* QR Scanner */
+    .no-print { @media print { display: none !important; } }
+    #scanner-container { display: none; position: relative; max-width: 300px; margin: 15px auto 0; border: 1px solid var(--gray-300); border-radius: var(--border-radius); overflow: hidden; }
+    #scanner-video { display: block; width: 100%; height: auto; }
+    /* Empty State */
+    .empty-state { text-align: center; padding: 1.5rem; color: var(--gray-500); }
+    .empty-state i { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.6; display: block; }
+    .empty-state-message { font-size: 1rem; font-weight: 500; margin-bottom: 0.25rem; }
+    .empty-state-description { font-size: 0.85rem; }
+    /* Responsive */
     @media (max-width: 768px) { .flex-row { flex-direction: column; gap: 20px; } .patient-info { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .header { padding: 12px 0; justify-content: center;} .header-main-content { width: 100%; justify-content: center; margin-bottom: 10px; } .header-logout { width: 100%;} .logout-btn { width: 100%; justify-content: center; } .header-title { font-size: 1.1rem; } .card-body { padding: 12px; } .btn { padding: 8px 12px; font-size: 0.8rem; } .patient-info { grid-template-columns: 1fr; } /* Single column info on very small */ .btn-group { gap: 6px; } #scanner-container { max-width: 100%; } }
   </style>
 </head>
 <body > <!-- Body starts hidden -->
   <div class="container">
     <div class="header">
-      <h1 class="header-title">Dashboard de Médecin</h1>
-      <div class="logo">
-        <i class="fas fa-hospital"></i> MediClinic
-         <button onclick="logout()" style="margin-left: 20px; padding: 5px 10px; cursor: pointer;" title="Déconnexion" class="btn btn-outline no-print">
-            <i class="fas fa-sign-out-alt"></i> Déconnexion
-        </button>
-      </div>
+        <div class="header-main-content">
+            <div class="logo">
+                <!-- UPDATE src path and alt text -->
+                <img src="./logo.png" alt="MediClinic Logo" class="logo-img">
+            </div>
+            <h1 class="header-title">Dashboard de Médecin</h1>
+        </div>
+         <div class="header-logout">
+            <button onclick="logout()" title="Déconnexion" class="btn btn-outline logout-btn no-print">
+                <i class="fas fa-sign-out-alt"></i> Déconnexion
+            </button>
+         </div>
     </div>
 
-    <div class="card">
-      <div class="card-header"> <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations du Patient </h2> <div class="card-actions"> <i class="fas fa-user"></i> </div> </div>
-      <div class="card-body"> <div id="patientInfo" class="patient-info">Chargement des informations...</div> </div>
-    </div>
-
-     <!-- QR Scanner Section -->
+    <!-- QR Scanner Card -->
      <div class="card no-print">
          <div class="card-header"> <h2 class="card-title"> <i class="fas fa-qrcode"></i> Scanner Patient </h2> <div class="card-actions"> <i class="fas fa-camera"></i> </div> </div>
           <div class="card-body">
             <div class="qr-scanner-section">
                 <div class="btn-group">
-                    <button id="scanQrButton" class="btn btn-outline"> <i class="fas fa-qrcode"></i> Scanner QR </button>
+                    <button id="scanQrButton" class="btn btn-primary"> <i class="fas fa-qrcode"></i> Scanner QR </button>
                 </div>
-                <div id="scanner-container" style="display: none; position: relative; max-width: 300px; margin-top: 15px; border: 1px solid var(--gray-300); border-radius: var(--border-radius); overflow: hidden;">
-                   <video id="scanner-video" style="display: block; width: 100%; height: auto;" playsinline></video>
+                <div id="scanner-container">
+                   <video id="scanner-video" playsinline></video>
                 </div>
-                <div id="scanResult" class="message" style="margin-top: 10px;"></div>
+                <div id="scanResult" class="message message-info" style="margin-top: 10px;"></div> <!-- Scan status message area -->
             </div>
          </div>
      </div>
 
+    <!-- Patient Info Card -->
+    <div class="card">
+      <div class="card-header"> <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations du Patient </h2> <div class="card-actions"> <i class="fas fa-user"></i> </div> </div>
+      <div class="card-body">
+          <div id="patientInfo" class="patient-info">
+               <div class="empty-state" style="grid-column: 1 / -1;"> <i class="fas fa-qrcode"></i> <div class="empty-state-message">Prêt à scanner</div> <div class="empty-state-description">Utilisez le bouton "Scanner QR" ou chargez un patient via l'URL.</div> </div>
+          </div>
+      </div>
+    </div>
+
+    <!-- Diagnosis & Prescription Row -->
     <div class="flex-row">
       <div class="flex-col">
         <div class="card">
           <div class="card-header"> <h2 class="card-title"> <i class="fas fa-stethoscope"></i> Diagnostic </h2> <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> </div>
           <div class="card-body">
-            <div class="input-group"> <textarea id="diagnosticInput" placeholder="Entrez le diagnostic du patient..."></textarea> </div>
-            <div class="btn-group"> <button class="btn btn-outline" onclick="startRecording('diagnosis')"> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" onclick="stopRecording('diagnosis')"> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="diagnosisStatus" class="status"></span> </div>
-            <div class="btn-group"> <button class="btn btn-success" onclick="submitDiagnostic()"> <i class="fas fa-check-circle"></i> Enregistrer </button> </div>
+            <div class="input-group"> <textarea id="diagnosticInput" placeholder="Entrez le diagnostic..." disabled></textarea> </div>
+            <div class="btn-group"> <button class="btn btn-outline" id="startDiagRecordBtn" onclick="startRecording('diagnosis')" disabled> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" id="stopDiagRecordBtn" onclick="stopRecording('diagnosis')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="diagnosisStatus" class="status"></span> </div>
+            <div class="btn-group"> <button class="btn btn-success" id="submitDiagBtn" onclick="submitDiagnostic()" disabled> <i class="fas fa-check-circle"></i> Enregistrer </button> </div>
             <div id="diagMessage" class="message"></div>
           </div>
         </div>
@@ -110,16 +134,16 @@
         <div class="card">
           <div class="card-header"> <h2 class="card-title"> <i class="fas fa-prescription-bottle-alt"></i> Prescription </h2> <div class="card-actions"> <i class="fas fa-pills"></i> </div> </div>
           <div class="card-body">
-            <div class="input-group"> <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 500mg 3x/jour pendant 5 jours..."></textarea> </div>
-            <div class="btn-group"> <button class="btn btn-outline" onclick="startRecording('prescription')"> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" onclick="stopRecording('prescription')"> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="prescriptionStatus" class="status"></span> </div>
-            <div class="btn-group"> <button class="btn btn-primary" onclick="submitPrescription()"> <i class="fas fa-robot"></i> Soumettre à l'IA </button> </div>
+            <div class="input-group"> <textarea id="prescriptionInput" placeholder="Entrez la prescription..." disabled></textarea> </div>
+            <div class="btn-group"> <button class="btn btn-outline" id="startPrescRecordBtn" onclick="startRecording('prescription')" disabled> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" id="stopPrescRecordBtn" onclick="stopRecording('prescription')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="prescriptionStatus" class="status"></span> </div>
+            <div class="btn-group"> <button class="btn btn-primary" id="submitPrescBtn" onclick="submitPrescription()" disabled> <i class="fas fa-robot"></i> Soumettre IA </button> </div>
             <div id="aiSuggestion" class="ai-suggestion" style="display: none;">
               <h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3>
               <div class="input-group"> <label>Médicament:</label> <input type="text" id="medicament"/> </div>
-              <div class="input-group"> <label>Date de début:</label> <input type="date" id="start_date"/> </div>
-              <div class="input-group"> <label>Date de fin:</label> <input type="date" id="end_date"/> </div>
+              <div class="input-group"> <label>Date début:</label> <input type="date" id="start_date"/> </div>
+              <div class="input-group"> <label>Date fin:</label> <input type="date" id="end_date"/> </div>
               <div class="input-group"> <label>Horaires:</label> <div class="checkbox-wrapper"> <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label> <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> Après-midi</label> <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label> <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label> </div> </div>
-              <div class="btn-group"> <button class="btn btn-success" onclick="validatePrescription()"> <i class="fas fa-check-double"></i> Valider la prescription </button> </div>
+              <div class="btn-group"> <button class="btn btn-success" id="validatePrescBtn" onclick="validatePrescription()"> <i class="fas fa-check-double"></i> Valider </button> </div>
               <div id="validationMessage" class="message"></div>
             </div>
           </div>
@@ -127,16 +151,16 @@
       </div>
     </div>
 
-  </div>
+  </div> <!-- End Container -->
 
-  <!-- jsQR Library Script - PLACE BEFORE your main script -->
-  <!-- Adjust src path if jsQR.js is in a different folder -->
-  <script src="./jsQR.js"></script>
+  <!-- jsQR Library Script -->
+  <script src="./jsQR.js"></script> <!-- Ensure path is correct -->
 
   <script>
+    // --- Configuration & Globals ---
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
     const LOGIN_PAGE_URL = 'https://hicham-taoufik.github.io/login/'; // Absolute URL
-    const QR_TARGET_BASE_URL = 'app://medilink/patient'; // Must match Reception
+    const QR_TARGET_BASE_URL = 'app://medilink/patient'; // MUST MATCH RECEPTION
 
     let currentIPP = null;
     let mediaRecorder;
@@ -144,75 +168,108 @@
     let recordingField = null;
     let aiData = {};
 
-    // --- fetchWithAuth Helper Function --- (Corrected)
-    function fetchWithAuth(url, options = {}) { const token = localStorage.getItem('authToken'); if (!token) { console.error('Doctor: Auth token not found.'); alert('Session expirée.'); window.location.href = LOGIN_PAGE_URL; return Promise.reject(new Error('Token non trouvé.')); } const headers = { ...options.headers, 'Authorization': `Bearer ${token}` }; if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; } else if (options.body instanceof FormData) { delete headers['Content-Type']; } return fetch(url, { ...options, headers: headers }) .then(response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); alert('Session invalide.'); window.location.href = LOGIN_PAGE_URL; throw new Error(`Auth failed: ${response.status}`); } if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); } return response; }); }
+    // --- Auth & Helpers ---
+    function fetchWithAuth(url, options={}) { /* ... Same validated function ... */ }
+    function logout() { /* ... Same validated function ... */ }
 
-    // --- Logout Function --- (Corrected)
-    function logout() { localStorage.removeItem('authToken'); alert('Déconnecté.'); window.location.href = LOGIN_PAGE_URL; }
+    // *** Added showMessage Function ***
+    function showMessage(elementId, message, type) {
+        const messageElement = document.getElementById(elementId);
+        if (!messageElement) { console.error(`Msg Elem "${elementId}" not found.`); return; }
+        const statusIcons = {'info':'fas fa-info-circle','success':'fas fa-check-circle','warning':'fas fa-exclamation-triangle','error':'fas fa-times-circle','loading':'fas fa-spinner fa-spin'};
+        const iconClass = statusIcons[type] || statusIcons['info'];
+        const iconHtml = message ? `<i class="${iconClass} me-2"></i>` : '';
+        messageElement.innerHTML = message ? `${iconHtml}${message}` : "";
+        messageElement.style.display = message ? "block" : "none";
+        messageElement.className = 'message'; // Reset class
+        if (type === "success") messageElement.classList.add("message-success");
+        else if (type === "warning") messageElement.classList.add("message-warning");
+        else if (type === "error") messageElement.classList.add("message-error");
+        else if (type === "info") messageElement.classList.add("message-info");
+        // Auto-hide success messages, keep others unless cleared (don't auto-hide scan result)
+        if (type === "success" && message && elementId !== 'scanResult') {
+             setTimeout(() => { if (messageElement.innerHTML.includes(message)) { messageElement.style.display = 'none'; } }, 5000);
+        }
+    }
 
-    // --- window.onload Check --- (Corrected)
-    window.onload = () => { if (!localStorage.getItem('authToken')) { console.log("Doctor: No token, redirecting."); window.location.href = LOGIN_PAGE_URL; return; } document.body.classList.add('loaded'); console.log("Doctor: Authenticated."); const urlParams = new URLSearchParams(window.location.search); currentIPP = urlParams.get("ipp"); if (currentIPP) { loadPatient(currentIPP); } else { document.getElementById("patientInfo").innerHTML = '<div class="message message-warning" style="display:block; grid-column: 1/-1;">Aucun patient sélectionné.</div>'; } };
+    // --- Enable/Disable Doctor Sections ---
+    function enableDoctorSections(enable) {
+        const diagInput = document.getElementById('diagnosticInput');
+        const prescInput = document.getElementById('prescriptionInput');
+        const diagButtons = document.querySelectorAll('#startDiagRecordBtn, #stopDiagRecordBtn, #submitDiagBtn');
+        const prescButtons = document.querySelectorAll('#startPrescRecordBtn, #stopPrescRecordBtn, #submitPrescBtn');
+        const aiSuggestion = document.getElementById('aiSuggestion');
 
-    // --- Load Patient Function --- (Uses fetchWithAuth)
-    function loadPatient(ipp) { const el = document.getElementById("patientInfo"); el.innerHTML = 'Chargement...'; fetchWithAuth(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`).then(r=>r.json()).then(d=>{if(typeof d!=='object'||!d)throw new Error("Data invalide.");el.innerHTML=`<div class="info-group"><div class="info-label">Nom</div><div class="info-value">${d.nom||'N/A'}</div></div> <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${d.prenom||'N/A'}</div></div> <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${d.cin||'N/A'}</div></div> <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${d.telephone||'N/A'}</div></div> <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${d.adresse||'N/A'}</div></div> <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${d.mutuelle||'Aucune'}</div></div>`;}).catch(e=>{if(!e.message.startsWith('Auth')){el.innerHTML=`<div class="message message-error" style="display:block;grid-column:1/-1;">Erreur: ${e.message}</div>`;}console.error("Err loadPatient:",e);}); }
+        const elementsToToggle = [diagInput, prescInput, ...diagButtons, ...prescButtons];
 
-    // --- Audio Recording Functions --- (Improved state handling)
-    function startRecording(field) { if(mediaRecorder&&mediaRecorder.state==='recording'){console.warn('Deja en enregistrement.');return;} audioChunks=[]; recordingField=field; const s=document.getElementById(`${field}Status`);s.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Start...';s.style.display='inline-flex'; navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};mediaRecorder.onstop=handleRecordingStop;mediaRecorder.onerror=e=>{console.error(`Rec Err:${e.error}`);const sE=document.getElementById(`${recordingField}Status`);if(sE)sE.innerHTML='<i class="fas fa-times-circle"></i> Err Rec.';recordingField=null;};mediaRecorder.start();s.innerHTML='<i class="fas fa-microphone-alt fa-beat"></i> REC...';}).catch(err=>{console.error("Mic Err:",err);s.innerHTML='<i class="fas fa-exclamation-triangle"></i> Err micro';alert("Err micro:"+err.message);recordingField=null;}); }
-    function stopRecording(field) { if(mediaRecorder&&mediaRecorder.state==='recording'){console.log(`Stop rec for ${recordingField}`);mediaRecorder.stop();}else{console.log("Not recording.");const s=document.getElementById(`${field}Status`);if(s)s.innerHTML='';} }
+        if (enable) {
+             elementsToToggle.forEach(el => el ? el.disabled = false : null);
+             if(diagInput) diagInput.parentElement.parentElement.parentElement.style.opacity = '1'; // Enable card look
+             if(prescInput) prescInput.parentElement.parentElement.parentElement.style.opacity = '1';
+             if(diagInput) diagInput.parentElement.parentElement.parentElement.style.pointerEvents = 'auto';
+             if(prescInput) prescInput.parentElement.parentElement.parentElement.style.pointerEvents = 'auto';
+        } else {
+            elementsToToggle.forEach(el => el ? el.disabled = true : null);
+            if(diagInput) diagInput.value = '';
+            if(prescInput) prescInput.value = '';
+            if(aiSuggestion) aiSuggestion.style.display = 'none'; // Hide AI suggestion
+            if(diagInput) diagInput.parentElement.parentElement.parentElement.style.opacity = '0.5'; // Disable card look
+            if(prescInput) prescInput.parentElement.parentElement.parentElement.style.opacity = '0.5';
+             if(diagInput) diagInput.parentElement.parentElement.parentElement.style.pointerEvents = 'none';
+             if(prescInput) prescInput.parentElement.parentElement.parentElement.style.pointerEvents = 'none';
+             showMessage('diagMessage', '', ''); // Clear messages
+             showMessage('validationMessage', '', '');
+             document.getElementById('diagnosisStatus').innerHTML = '';
+             document.getElementById('prescriptionStatus').innerHTML = '';
+        }
+    }
+
+
+    // --- Load Patient Function ---
+    function loadPatient(ipp) { console.log(`loadPatient CALLED for IPP: ${ipp}`); const el = document.getElementById("patientInfo"); el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...'; enableDoctorSections(false); fetchWithAuth(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`).then(r=>r.json()).then(d=>{if(typeof d!=='object'||!d)throw new Error("Data invalide.");el.innerHTML=`<div class="info-group"><div class="info-label">Nom</div><div class="info-value">${d.nom||'-'}</div></div> <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${d.prenom||'-'}</div></div> <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${d.cin||'-'}</div></div> <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${d.telephone||'-'}</div></div> <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${d.adresse||'-'}</div></div> <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${d.mutuelle||'Aucune'}</div></div>`; enableDoctorSections(true); /* TODO: Optionally load previous diagnosis/prescription here */ }).catch(e=>{if(!e.message.startsWith('Auth')){el.innerHTML=`<div class="message message-error" style="display:block;grid-column:1/-1;">Erreur: ${e.message}</div>`;}console.error("Err loadPatient:",e); enableDoctorSections(false); }); }
+
+    // --- Audio Recording Functions ---
+    function startRecording(field) { if (!currentIPP) { alert("Chargez un patient."); return; } if (mediaRecorder && mediaRecorder.state === 'recording') return; audioChunks = []; recordingField = field; const s=document.getElementById(`${field}Status`);s.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Start...';s.style.display='inline-flex'; navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};mediaRecorder.onstop=handleRecordingStop;mediaRecorder.onerror=e=>{console.error(`Rec Err:${e.error}`);const sE=document.getElementById(`${recordingField}Status`);if(sE)sE.innerHTML='<i class="fas fa-times-circle"></i> Err Rec.';recordingField=null;};mediaRecorder.start();s.innerHTML='<i class="fas fa-microphone-alt fa-beat"></i> REC...';}).catch(err=>{console.error("Mic Err:",err);s.innerHTML='<i class="fas fa-exclamation-triangle"></i> Err micro';alert("Err micro:"+err.message);recordingField=null;}); }
+    function stopRecording(field) { if(mediaRecorder&&mediaRecorder.state==='recording'){console.log(`Stop rec for ${recordingField || field}`);mediaRecorder.stop();}else{console.log("Not recording.");const s=document.getElementById(`${field}Status`);if(s)s.innerHTML='';} } // Note: Doesn't disable start button here, onstop handles logic
     function handleRecordingStop() { console.log(`Stopped for ${recordingField}. Chunks:${audioChunks.length}`);const s=document.getElementById(`${recordingField}Status`);if(audioChunks.length===0){console.warn("No audio.");if(s)s.innerHTML='<i class="fas fa-exclamation-circle"></i> Vide';recordingField=null;return;} const blob=new Blob(audioChunks,{type:'audio/webm'});if(s)s.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Transc...';sendAudioToAI(blob,recordingField);audioChunks=[];recordingField=null;}
 
-    // --- Send Audio Function --- (Uses fetchWithAuth)
+    // --- Send Audio Function ---
     function sendAudioToAI(blob,field){if(!field){console.error("Field missing");return;} const ep=field==='diagnosis'?`${BASE_URL}/webhook/transcribe-diagnosis`:`${BASE_URL}/webhook/transcribe-prescription`;const fd=new FormData();fd.append("audio",blob,`${field}.webm`);const s=document.getElementById(`${field}Status`);if(s)s.innerHTML='<i class="fas fa-circle-notch fa-spin"></i> Envoi...';fetchWithAuth(ep,{method:"POST",body:fd}).then(r=>r.json()).then(d=>{let t='';if(Array.isArray(d)&&d.length>0){t=d[0]?.text||d[0]?.transcript||''}else if(typeof d==='object'&&d!==null){t=d.text||d.transcript||''} if(!t){console.warn("Transc empty:",d);if(s)s.innerHTML='<i class="fas fa-exclamation-circle"></i> Vide';return;} document.getElementById(field==='diagnosis'?'diagnosticInput':'prescriptionInput').value=t;if(s)s.innerHTML='<i class="fas fa-check"></i> Terminé';}).catch(e=>{if(!e.message.startsWith('Auth')){if(s)s.innerHTML='<i class="fas fa-times-circle"></i> Err Transc.';}console.error("Transc err:",e);});}
 
-    // --- Form Submission Functions --- (Use fetchWithAuth)
+    // --- Form Submission Functions ---
     function submitDiagnostic() { const diag=document.getElementById("diagnosticInput").value;if(!diag||!currentIPP){showMessage("diagMessage",`Diagnostic vide ${!currentIPP?'ou patient?':''}.`,"warning");return;} showMessage("diagMessage","","");fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-diagnostic`,{method:"POST",body:JSON.stringify({ipp:currentIPP,diagnostic:diag})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("diagMessage","<i class='fas fa-check-circle'></i> Diagnostic OK.","success");}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("diagMessage",`<i class='fas fa-exclamation-triangle'></i> Err: ${e.message}`,"error");}console.error("Err submitDiag:",e);});}
     function submitPrescription() { const presc=document.getElementById("prescriptionInput").value;if(!presc||!currentIPP){showMessage("validationMessage",`Prescription vide ${!currentIPP?'ou patient?':''}.`,"warning");document.getElementById("aiSuggestion").style.display="none";return;} showMessage("validationMessage","","");document.getElementById("aiSuggestion").style.display="none";fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-prescription`,{method:"POST",body:JSON.stringify({ipp:currentIPP,prescription:presc})}).then(r=>r.json()).then(d=>{console.log("AI Raw:",JSON.stringify(d,null,2));if(d&&d.success===true&&d.suggestion){aiData=d.suggestion;document.getElementById("aiSuggestion").style.display="block";document.getElementById("medicament").value=aiData.medicament||'';const cvDate=(dt)=>{if(!dt||typeof dt!=='string'||!/^\d{2}\/\d{2}\/\d{4}$/.test(dt))return '';const p=dt.split('/');if(p.length!==3)return '';const day=parseInt(p[0],10),mo=parseInt(p[1],10),yr=parseInt(p[2],10);if(isNaN(day)||isNaN(mo)||isNaN(yr)||day<1||day>31||mo<1||mo>12||yr<1900)return '';return `${yr}-${String(mo).padStart(2,'0')}-${String(day).padStart(2,'0')}`};document.getElementById("start_date").value=cvDate(aiData.start_date);document.getElementById("end_date").value=cvDate(aiData.end_date);if(aiData.schedule){document.getElementById("matin").checked=!!aiData.schedule.matin;document.getElementById("apres_midi").checked=!!aiData.schedule.apres_midi;document.getElementById("soir").checked=!!aiData.schedule.soir;document.getElementById("nuit").checked=!!aiData.schedule.nuit;} document.getElementById("aiSuggestion").scrollIntoView({behavior:'smooth'});}else{console.error("Invalid AI structure:",d);showMessage("validationMessage","<i class='fas fa-exclamation-triangle'></i> Réponse IA invalide.","error");}}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`,"error");}console.error("Err submitPresc:",e);document.getElementById("aiSuggestion").style.display="none";});}
     function validatePrescription() { const med=document.getElementById("medicament").value,sd=document.getElementById("start_date").value,ed=document.getElementById("end_date").value;if(!med||!sd||!ed||!currentIPP){showMessage("validationMessage",`Champs requis ${!currentIPP?'ou patient?':''}.`,"warning");return;} showMessage("validationMessage","","");const sched={matin:document.getElementById("matin").checked,apres_midi:document.getElementById("apres_midi").checked,soir:document.getElementById("soir").checked,nuit:document.getElementById("nuit").checked};const cvAPI=(dt)=>{if(!dt||!/^\d{4}-\d{2}-\d{2}$/.test(dt))return '';const p=dt.split('-');if(p.length!==3)return '';return `${p[2]}/${p[1]}/${p[0]}`};const apiSD=cvAPI(sd),apiED=cvAPI(ed);fetchWithAuth(`${BASE_URL}/webhook/doctor-validate-prescription`,{method:"POST",body:JSON.stringify({ipp:currentIPP,final_prescription:document.getElementById("prescriptionInput").value,start_date:apiSD,end_date:apiED,schedule:sched,medicament_name:med})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("validationMessage","<i class='fas fa-check-circle'></i> Prescription validée.","success");}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err valid: ${e.message}`,"error");}console.error("Err validatePresc:",e);});}
 
-    // --- Show Message Function ---
-    function showMessage(elementId, message, type) { const messageElement = document.getElementById(elementId); if (!messageElement) { console.error(`Msg Elem "${elementId}" not found.`); return; } messageElement.innerHTML = message || ""; messageElement.style.display = message ? "block" : "none"; messageElement.className = "message"; if (type === "success") messageElement.classList.add("message-success"); else if (type === "warning") messageElement.classList.add("message-warning"); else if (type === "error") messageElement.classList.add("message-error"); else if (type === "info") messageElement.classList.add("message-info"); if (type === "success" && message) { setTimeout(() => { if (messageElement.classList.contains("message-success") && messageElement.innerHTML === message) { messageElement.style.display = "none"; } }, 5000); } }
-
-
     // --- QR SCANNER CODE ---
-    // Config (MUST MATCH RECEPTION'S QR GENERATION)
-    // const QR_TARGET_BASE_URL = QR_TARGET_BASE_URL; // Already defined above
-
-    // Get Scanner Elements
-    const scanButton = document.getElementById('scanQrButton');
-    const scannerContainer = document.getElementById('scanner-container');
-    const video = document.getElementById('scanner-video');
-    const scanResultDiv = document.getElementById("scanResult");
-    let scanning = false;
-    let currentStream = null;
-    let scanTimeout = null;
-
-    if (scanButton) {
-         scanButton.onclick = async () => {
-            if (!scanning) { // Start Scan
-                try {
-                    showMessage('scanResult', '', ''); updateScanStatus('Recherche caméra...', 'loading');
-                    scannerContainer.style.display = 'block';
-                    currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                    video.srcObject = currentStream; await video.play();
-                    updateScanStatus('Caméra prête. Scannez le code.', 'info');
-                    scanButton.innerHTML = '<i class="fas fa-stop-circle"></i> Arrêter Scan'; scanButton.classList.replace('btn-outline','btn-danger'); scanning = true;
-                    clearTimeout(scanTimeout); scanTimeout = setTimeout(() => { if (scanning) { updateScanStatus('Aucun code détecté.', 'warning'); stopScanner(); } }, 30000); // 30s timeout
-                    requestAnimationFrame(tick);
-                } catch (err) { console.error("Cam Err:", err); updateScanStatus(`Err Cam: ${err.message}`, 'error'); stopScanner(); }
-            } else { stopScanner(); updateScanStatus('Scan arrêté.', 'info'); } // Stop Scan
-        };
-    } else { console.warn("Scan button not found."); }
-
-    function stopScanner() { clearTimeout(scanTimeout); if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); } video.srcObject = null; scannerContainer.style.display = 'none'; if(scanButton) {scanButton.innerHTML = '<i class="fas fa-qrcode"></i> Scanner QR'; scanButton.classList.replace('btn-danger','btn-outline');} scanning = false; currentStream = null; }
-
-    function tick() { if (!scanning || !video || video.readyState !== video.HAVE_ENOUGH_DATA) { if (scanning) requestAnimationFrame(tick); return; } const tempCanvasElement = document.createElement('canvas'); tempCanvasElement.height = video.videoHeight; tempCanvasElement.width = video.videoWidth; const tempCanvas = tempCanvasElement.getContext("2d"); tempCanvas.drawImage(video, 0, 0, tempCanvasElement.width, tempCanvasElement.height); const imageData = tempCanvas.getImageData(0, 0, tempCanvasElement.width, tempCanvasElement.height); const code = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" }); if (code) { console.log("QR Found:", code.data); stopScanner(); processScannedQrCode(code.data); } else { requestAnimationFrame(tick); } }
-
-    function processScannedQrCode(scannedUrl) { clearTimeout(scanTimeout); updateScanStatus('Code détecté. Traitement...', 'loading'); try { const url = new URL(scannedUrl); let urlBasePart = ''; if (url.protocol === 'app:') { urlBasePart = url.protocol + '//' + url.hostname + url.pathname; } else { urlBasePart = url.origin + url.pathname; } console.log(`Compare Scan Base: "${urlBasePart}" vs Expected: "${QR_TARGET_BASE_URL}"`); if (scannedUrl.startsWith(QR_TARGET_BASE_URL)) { const ipp = url.searchParams.get('ipp'); console.log("Attempting to get IPP. Found:", ipp); if (ipp) { console.log("IPP Found:", ipp); updateScanStatus(`<i class="fas fa-check-circle"></i> Patient IPP ${ipp} trouvé. Chargement...`, 'success'); loadPatientIntoCurrentDashboard(ipp); } else { console.error("IPP missing."); updateScanStatus('Erreur: IPP manquant.', 'error'); } } else { console.error("Base URL mismatch."); updateScanStatus('Erreur: QR Code non reconnu.', 'error'); } } catch (e) { console.error("Error processing scan:", e); updateScanStatus(`Erreur: Format QR invalide (${e.message}).`, 'error'); } }
-
-     function updateScanStatus(message, type = 'info') { const statusTypes={'info':{icon:'fas fa-info-circle',cls:'message-info'},'success':{icon:'fas fa-check-circle',cls:'message-success'},'warning':{icon:'fas fa-exclamation-triangle',cls:'message-warning'},'error':{icon:'fas fa-times-circle',cls:'message-error'},'loading':{icon:'fas fa-spinner fa-spin',cls:'message-info'}}; const sInfo=statusTypes[type]||statusTypes['info']; showMessage('scanResult',`<i class="${sInfo.icon}"></i> ${message}`, type); }
-
-    function loadPatientIntoCurrentDashboard(ipp) { console.log(`Loading patient ${ipp} into Doctor dashboard`); currentIPP = ipp; try { const newUrl = new URL(window.location); newUrl.searchParams.set('ipp', ipp); window.history.pushState({ ipp: ipp }, '', newUrl); } catch(e) { console.error("History API err:", e); } console.log("Calling loadPatient..."); loadPatient(ipp); console.log("Clearing fields..."); if(document.getElementById('diagnosticInput')) document.getElementById('diagnosticInput').value = ''; if(document.getElementById('prescriptionInput')) document.getElementById('prescriptionInput').value = ''; if(document.getElementById('diagMessage')) showMessage('diagMessage','',''); if(document.getElementById('validationMessage')) showMessage('validationMessage','',''); if(document.getElementById('aiSuggestion')) document.getElementById('aiSuggestion').style.display = 'none'; setTimeout(() => { showMessage('scanResult', '', ''); }, 4000); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    const scanButton = document.getElementById('scanQrButton'); const scannerContainer = document.getElementById('scanner-container'); const video = document.getElementById('scanner-video'); const scanResultDiv = document.getElementById("scanResult"); let scanning = false; let currentStream = null; let scanTimeout = null;
+    function updateScanStatus(message, type = 'info') { showMessage('scanResult', message, type); } // Use showMessage
+    if (scanButton) { scanButton.onclick = async () => { if (!scanning) { try { showMessage('scanResult', '', ''); updateScanStatus('Recherche caméra...', 'loading'); scannerContainer.style.display = 'block'; currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); video.srcObject = currentStream; await video.play(); updateScanStatus('Caméra prête. Scannez le code.', 'info'); scanButton.innerHTML = '<i class="fas fa-stop-circle"></i> Arrêter Scan'; scanButton.classList.replace('btn-outline','btn-danger'); scanning = true; clearTimeout(scanTimeout); scanTimeout = setTimeout(() => { if (scanning) { updateScanStatus('Aucun code détecté.', 'warning'); stopScanner(); } }, 30000); requestAnimationFrame(tick); } catch (err) { console.error("Cam Err:", err); updateScanStatus(`Err Cam: ${err.message}`, 'error'); stopScanner(); } } else { stopScanner(); updateScanStatus('Scan arrêté.', 'info'); } }; } else { console.warn("Scan button not found."); }
+    function stopScanner() { clearTimeout(scanTimeout); if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); } if(video) video.srcObject = null; if(scannerContainer) scannerContainer.style.display = 'none'; if(scanButton) {scanButton.innerHTML = '<i class="fas fa-qrcode"></i> Scanner QR'; scanButton.classList.replace('btn-danger','btn-outline');} scanning = false; currentStream = null; }
+    function tick() { if (!scanning || !video || video.videoWidth === 0 || video.readyState < 2) { if (scanning) requestAnimationFrame(tick); return; } const tce = document.createElement('canvas'); tce.height = video.videoHeight; tce.width = video.videoWidth; const tc = tce.getContext("2d",{willReadFrequently:true}); tc.drawImage(video, 0, 0, tce.width, tce.height); try { const id = tc.getImageData(0, 0, tce.width, tce.height); const code = window.jsQR(id.data, id.width, id.height, { inversionAttempts: "dontInvert" }); if (code) { console.log("QR Found:", code.data); stopScanner(); processScannedQrCode(code.data); } else { requestAnimationFrame(tick); } } catch (e) { console.error("Error QR proc:", e); requestAnimationFrame(tick); } }
+    function processScannedQrCode(scannedUrl) { clearTimeout(scanTimeout); updateScanStatus('Code détecté. Traitement...', 'loading'); try { const url = new URL(scannedUrl); if (scannedUrl.startsWith(QR_TARGET_BASE_URL)) { const ippFromQr = url.searchParams.get('ipp'); if (ippFromQr) { updateScanStatus(`Patient IPP ${ippFromQr} trouvé. Chargement...`, 'success'); loadPatientIntoCurrentDashboard(ippFromQr); } else { updateScanStatus('Erreur: IPP manquant.', 'error'); } } else { updateScanStatus('Erreur: QR Code non reconnu.', 'error'); } } catch (e) { updateScanStatus(`Erreur: Format QR invalide (${e.message}).`, 'error'); } }
+    function loadPatientIntoCurrentDashboard(scannedIpp) { console.log(`Loading patient ${scannedIpp} into Doctor dashboard`); currentIPP = scannedIpp; try { const newUrl = new URL(window.location); newUrl.searchParams.set('ipp', scannedIpp); window.history.pushState({ ipp: scannedIpp }, '', newUrl); } catch(e) { console.error("History API err:", e); } console.log("Calling loadPatient..."); loadPatient(ipp); console.log("Clearing fields..."); if(document.getElementById('diagnosticInput')) document.getElementById('diagnosticInput').value = ''; if(document.getElementById('prescriptionInput')) document.getElementById('prescriptionInput').value = ''; if(document.getElementById('diagMessage')) showMessage('diagMessage','',''); if(document.getElementById('validationMessage')) showMessage('validationMessage','',''); if(document.getElementById('aiSuggestion')) document.getElementById('aiSuggestion').style.display = 'none'; setTimeout(() => { showMessage('scanResult', '', ''); }, 4000); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     // --- END QR SCANNER CODE ---
+
+    // --- window.onload (Corrected) ---
+     window.onload = () => {
+      if (!localStorage.getItem('authToken')) { console.log("Doctor: No token, redirecting."); window.location.href = LOGIN_PAGE_URL; return; }
+       document.body.classList.add('loaded'); console.log("Doctor: Authenticated.");
+
+       const urlParams = new URLSearchParams(window.location.search); // Define urlParams here
+       const ippFromUrl = urlParams.get("ipp");
+
+       if (ippFromUrl) { // Load patient if IPP is in URL
+           console.log(`IPP in URL: ${ippFromUrl}. Loading initial data.`);
+           currentIPP = ippFromUrl;
+           loadPatient(currentIPP); // Load data for this IPP
+       } else { // No IPP in URL, show empty state and disable sections
+           console.log("No initial IPP. Waiting scan.");
+           document.getElementById('patientInfo').innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><i class="fas fa-qrcode"></i><div class="empty-state-message">Prêt à scanner</div><div class="empty-state-description">Utilisez le bouton "Scanner QR" ou chargez un patient via l\'URL.</div></div>';
+           enableDoctorSections(false); // Keep doctor sections disabled
+       }
+        // Attach general listeners if any (already handled by onclick)
+    };
 
   </script>
 </body>

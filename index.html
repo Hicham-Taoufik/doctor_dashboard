@@ -7,30 +7,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
   <style>
-    /* --- CSS remains exactly the same as your previous version --- */
+    /* --- CSS remains exactly the same --- */
     :root {
-      --primary: #5d74f2;
-      --primary-light: #ebeffe;
-      --success: #31c971;
-      --success-light: #e0fbea;
-      --warning: #ffb648;
-      --warning-light: #fff8ec;
-      --danger: #ff5a5a;
-      --danger-light: #ffeded;
-      --gray-100: #f9fafb;
-      --gray-200: #f1f3f9;
-      --gray-300: #e5e7eb;
-      --gray-400: #d1d5db;
-      --gray-500: #9ca3af;
-      --gray-600: #6b7280;
-      --gray-700: #4b5563;
-      --gray-800: #374151;
-      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 6px rgba(0,0,0,0.04);
-      --border-radius: 8px;
+      --primary: #5d74f2; --primary-light: #ebeffe; --success: #31c971; --success-light: #e0fbea; --warning: #ffb648; --warning-light: #fff8ec; --danger: #ff5a5a; --danger-light: #ffeded; --gray-100: #f9fafb; --gray-200: #f1f3f9; --gray-300: #e5e7eb; --gray-400: #d1d5db; --gray-500: #9ca3af; --gray-600: #6b7280; --gray-700: #4b5563; --gray-800: #374151; --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.04); --border-radius: 8px;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: #f9fafb; color: var(--gray-800); line-height: 1.5; min-height: 100vh; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f9fafb; color: var(--gray-800); line-height: 1.5; min-height: 100vh; padding: 0; visibility: hidden; /* Hide initially */ }
+    body.loaded { visibility: visible; /* Show when JS confirms auth */ }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
     .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; margin-bottom: 30px; }
     .header-title { color: var(--primary); font-size: 1.5rem; font-weight: 600; }
@@ -57,12 +40,10 @@
     .btn-group { display: flex; gap: 10px; margin-top: 15px; }
     .btn { padding: 8px 16px; font-size: 0.85rem; font-weight: 500; border-radius: var(--border-radius); border: none; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; }
     .btn i { margin-right: 6px; }
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: #4a62d8; }
-    .btn-outline { background: white; color: var(--primary); border: 1px solid var(--gray-300); }
-    .btn-outline:hover { border-color: var(--primary); background: var(--primary-light); }
-    .btn-success { background: var(--success); color: white; }
-    .btn-success:hover { background: #28a960; }
+    .btn-primary { background: var(--primary); color: white; } .btn-primary:hover { background: #4a62d8; }
+    .btn-outline { background: white; color: var(--primary); border: 1px solid var(--gray-300); } .btn-outline:hover { border-color: var(--primary); background: var(--primary-light); }
+    .btn-success { background: var(--success); color: white; } .btn-success:hover { background: #28a960; }
+    .btn:disabled { background-color: var(--gray-300); cursor: not-allowed; }
     .status { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--gray-600); background: var(--gray-200); margin-left: 10px; }
     .checkbox-wrapper { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; }
     .checkbox-item { display: flex; align-items: center; }
@@ -77,7 +58,7 @@
     @media (max-width: 768px) { .flex-row { flex-direction: column; gap: 20px; } .patient-info { grid-template-columns: 1fr 1fr; } }
   </style>
 </head>
-<body>
+<body > <!-- Body starts hidden -->
   <div class="container">
     <div class="header">
       <h1 class="header-title">Dashboard de Médecin</h1>
@@ -92,12 +73,8 @@
 
     <div class="card">
       <div class="card-header">
-        <h2 class="card-title">
-          <i class="fas fa-user-circle"></i> Informations du Patient
-        </h2>
-        <div class="card-actions">
-          <i class="fas fa-user"></i>
-        </div>
+        <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations du Patient </h2>
+        <div class="card-actions"> <i class="fas fa-user"></i> </div>
       </div>
       <div class="card-body">
         <div id="patientInfo" class="patient-info">Chargement des informations...</div>
@@ -107,511 +84,249 @@
     <div class="flex-row">
       <div class="flex-col">
         <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">
-              <i class="fas fa-stethoscope"></i> Diagnostic
-            </h2>
-            <div class="card-actions">
-              <i class="fas fa-notes-medical"></i>
-            </div>
-          </div>
+          <div class="card-header"> <h2 class="card-title"> <i class="fas fa-stethoscope"></i> Diagnostic </h2> <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> </div>
           <div class="card-body">
-            <div class="input-group">
-              <textarea id="diagnosticInput" placeholder="Entrez le diagnostic du patient..."></textarea>
-            </div>
-
-            <div class="btn-group">
-              <button class="btn btn-outline" onclick="startRecording('diagnosis')">
-                <i class="fas fa-microphone"></i> Démarrer
-              </button>
-              <button class="btn btn-outline" onclick="stopRecording('diagnosis')">
-                <i class="fas fa-stop-circle"></i> Arrêter
-              </button>
-              <span id="diagnosisStatus" class="status"></span>
-            </div>
-
-            <div class="btn-group">
-              <button class="btn btn-success" onclick="submitDiagnostic()">
-                <i class="fas fa-check-circle"></i> Enregistrer
-              </button>
-            </div>
-
-            <div id="diagMessage" class="message message-success"></div>
+            <div class="input-group"> <textarea id="diagnosticInput" placeholder="Entrez le diagnostic du patient..."></textarea> </div>
+            <div class="btn-group"> <button class="btn btn-outline" onclick="startRecording('diagnosis')"> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" onclick="stopRecording('diagnosis')"> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="diagnosisStatus" class="status"></span> </div>
+            <div class="btn-group"> <button class="btn btn-success" onclick="submitDiagnostic()"> <i class="fas fa-check-circle"></i> Enregistrer </button> </div>
+            <div id="diagMessage" class="message"></div>
           </div>
         </div>
       </div>
 
       <div class="flex-col">
         <div class="card">
-          <div class="card-header">
-            <h2 class="card-title">
-              <i class="fas fa-prescription-bottle-alt"></i> Prescription
-            </h2>
-            <div class="card-actions">
-              <i class="fas fa-pills"></i>
-            </div>
-          </div>
+          <div class="card-header"> <h2 class="card-title"> <i class="fas fa-prescription-bottle-alt"></i> Prescription </h2> <div class="card-actions"> <i class="fas fa-pills"></i> </div> </div>
           <div class="card-body">
-            <div class="input-group">
-              <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 500mg 3x/jour pendant 5 jours..."></textarea>
-            </div>
-
-            <div class="btn-group">
-              <button class="btn btn-outline" onclick="startRecording('prescription')">
-                <i class="fas fa-microphone"></i> Démarrer
-              </button>
-              <button class="btn btn-outline" onclick="stopRecording('prescription')">
-                <i class="fas fa-stop-circle"></i> Arrêter
-              </button>
-              <span id="prescriptionStatus" class="status"></span>
-            </div>
-
-            <div class="btn-group">
-              <button class="btn btn-primary" onclick="submitPrescription()">
-                <i class="fas fa-robot"></i> Soumettre à l'IA
-              </button>
-            </div>
-
+            <div class="input-group"> <textarea id="prescriptionInput" placeholder="Ex: Amoxicillin 500mg 3x/jour pendant 5 jours..."></textarea> </div>
+            <div class="btn-group"> <button class="btn btn-outline" onclick="startRecording('prescription')"> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" onclick="stopRecording('prescription')"> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="prescriptionStatus" class="status"></span> </div>
+            <div class="btn-group"> <button class="btn btn-primary" onclick="submitPrescription()"> <i class="fas fa-robot"></i> Soumettre à l'IA </button> </div>
             <div id="aiSuggestion" class="ai-suggestion" style="display: none;">
               <h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3>
-
-              <div class="input-group">
-                <label>Médicament:</label>
-                <input type="text" id="medicament"/>
-              </div>
-
-              <div class="input-group">
-                <label>Date de début:</label>
-                <input type="date" id="start_date"/>
-              </div>
-
-              <div class="input-group">
-                <label>Date de fin:</label>
-                <input type="date" id="end_date"/> <!-- Ensure ID is correct -->
-              </div>
-
-              <div class="input-group">
-                <label>Horaires:</label>
-                <div class="checkbox-wrapper">
-                  <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label>
-                  <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> Après-midi</label>
-                  <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label>
-                  <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label>
-                </div>
-              </div>
-
-              <!-- Total Amount Div Removed -->
-
-              <div class="btn-group">
-                <button class="btn btn-success" onclick="validatePrescription()">
-                  <i class="fas fa-check-double"></i> Valider la prescription
-                </button>
-              </div>
-
-              <div id="validationMessage" class="message message-success"></div>
+              <div class="input-group"> <label>Médicament:</label> <input type="text" id="medicament"/> </div>
+              <div class="input-group"> <label>Date de début:</label> <input type="date" id="start_date"/> </div>
+              <div class="input-group"> <label>Date de fin:</label> <input type="date" id="end_date"/> </div>
+              <div class="input-group"> <label>Horaires:</label> <div class="checkbox-wrapper"> <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label> <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> Après-midi</label> <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label> <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label> </div> </div>
+              <div class="btn-group"> <button class="btn btn-success" onclick="validatePrescription()"> <i class="fas fa-check-double"></i> Valider la prescription </button> </div>
+              <div id="validationMessage" class="message"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Consultation History Card Removed -->
-
   </div>
 
   <script>
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-    // REMOVED const TOKEN = 'Bearer ...'; // Hardcoded token removed
+    // *** ADD ABSOLUTE URL for the Login Page ***
+    const LOGIN_PAGE_URL = 'https://hicham-taoufik.github.io/login/'; // Assuming login is hosted here
 
     let currentIPP = null;
     let mediaRecorder;
     let audioChunks = [];
+    let recordingField = null; // Store which field is being recorded
     let aiData = {};
 
-    // --- ADDED: fetchWithAuth Helper Function ---
+    // --- fetchWithAuth Helper Function ---
     function fetchWithAuth(url, options = {}) {
-        const token = localStorage.getItem('authToken'); // Using localStorage
+        const token = localStorage.getItem('authToken');
         if (!token) {
-            console.error('Authentication token not found. Redirecting to login.');
-            alert('Session expirée ou non connecté. Veuillez vous reconnecter.'); // User feedback
-            // Redirect to login page (replace '/login.html' with your actual login page)
-            window.location.href = '/login.html';
-            return Promise.reject(new Error('Authentication token not found.')); // Stop the fetch
+            console.error('Doctor: Auth token not found. Redirecting to login.');
+            alert('Session expirée ou non connecté. Veuillez vous reconnecter.');
+            window.location.href = LOGIN_PAGE_URL; // Use absolute URL
+            return Promise.reject(new Error('Authentication token not found.'));
         }
-
-        const headers = {
-            ...options.headers,
-            'Authorization': `Bearer ${token}`
-        };
-
-        // Set Content-Type ONLY if body exists AND is not FormData
-        if (options.body && !(options.body instanceof FormData)) {
-            headers['Content-Type'] = 'application/json';
-        }
-         // If body is FormData, DO NOT set Content-Type header
-         else if (options.body instanceof FormData) {
-             delete headers['Content-Type']; // Ensure it's not set by default
-         }
-
-
-        return fetch(url, {
-            ...options,
-            headers: headers
-        })
-        .then(response => {
-            // Check for 401/403 Unauthorized/Forbidden errors globally
-            if (response.status === 401 || response.status === 403) {
-                 console.error('Authentication error:', response.status, response.statusText);
-                 localStorage.removeItem('authToken'); // Clear invalid token
-                 alert('Session expirée ou invalide. Veuillez vous reconnecter.'); // User feedback
-                 // Redirect to login page
-                 window.location.href = '/login.html';
-                 // Throw an error to stop further processing in the specific fetch chain
-                 throw new Error(`Authentication failed: ${response.status}`);
-            }
-            // Check for other errors that might not be caught by .catch later
-            if (!response.ok && response.status !== 401 && response.status !== 403) {
-                 console.error('Network error:', response.status, response.statusText);
-                 // Attempt to get error message from response body if possible
-                 return response.text().then(text => {
-                     throw new Error(`Erreur réseau ${response.status}: ${text || response.statusText}`);
-                 });
-            }
-            return response; // Pass the response along if OK
-        });
+        const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
+        if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; }
+        else if (options.body instanceof FormData) { delete headers['Content-Type']; }
+        return fetch(url, { ...options, headers: headers })
+            .then(response => {
+                if (response.status === 401 || response.status === 403) {
+                    console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); alert('Session expirée ou invalide. Veuillez vous reconnecter.');
+                    window.location.href = LOGIN_PAGE_URL; // Use absolute URL
+                    throw new Error(`Authentication failed: ${response.status}`);
+                }
+                if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); }
+                return response;
+            });
     }
-    // --- END: fetchWithAuth Helper Function ---
 
-     // --- ADDED: Logout Function ---
-     function logout() {
+    // --- Logout Function ---
+    function logout() {
         localStorage.removeItem('authToken');
         alert('Vous avez été déconnecté.');
-        window.location.href = '/login.html'; // Redirect to login
-     }
-     // --- END: Logout Function ---
+        window.location.href = LOGIN_PAGE_URL; // Use absolute URL
+    }
 
+    // --- window.onload Check ---
     window.onload = () => {
+       if (!localStorage.getItem('authToken')) {
+           console.log("Doctor Dash: No auth token found, redirecting to login.");
+           window.location.href = LOGIN_PAGE_URL; // Use absolute URL
+           return; // Stop execution
+       }
+       // If token exists, make body visible and proceed
+       document.body.classList.add('loaded');
+       console.log("Doctor dashboard loaded with valid token.");
+
       const urlParams = new URLSearchParams(window.location.search);
       currentIPP = urlParams.get("ipp");
-      // Check if token exists on load, redirect if not (optional, good practice)
-       if (!localStorage.getItem('authToken')) {
-           console.log("No auth token found on load, redirecting to login.");
-           // window.location.href = '/login.html'; // Uncomment to enforce login
-           // Instead of redirect, maybe just disable functionality or show login message
-           document.body.innerHTML = '<div style="padding: 50px; text-align: center;">Veuillez vous <a href="/login.html">connecter</a> pour accéder au dashboard.</div>';
-           return; // Stop further execution
-       }
-
       if (currentIPP) {
           loadPatient(currentIPP);
       } else {
-          // Optionally display a message if no IPP is provided
-           document.getElementById("patientInfo").innerHTML = '<div class="message message-warning" style="display:block; grid-column: 1/-1;">Aucun patient sélectionné (IPP manquant dans l\'URL).</div>';
+           document.getElementById("patientInfo").innerHTML = '<div class="message message-warning" style="display:block; grid-column: 1/-1;">Aucun patient sélectionné (IPP manquant).</div>';
       }
     };
 
+    // --- Load Patient Function ---
     function loadPatient(ipp) {
       const patientInfoContainer = document.getElementById("patientInfo");
-      patientInfoContainer.innerHTML = 'Chargement des informations...';
-
-      // Use fetchWithAuth
+      patientInfoContainer.innerHTML = 'Chargement...';
       fetchWithAuth(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`)
-      // No need for Authorization header here anymore
-      .then(res => {
-        // Error check already done in fetchWithAuth, but double check ok status
-        if (!res.ok) throw new Error(`Erreur ${res.status} lors du chargement.`);
-        return res.json();
-      })
-      .then(data => {
-        if (typeof data !== 'object' || data === null) {
-            throw new Error("Réponse invalide pour les infos patient");
-        }
-        // ... (rest of the code to populate patientInfoContainer remains the same) ...
-        patientInfoContainer.innerHTML = `
-          <div class="info-group"> <div class="info-label">Nom</div> <div class="info-value">${data.nom || 'N/A'}</div> </div>
-          <div class="info-group"> <div class="info-label">Prénom</div> <div class="info-value">${data.prenom || 'N/A'}</div> </div>
-          <div class="info-group"> <div class="info-label">CIN</div> <div class="info-value">${data.cin || 'N/A'}</div> </div>
-          <div class="info-group"> <div class="info-label">Téléphone</div> <div class="info-value">${data.telephone || 'N/A'}</div> </div>
-          <div class="info-group"> <div class="info-label">Adresse</div> <div class="info-value">${data.adresse || 'N/A'}</div> </div>
-          <div class="info-group"> <div class="info-label">Mutuelle</div> <div class="info-value">${data.mutuelle || 'Aucune'}</div> </div>
-        `;
-      })
-      .catch(error => {
-         // Avoid redirecting here if it was just a fetch error for this specific patient
-         if (!error.message.startsWith('Authentication failed')) {
-             patientInfoContainer.innerHTML =
-             `<div class="message message-error" style="display:block; grid-column: 1 / -1;">Erreur chargement patient: ${error.message}</div>`;
-         }
-         console.error("Error loading patient data:", error);
-      });
+        .then(res => res.json())
+        .then(data => {
+          if (typeof data !== 'object' || data === null) { throw new Error("Réponse invalide."); }
+          patientInfoContainer.innerHTML = `
+            <div class="info-group"><div class="info-label">Nom</div><div class="info-value">${data.nom||'N/A'}</div></div>
+            <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${data.prenom||'N/A'}</div></div>
+            <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${data.cin||'N/A'}</div></div>
+            <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${data.telephone||'N/A'}</div></div>
+            <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${data.adresse||'N/A'}</div></div>
+            <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${data.mutuelle||'Aucune'}</div></div>`;
+        })
+        .catch(error => { if (!error.message.startsWith('Auth')) { patientInfoContainer.innerHTML = `<div class="message message-error" style="display:block; grid-column: 1 / -1;">Erreur chargement: ${error.message}</div>`; } console.error("Error loading patient:", error); });
     }
 
+    // --- Audio Recording Functions ---
     function startRecording(field) {
-      audioChunks = [];
-       // Check for mediaDevices support
-       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-           alert("L'enregistrement audio n'est pas supporté par ce navigateur.");
-            document.getElementById(`${field}Status`).innerHTML = '<i class="fas fa-exclamation-triangle"></i> Non supporté';
-           return;
-       }
-      navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-        mediaRecorder = new MediaRecorder(stream);
-        mediaRecorder.start();
-        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-        document.getElementById(`${field}Status`).innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Enregistrement...';
-      }).catch(error => {
-        document.getElementById(`${field}Status`).innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur micro';
-        console.error("Error accessing microphone:", error);
-        alert("Erreur d'accès au microphone: " + error.message);
-      });
-    }
-
-    function stopRecording(field) {
       if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
-        // onstop will handle the rest
-      } else {
-           document.getElementById(`${field}Status`).innerHTML = ''; // Clear status if already stopped
+           console.warn("Recording already in progress.");
+           return;
       }
-      // Reset recorder state variables if needed
-      // mediaRecorder = null;
+      audioChunks = [];
+      recordingField = field; // Store the field being recorded
+      const statusEl = document.getElementById(`${field}Status`);
+      statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Démarrage...'; statusEl.style.display = 'inline-flex';
+
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+            mediaRecorder.onstop = handleRecordingStop; // Use named handler
+            mediaRecorder.onerror = (event) => {
+                console.error(`Recorder Error: ${event.error}`);
+                const statusEl = document.getElementById(`${recordingField}Status`);
+                if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Erreur Rec.';
+                recordingField = null; // Reset field on error
+            };
+            mediaRecorder.start();
+            statusEl.innerHTML = '<i class="fas fa-microphone-alt fa-beat"></i> Enregistrement...'; // Use a different icon
+        })
+        .catch(error => {
+            console.error("Mic Error:", error);
+            statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur micro';
+            alert("Erreur accès microphone: " + error.message);
+            recordingField = null; // Reset field
+        });
     }
 
-    // This function runs when mediaRecorder.stop() is called
-    mediaRecorder.onstop = () => {
-         if (audioChunks.length === 0) {
-              console.warn("No audio chunks recorded.");
-              // Assume 'field' is accessible or pass it somehow if needed globally
-              const currentField = mediaRecorder.stream.id.includes('diag') ? 'diagnosis' : 'prescription'; // Hacky way, better to pass field
-               document.getElementById(`${currentField}Status`).innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide';
-              return;
-         }
-         const blob = new Blob(audioChunks, { type: 'audio/webm' });
-          // Need to know which field this belongs to
-         // Let's assume we stored it somewhere, or derive it (less ideal)
-         // For simplicity, let's hardcode for now, needs better state management
-         let field = 'diagnosis'; // Default, needs update
-         if (document.getElementById('prescriptionStatus').innerHTML.includes('Enregistrement')) {
-             field = 'prescription';
-         } else if(document.getElementById('diagnosisStatus').innerHTML.includes('Enregistrement')) {
-              field = 'diagnosis';
-         }
-
-         sendAudioToAI(blob, field);
-         document.getElementById(`${field}Status`).innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Transcription...';
-         audioChunks = []; // Clear chunks for next recording
-    };
-
-
-    function sendAudioToAI(blob, field) {
-      const endpoint = field === 'diagnosis'
-        ? `${BASE_URL}/webhook/transcribe-diagnosis`
-        : `${BASE_URL}/webhook/transcribe-prescription`;
-
-      const formData = new FormData();
-      formData.append("audio", blob, `${field}.webm`);
-
-      document.getElementById(`${field}Status`).innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Envoi...';
-
-      // Use fetchWithAuth for FormData
-      fetchWithAuth(endpoint, {
-        method: "POST",
-        // No Content-Type header needed for FormData
-        body: formData
-      })
-      .then(res => {
-         // Check moved to fetchWithAuth
-         return res.json();
-      })
-      .then(data => {
-        // ... (parsing logic remains the same) ...
-        let text = '';
-        if (Array.isArray(data) && data.length > 0) { text = data[0]?.text || data[0]?.transcript || ''; }
-        else if (typeof data === 'object' && data !== null) { text = data.text || data.transcript || ''; }
-
-        if (!text) {
-          console.warn("Transcription result empty or in unexpected format:", data);
-          document.getElementById(`${field}Status`).innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide';
-          return;
-        }
-        document.getElementById(field === 'diagnosis' ? 'diagnosticInput' : 'prescriptionInput').value = text;
-        document.getElementById(`${field}Status`).innerHTML = '<i class="fas fa-check"></i> Terminé';
-      })
-      .catch(error => {
-         if (!error.message.startsWith('Authentication failed')) {
-            document.getElementById(`${field}Status`).innerHTML = '<i class="fas fa-times-circle"></i> Erreur Transc.';
-         }
-         console.error("Transcription error:", error);
-      });
-    }
-
-    function submitDiagnostic() {
-      const diagnostic = document.getElementById("diagnosticInput").value;
-      if (!diagnostic || !currentIPP) { // Also check if IPP is loaded
-        showMessage("diagMessage", `Veuillez entrer un diagnostic ${!currentIPP ? 'et sélectionner un patient' : ''}.`, "warning");
-        return;
-      }
-      showMessage("diagMessage", "", "");
-
-      // Use fetchWithAuth
-      fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-diagnostic`, {
-        method: "POST",
-        // No headers needed, handled by fetchWithAuth
-        body: JSON.stringify({ ipp: currentIPP, diagnostic })
-      })
-      .then(response => {
-        // Check moved to fetchWithAuth
-        const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-            return response.json();
+    function stopRecording(field) { // Pass field to potentially stop specific recorder if needed
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            console.log(`Stopping recording for ${recordingField}`);
+            mediaRecorder.stop(); // This will trigger the onstop handler
         } else {
-            return {};
+            console.log("Not recording or recorder not ready.");
+             // Clear status if stop is clicked when not recording
+             const statusEl = document.getElementById(`${field}Status`);
+             if(statusEl) statusEl.innerHTML = '';
         }
-      })
-      .then((data) => {
-        showMessage("diagMessage", "<i class='fas fa-check-circle'></i> Diagnostic enregistré", "success");
-        console.log("Diagnostic submission response:", data);
-      })
-      .catch(error => {
-         if (!error.message.startsWith('Authentication failed')) {
-             showMessage("diagMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur enregistrement: ${error.message}`, "error");
-         }
-         console.error("Error submitting diagnostic:", error);
-      });
+    }
+
+    function handleRecordingStop() {
+        console.log(`Recording stopped for ${recordingField}. Chunks: ${audioChunks.length}`);
+        const statusEl = document.getElementById(`${recordingField}Status`);
+
+        if (audioChunks.length === 0) {
+            console.warn("No audio data recorded.");
+            if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide';
+            recordingField = null; // Reset field
+            return;
+        }
+
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        if(statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Transcription...';
+        sendAudioToAI(blob, recordingField); // Send the data
+        audioChunks = []; // Clear chunks
+        recordingField = null; // Reset field after processing starts
+         // Optional: re-enable start button here if needed, although usually done in start/stop logic
+    }
+
+    // --- Send Audio Function ---
+    function sendAudioToAI(blob, field) {
+        if (!field) { console.error("Field missing for audio submission"); return; }
+        const endpoint = field === 'diagnosis' ? `${BASE_URL}/webhook/transcribe-diagnosis` : `${BASE_URL}/webhook/transcribe-prescription`;
+        const formData = new FormData(); formData.append("audio", blob, `${field}.webm`);
+        const statusEl = document.getElementById(`${field}Status`);
+        if(statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Envoi...';
+
+        fetchWithAuth(endpoint, { method: "POST", body: formData })
+          .then(res => res.json())
+          .then(data => {
+              let text = ''; if (Array.isArray(data) && data.length > 0) { text = data[0]?.text || data[0]?.transcript || ''; } else if (typeof data === 'object' && data !== null) { text = data.text || data.transcript || ''; }
+              if (!text) { console.warn("Transcription empty:", data); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; return; }
+              document.getElementById(field === 'diagnosis' ? 'diagnosticInput' : 'prescriptionInput').value = text;
+              if(statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> Terminé';
+          })
+          .catch(error => { if (!error.message.startsWith('Auth')) { if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Erreur Transc.'; } console.error("Transcription error:", error); });
+    }
+
+    // --- Form Submission Functions ---
+    function submitDiagnostic() {
+        const diagnostic = document.getElementById("diagnosticInput").value;
+        if (!diagnostic || !currentIPP) { showMessage("diagMessage", `Diagnostic vide ${!currentIPP ? 'ou patient non sélectionné' : ''}.`, "warning"); return; }
+        showMessage("diagMessage", "", "");
+        fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-diagnostic`, { method: "POST", body: JSON.stringify({ ipp: currentIPP, diagnostic }) })
+            .then(response => response.ok ? response.json().catch(()=>({})) : response.text().then(text => { throw new Error(text||`Erreur ${response.status}`)}) ) // Handle potential empty JSON response on success
+            .then(() => { showMessage("diagMessage", "<i class='fas fa-check-circle'></i> Diagnostic enregistré.", "success"); })
+            .catch(error => { if (!error.message.startsWith('Auth')) { showMessage("diagMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur: ${error.message}`, "error"); } console.error("Error submitting diagnostic:", error); });
     }
 
     function submitPrescription() {
-      const prescription = document.getElementById("prescriptionInput").value;
-      if (!prescription || !currentIPP) {
-        showMessage("validationMessage", `Veuillez entrer une prescription ${!currentIPP ? 'et sélectionner un patient' : ''}.`, "warning");
-        document.getElementById("aiSuggestion").style.display = "none";
-        return;
-      }
-      showMessage("validationMessage", "", "");
-      document.getElementById("aiSuggestion").style.display = "none";
-
-      // Use fetchWithAuth
-      fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-prescription`, {
-        method: "POST",
-        // No headers needed, handled by fetchWithAuth
-        body: JSON.stringify({ ipp: currentIPP, prescription })
-      })
-      .then(response => {
-        // Check moved to fetchWithAuth
-        return response.json();
-      })
-      .then(data => {
-        // ... (logic for handling AI suggestion remains the same) ...
-         console.log("Raw data received from API:", JSON.stringify(data, null, 2));
-         if (data && data.success === true && data.suggestion) {
-            console.log("Data structure check PASSED (found data.success and data.suggestion). Attempting to show suggestion.");
-            aiData = data.suggestion;
-            document.getElementById("aiSuggestion").style.display = "block";
-            console.log("aiSuggestion display set to 'block'.");
-            document.getElementById("medicament").value = aiData.medicament || '';
-            const convertDate = (dateStr) => { /* ... (convertDate function) ... */
-                 if (!dateStr || typeof dateStr !== 'string' || !/^\d{2}\/\d{2}\/\d{4}$/.test(dateStr)) { console.warn(`Invalid date format: "${dateStr}"`); return ''; }
-                 const parts = dateStr.split('/'); if (parts.length !== 3) { console.warn(`Split failed: "${dateStr}"`); return ''; }
-                 const day = parseInt(parts[0], 10); const month = parseInt(parts[1], 10); const year = parseInt(parts[2], 10);
-                 if (isNaN(day) || isNaN(month) || isNaN(year) || day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > 2100) { console.warn(`Invalid parts: D=${day}, M=${month}, Y=${year}`); return ''; }
-                 const formattedDay = String(day).padStart(2, '0'); const formattedMonth = String(month).padStart(2, '0');
-                 return `${year}-${formattedMonth}-${formattedDay}`;
-             };
-            document.getElementById("start_date").value = convertDate(aiData.start_date);
-            document.getElementById("end_date").value = convertDate(aiData.end_date);
-             if (aiData.schedule) {
-                document.getElementById("matin").checked = aiData.schedule.matin || false;
-                document.getElementById("apres_midi").checked = aiData.schedule.apres_midi || false;
-                document.getElementById("soir").checked = aiData.schedule.soir || false;
-                document.getElementById("nuit").checked = aiData.schedule.nuit || false;
-            } else { /* ... clear checkboxes ... */ }
-             document.getElementById("aiSuggestion").scrollIntoView({ behavior: 'smooth' });
-         } else { /* ... handle invalid structure ... */
-              console.error("Invalid AI suggestion structure:", data);
-              showMessage("validationMessage", "<i class='fas fa-exclamation-triangle'></i> Réponse IA invalide", "error");
-         }
-      })
-      .catch(error => {
-         if (!error.message.startsWith('Authentication failed')) {
-             showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur soumission IA: ${error.message}`, "error");
-         }
-         console.error("Error submitting prescription:", error);
-         document.getElementById("aiSuggestion").style.display = "none";
-      });
+        const prescription = document.getElementById("prescriptionInput").value;
+        if (!prescription || !currentIPP) { showMessage("validationMessage", `Prescription vide ${!currentIPP ? 'ou patient non sélectionné' : ''}.`, "warning"); document.getElementById("aiSuggestion").style.display = "none"; return; }
+        showMessage("validationMessage", "", ""); document.getElementById("aiSuggestion").style.display = "none";
+        fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-prescription`, { method: "POST", body: JSON.stringify({ ipp: currentIPP, prescription }) })
+            .then(res => res.json())
+            .then(data => {
+                console.log("AI Suggestion Raw:", JSON.stringify(data, null, 2));
+                if (data && data.success === true && data.suggestion) {
+                    aiData = data.suggestion; document.getElementById("aiSuggestion").style.display = "block";
+                    document.getElementById("medicament").value = aiData.medicament || '';
+                    const convertDate = (d) => {if(!d||typeof d !=='string'||!/^\d{2}\/\d{2}\/\d{4}$/.test(d)){console.warn(`Invalid date format:"${d}"`);return ''};const p=d.split('/');if(p.length!==3)return '';const day=parseInt(p[0],10),mo=parseInt(p[1],10),yr=parseInt(p[2],10);if(isNaN(day)||isNaN(mo)||isNaN(yr)||day<1||day>31||mo<1||mo>12||yr<1900)return '';return `${yr}-${String(mo).padStart(2,'0')}-${String(day).padStart(2,'0')}`}; // DD/MM/YYYY -> YYYY-MM-DD
+                    document.getElementById("start_date").value = convertDate(aiData.start_date); document.getElementById("end_date").value = convertDate(aiData.end_date);
+                    if (aiData.schedule) { document.getElementById("matin").checked = !!aiData.schedule.matin; document.getElementById("apres_midi").checked = !!aiData.schedule.apres_midi; document.getElementById("soir").checked = !!aiData.schedule.soir; document.getElementById("nuit").checked = !!aiData.schedule.nuit; } else { /* clear checkboxes */ }
+                    document.getElementById("aiSuggestion").scrollIntoView({ behavior: 'smooth' });
+                } else { console.error("Invalid AI suggestion structure:", data); showMessage("validationMessage", "<i class='fas fa-exclamation-triangle'></i> Réponse IA invalide.", "error"); }
+            })
+            .catch(error => { if (!error.message.startsWith('Auth')) { showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur IA: ${error.message}`, "error"); } console.error("Error submitting prescription:", error); document.getElementById("aiSuggestion").style.display = "none"; });
     }
 
     function validatePrescription() {
-      const medicament = document.getElementById("medicament").value;
-      const start_date = document.getElementById("start_date").value;
-      const end_date = document.getElementById("end_date").value;
-
-      if (!medicament || !start_date || !end_date || !currentIPP) {
-        showMessage("validationMessage", `Veuillez remplir tous les champs ${!currentIPP ? 'et sélectionner un patient' : ''}.`, "warning");
-        return;
-      }
-      showMessage("validationMessage", "", "");
-
-      const schedule = {
-        matin: document.getElementById("matin").checked,
-        apres_midi: document.getElementById("apres_midi").checked,
-        soir: document.getElementById("soir").checked,
-        nuit: document.getElementById("nuit").checked
-      };
-
-      const convertDateToAPI = (dateStr) => { /* ... (convertDateToAPI function remains same) ... */
-         if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) { console.warn(`Invalid YYYY-MM-DD format: "${dateStr}"`); return ''; }
-         const parts = dateStr.split('-'); if (parts.length !== 3) { console.warn(`API Split failed: "${dateStr}"`); return ''; }
-         return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      };
-      const apiStartDate = convertDateToAPI(start_date);
-      const apiEndDate = convertDateToAPI(end_date);
-
-      // Use fetchWithAuth
-      fetchWithAuth(`${BASE_URL}/webhook/doctor-validate-prescription`, {
-        method: "POST",
-        // No headers needed, handled by fetchWithAuth
-        body: JSON.stringify({
-          ipp: currentIPP,
-          final_prescription: document.getElementById("prescriptionInput").value,
-          start_date: apiStartDate, // Sending DD/MM/YYYY
-          end_date: apiEndDate,     // Sending DD/MM/YYYY
-          schedule,
-          medicament_name: medicament
-        })
-      })
-      .then(response => {
-        // Check moved to fetchWithAuth
-         const contentType = response.headers.get("content-type");
-        if (contentType && contentType.indexOf("application/json") !== -1) {
-            return response.json();
-        } else {
-            return {};
-        }
-      })
-      .then((data) => {
-        showMessage("validationMessage", "<i class='fas fa-check-circle'></i> Prescription enregistrée avec succès", "success");
-        console.log("Validation response:", data);
-      })
-      .catch(error => {
-         if (!error.message.startsWith('Authentication failed')) {
-            showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur validation: ${error.message}`, "error");
-         }
-         console.error("Error validating prescription:", error);
-      });
+        const medicament = document.getElementById("medicament").value; const start_date = document.getElementById("start_date").value; const end_date = document.getElementById("end_date").value;
+        if (!medicament || !start_date || !end_date || !currentIPP) { showMessage("validationMessage", `Champs requis manquants ${!currentIPP ? 'ou patient non sélectionné' : ''}.`, "warning"); return; }
+        showMessage("validationMessage", "", "");
+        const schedule = { matin: document.getElementById("matin").checked, apres_midi: document.getElementById("apres_midi").checked, soir: document.getElementById("soir").checked, nuit: document.getElementById("nuit").checked };
+        const convertDateToAPI = (d) => {if(!d||!/^\d{4}-\d{2}-\d{2}$/.test(d)){console.warn(`Invalid YYYY-MM-DD:"${d}"`);return ''};const p=d.split('-');if(p.length!==3)return '';return `${p[2]}/${p[1]}/${p[0]}`}; // YYYY-MM-DD -> DD/MM/YYYY
+        const apiStartDate = convertDateToAPI(start_date); const apiEndDate = convertDateToAPI(end_date);
+        fetchWithAuth(`${BASE_URL}/webhook/doctor-validate-prescription`, { method: "POST", body: JSON.stringify({ ipp: currentIPP, final_prescription: document.getElementById("prescriptionInput").value, start_date: apiStartDate, end_date: apiEndDate, schedule, medicament_name: medicament }) })
+            .then(response => response.ok ? response.json().catch(()=>({})) : response.text().then(text => { throw new Error(text||`Erreur ${response.status}`)}) )
+            .then(() => { showMessage("validationMessage", "<i class='fas fa-check-circle'></i> Prescription validée.", "success"); })
+            .catch(error => { if (!error.message.startsWith('Auth')) { showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Erreur validation: ${error.message}`, "error"); } console.error("Error validating prescription:", error); });
     }
 
-    function showMessage(elementId, message, type) {
-        // ... (showMessage function remains the same) ...
-          const messageElement = document.getElementById(elementId);
-          if (!messageElement) { console.error(`Message element with ID "${elementId}" not found.`); return; }
-          messageElement.innerHTML = message || "";
-          messageElement.style.display = message ? "block" : "none";
-          messageElement.classList.remove("message-success", "message-warning", "message-error");
-          if (type === "success") messageElement.classList.add("message-success");
-          else if (type === "warning") messageElement.classList.add("message-warning");
-          else if (type === "error") messageElement.classList.add("message-error");
-           if (type === "success" && message) { setTimeout(() => { if (messageElement.classList.contains("message-success") && messageElement.innerHTML === message) { messageElement.style.display = "none"; } }, 5000); }
-    }
+    // --- Show Message Function ---
+    function showMessage(elementId, message, type) { const messageElement = document.getElementById(elementId); if (!messageElement) { console.error(`Msg Element "${elementId}" not found.`); return; } messageElement.innerHTML = message || ""; messageElement.style.display = message ? "block" : "none"; messageElement.className = "message"; if (type === "success") messageElement.classList.add("message-success"); else if (type === "warning") messageElement.classList.add("message-warning"); else if (type === "error") messageElement.classList.add("message-error"); if (type === "success" && message) { setTimeout(() => { if (messageElement.classList.contains("message-success") && messageElement.innerHTML === message) { messageElement.style.display = "none"; } }, 5000); } }
 
   </script>
 </body>

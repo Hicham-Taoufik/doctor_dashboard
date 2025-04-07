@@ -162,15 +162,55 @@
     // No global aiData needed
 
     // --- Auth & Helpers ---
-    function fetchWithAuth(url, options={}) { const token = localStorage.getItem('authToken'); if (!token) { console.error('Doctor: No token.'); alert('Session expirée.'); window.location.href = LOGIN_PAGE_URL; return Promise.reject(new Error('Token non trouvé.')); } /* resetSessionTimeout(); // Add session timeout if needed */ const headers = { ...options.headers, 'Authorization': `Bearer ${token}` }; if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; } else if (options.body instanceof FormData) { delete headers['Content-Type']; } return fetch(url, { ...options, headers: headers }) .then(response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); alert('Session invalide.'); window.location.href = LOGIN_PAGE_URL; throw new Error(`Auth failed: ${response.status}`); } if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); } return response; }); }
+    function fetchWithAuth(url, options={}) { const token = localStorage.getItem('authToken'); if (!token) { console.error('Doctor: No token.'); alert('Session expirée.'); window.location.href = LOGIN_PAGE_URL; return Promise.reject(new Error('Token non trouvé.')); } /* resetSessionTimeout(); */ const headers = { ...options.headers, 'Authorization': `Bearer ${token}` }; if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; } else if (options.body instanceof FormData) { delete headers['Content-Type']; } return fetch(url, { ...options, headers: headers }) .then(response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); alert('Session invalide.'); window.location.href = LOGIN_PAGE_URL; throw new Error(`Auth failed: ${response.status}`); } if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); } return response; }); }
     function logout() { localStorage.removeItem('authToken'); alert('Déconnecté.'); window.location.href = LOGIN_PAGE_URL; }
-    function showMessage(elementId, message, type) { const messageElement = document.getElementById(elementId); if (!messageElement) { console.error(`Msg Elem "${elementId}" not found.`); return; } const statusIcons = {'info':'fas fa-info-circle','success':'fas fa-check-circle','warning':'fas fa-exclamation-triangle','error':'fas fa-times-circle','loading':'fas fa-spinner fa-spin'}; const iconClass = statusIcons[type] || statusIcons['info']; const iconHtml = message ? `<i class="${iconClass} me-2"></i>` : ''; messageElement.innerHTML = message ? `${iconHtml}${message}` : ""; messageElement.style.display = message ? "block" : "none"; messageElement.className = 'message'; if (type === "success") messageElement.classList.add("message-success"); else if (type === "warning") messageElement.classList.add("message-warning"); else if (type === "error") messageElement.classList.add("message-error"); else if (type === "info") messageElement.classList.add("message-info"); if (type === "success" && message && elementId !== 'scanResult') { setTimeout(() => { if (messageElement.innerHTML.includes(message)) { messageElement.style.display = 'none'; } }, 5000); } }
+    function showMessage(elementId, message, type) { const messageElement = document.getElementById(elementId); if (!messageElement) { console.error(`Msg Elem "${elementId}" not found.`); return; } const statusIcons = {'info':'fas fa-info-circle','success':'fas fa-check-circle','warning':'fas fa-exclamation-triangle','error':'fas fa-times-circle','loading':'fas fa-spinner fa-spin'}; const iconClass = statusIcons[type] || statusIcons['info']; const iconHtml = message ? `<i class="${iconClass} me-2"></i>` : ''; messageElement.innerHTML = message ? `${iconHtml}${message}` : ""; messageElement.style.display = message ? "block" : "none"; messageElement.className = 'message'; if (type === "success") messageElement.classList.add("message-success"); else if (type === "warning") messageElement.classList.add("message-warning"); else if (type === "error") messageElement.classList.add("message-error"); else if (type === "info") messageElement.classList.add("message-info"); if (type === "success" && message && elementId !== 'scanResult') { setTimeout(() => { const currentElement = document.getElementById(elementId); if (currentElement && currentElement.innerHTML.includes(message)) { currentElement.style.display = 'none'; } }, 5000); } } // Added existence check in timeout
 
     // --- Enable/Disable Doctor Sections ---
     function enableDoctorSections(enable) { const diagCardBody = document.getElementById('diagCardBody'); const prescCardBody = document.getElementById('prescCardBody'); const elementsToToggle = document.querySelectorAll('#diagCardBody textarea, #diagCardBody button, #prescCardBody textarea, #prescCardBody button, #aiSuggestion input, #aiSuggestion button'); if (enable) { if(diagCardBody) { diagCardBody.style.opacity = '1'; diagCardBody.style.pointerEvents = 'auto'; } if(prescCardBody) { prescCardBody.style.opacity = '1'; prescCardBody.style.pointerEvents = 'auto'; } elementsToToggle.forEach(el => el ? el.disabled = false : null); const stopDiag = document.getElementById('stopDiagRecordBtn'); const stopPresc = document.getElementById('stopPrescRecordBtn'); if(stopDiag) stopDiag.disabled = true; if(stopPresc) stopPresc.disabled = true; } else { if(diagCardBody) { diagCardBody.style.opacity = '0.5'; diagCardBody.style.pointerEvents = 'none'; } if(prescCardBody) { prescCardBody.style.opacity = '0.5'; prescCardBody.style.pointerEvents = 'none'; } elementsToToggle.forEach(el => el ? el.disabled = true : null); const diagInput = document.getElementById('diagnosticInput'); const prescInput = document.getElementById('prescriptionInput'); const aiSuggestion = document.getElementById('aiSuggestion'); if(diagInput) diagInput.value = ''; if(prescInput) prescInput.value = ''; if(aiSuggestion) aiSuggestion.style.display = 'none'; showMessage('diagMessage', '', ''); showMessage('validationMessage', '', ''); const diagStatus = document.getElementById('diagnosisStatus'); const prescStatus = document.getElementById('prescriptionStatus'); if (diagStatus) diagStatus.innerHTML = ''; if (prescStatus) prescStatus.innerHTML = ''; } }
 
-    // --- Load Patient Function ---
-    function loadPatient(ipp) { console.log(`loadPatient CALLED for IPP: ${ipp}`); const el = document.getElementById("patientInfo"); el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...'; enableDoctorSections(false); fetchWithAuth(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`).then(r=>r.json()).then(d=>{if(typeof d!=='object'||!d)throw new Error("Data invalide.");el.innerHTML=`<div class="info-group"><div class="info-label">Nom</div><div class="info-value">${d.nom||'-'}</div></div> <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${d.prenom||'-'}</div></div> <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${d.cin||'-'}</div></div> <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${d.telephone||'-'}</div></div> <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${d.adresse||'-'}</div></div> <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${d.mutuelle||'Aucune'}</div></div>`; enableDoctorSections(true); }).catch(e=>{if(!e.message.startsWith('Auth')){el.innerHTML=`<div class="message message-error" style="display:block;grid-column:1/-1;">Erreur: ${e.message}</div>`;}console.error("Err loadPatient:",e); enableDoctorSections(false);}); }
+    // --- Load Patient Function (Corrected Date Formatting) ---
+    function loadPatient(ipp) {
+        console.log(`loadPatient CALLED for IPP: ${ipp}`);
+        const el = document.getElementById("patientInfo");
+        el.innerHTML = '<div style="grid-column: 1 / -1; text-align: center;"><i class="fas fa-spinner fa-spin"></i> Chargement...</div>';
+        enableDoctorSections(false); // Disable while loading
+
+        fetchWithAuth(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`)
+            .then(r => r.json())
+            .then(d => {
+                if (typeof d !== 'object' || !d || !d.nom) { throw new Error("Données patient invalides ou patient non trouvé."); }
+
+                // *** CORRECTED formatDate for ISO 8601 Input ***
+                const formatDate = (dateString) => {
+                    console.log("loadPatient - Formatting date:", dateString);
+                    if (!dateString || typeof dateString !== 'string') { return '-'; }
+                    try {
+                        const dateObj = new Date(dateString); // Directly parse ISO string
+                        if (isNaN(dateObj.getTime())) { console.warn(`loadPatient: Could not parse date string: "${dateString}"`); return 'Date Invalide'; }
+                        return dateObj.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+                    } catch (e) { console.error("Error formatting date in loadPatient:", dateString, e); return 'Formatage Échoué'; }
+                };
+
+                el.innerHTML = `
+                    <div class="info-group"><div class="info-label">Nom</div><div class="info-value">${d.nom||'-'}</div></div>
+                    <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${d.prenom||'-'}</div></div>
+                    <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${d.cin||'-'}</div></div>
+                    <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${d.telephone||'-'}</div></div>
+                    <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${d.adresse||'-'}</div></div>
+                    <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${d.mutuelle||'Aucune'}</div></div>
+                    <div class="info-group"><div class="info-label">Naissance</div><div class="info-value">${formatDate(d.date_naissance)}</div></div> {/* Use corrected function */}
+                    <div class="info-group"><div class="info-label">Sexe</div><div class="info-value">${d.sexe === 'M' ? 'Homme' : 'Femme'}</div></div>
+                    `;
+                enableDoctorSections(true); // Enable sections after successful load
+            })
+            .catch(e => {
+                if (!e.message.startsWith('Auth')) { el.innerHTML = `<div class="message message-error" style="display:block;grid-column:1/-1;">Erreur chargement patient: ${e.message}</div>`; }
+                console.error("Err loadPatient:", e);
+                enableDoctorSections(false); // Keep sections disabled on error
+            });
+    }
+    // *** END CORRECTED Load Patient Function ***
 
     // --- Audio Recording Functions ---
     function startRecording(field) { if (!currentIPP) { alert("Chargez un patient."); return; } if (mediaRecorder && mediaRecorder.state === 'recording') return; audioChunks = []; recordingField = field; const statusEl = document.getElementById(`${field}Status`); const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn'); const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn'); statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Start...'; statusEl.style.display = 'inline-flex'; if(startBtn) startBtn.disabled = true; if(stopBtn) stopBtn.disabled = false; navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{mediaRecorder=new MediaRecorder(stream);mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};mediaRecorder.onstop=handleRecordingStop;mediaRecorder.onerror=e=>{console.error(`Rec Err:${e.error}`);const sE=document.getElementById(`${recordingField}Status`);if(sE)sE.innerHTML='<i class="fas fa-times-circle"></i> Err Rec.';if(startBtn)startBtn.disabled=false;if(stopBtn)stopBtn.disabled=true;recordingField=null;};mediaRecorder.start();statusEl.innerHTML='<i class="fas fa-microphone-alt fa-beat"></i> REC...';}).catch(err=>{console.error("Mic Err:",err);statusEl.innerHTML='<i class="fas fa-exclamation-triangle"></i> Err micro';alert("Err micro:"+err.message);if(startBtn)startBtn.disabled=false;if(stopBtn)stopBtn.disabled=true;recordingField=null;}); }
@@ -183,7 +223,7 @@
     // --- Form Submission Functions ---
     function submitDiagnostic() { const diag=document.getElementById("diagnosticInput").value;if(!diag||!currentIPP){showMessage("diagMessage",`Diagnostic vide ${!currentIPP?'ou patient?':''}.`,"warning");return;} showMessage("diagMessage","","");fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-diagnostic`,{method:"POST",body:JSON.stringify({ipp:currentIPP,diagnostic:diag})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("diagMessage","<i class='fas fa-check-circle'></i> Diagnostic OK.","success");}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("diagMessage",`<i class='fas fa-exclamation-triangle'></i> Err: ${e.message}`,"error");}console.error("Err submitDiag:",e);});}
 
-    // *** CORRECTED submitPrescription with Date Fix ***
+    // *** submitPrescription with Corrected Date Fix & Data Access ***
     function submitPrescription() {
         const presc=document.getElementById("prescriptionInput").value;
         if(!presc||!currentIPP){showMessage("validationMessage",`Prescription vide ${!currentIPP?'ou patient?':''}.`,"warning");document.getElementById("aiSuggestion").style.display="none";return;}
@@ -202,7 +242,7 @@
                     document.getElementById("aiSuggestion").style.display="block";
                     document.getElementById("medicament").value=suggestionData.medicament||'';
 
-                    // --- Date Conversion Function (Assuming MM/DD/YYYY input from AI) ---
+                    // Date conversion function (assuming MM/DD/YYYY input from AI)
                     const convertDate = (dateStr) => {
                          if(!dateStr||typeof dateStr!=='string'||!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)){ console.warn(`Invalid AI date format:"${dateStr}"`); return ''; };
                          const p=dateStr.split('/'); if(p.length!==3) return '';
@@ -250,7 +290,7 @@
 
     // --- QR SCANNER CODE ---
     const scanButton = document.getElementById('scanQrButton'); const scannerContainer = document.getElementById('scanner-container'); const video = document.getElementById('scanner-video'); const scanResultDiv = document.getElementById("scanResult"); let scanning = false; let currentStream = null; let scanTimeout = null;
-    function updateScanStatus(message, type = 'info') { showMessage('scanResult', message, type); }
+    function updateScanStatus(message, type = 'info') { showMessage('scanResult', message, type); } // Use showMessage
     if (scanButton) { scanButton.onclick = async () => { if (!scanning) { try { updateScanStatus(''); scannerContainer.style.display = 'block'; updateScanStatus('Recherche caméra...', 'loading'); currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); video.srcObject = currentStream; await video.play(); updateScanStatus('Caméra prête. Scannez le code.', 'info'); scanButton.innerHTML = '<i class="fas fa-stop-circle"></i> Arrêter Scan'; scanButton.classList.replace('btn-primary','btn-danger'); scanning = true; clearTimeout(scanTimeout); scanTimeout = setTimeout(() => { if (scanning) { updateScanStatus('Aucun code détecté.', 'warning'); stopScanner(); } }, 30000); requestAnimationFrame(tick); } catch (err) { console.error("Cam Err:", err); updateScanStatus(`Err Cam: ${err.message}`, 'error'); stopScanner(); } } else { stopScanner(); updateScanStatus('Scan arrêté.', 'info'); } }; } else { console.warn("Scan button not found."); }
     function stopScanner() { clearTimeout(scanTimeout); if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); } if(video) video.srcObject = null; if(scannerContainer) scannerContainer.style.display = 'none'; if(scanButton) {scanButton.innerHTML = '<i class="fas fa-qrcode"></i> Scanner QR'; scanButton.classList.replace('btn-danger','btn-primary');} scanning = false; currentStream = null; }
     function tick() { if (!scanning || !video || video.videoWidth === 0 || video.readyState < 2) { if (scanning) requestAnimationFrame(tick); return; } const tce = document.createElement('canvas'); tce.height = video.videoHeight; tce.width = video.videoWidth; const tc = tce.getContext("2d",{willReadFrequently:true}); tc.drawImage(video, 0, 0, tce.width, tce.height); try { const id = tc.getImageData(0, 0, tce.width, tce.height); const code = window.jsQR(id.data, id.width, id.height, { inversionAttempts: "dontInvert" }); if (code) { console.log("QR Found:", code.data); stopScanner(); processScannedQrCode(code.data); } else { requestAnimationFrame(tick); } } catch (e) { console.error("Error QR proc:", e); requestAnimationFrame(tick); } }
@@ -258,7 +298,7 @@
     function loadPatientIntoCurrentDashboard(scannedIpp) { console.log(`Loading patient ${scannedIpp} into Doctor dashboard`); currentIPP = scannedIpp; try { const newUrl = new URL(window.location); newUrl.searchParams.set('ipp', scannedIpp); window.history.pushState({ ipp: scannedIpp }, '', newUrl); } catch(e) { console.error("History API err:", e); } console.log("Calling loadPatient..."); loadPatient(scannedIpp); console.log("Clearing fields..."); if(document.getElementById('diagnosticInput')) document.getElementById('diagnosticInput').value = ''; if(document.getElementById('prescriptionInput')) document.getElementById('prescriptionInput').value = ''; if(document.getElementById('diagMessage')) showMessage('diagMessage','',''); if(document.getElementById('validationMessage')) showMessage('validationMessage','',''); if(document.getElementById('aiSuggestion')) document.getElementById('aiSuggestion').style.display = 'none'; setTimeout(() => { showMessage('scanResult', '', ''); }, 4000); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     // --- END QR SCANNER CODE ---
 
-    // --- window.onload ---
+    // --- window.onload (Corrected) ---
      window.onload = () => {
       if (!localStorage.getItem('authToken')) { console.log("Doctor: No token, redirecting."); window.location.href = LOGIN_PAGE_URL; return; }
        document.body.classList.add('loaded'); console.log("Doctor: Authenticated.");

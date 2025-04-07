@@ -7,8 +7,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
   <style>
-    /* --- CSS --- */
-    :root { --primary: #5d74f2; --primary-light: #ebeffe; --primary-dark: #4a62d8; --success: #31c971; --success-light: #e0fbea; --success-dark: #28a960; --warning: #ffb648; --warning-light: #fff8ec; --danger: #ff5a5a; --danger-light: #ffeded; --gray-100: #f9fafb; --gray-200: #f1f3f9; --gray-300: #e5e7eb; --gray-400: #d1d5db; --gray-500: #9ca3af; --gray-600: #6b7280; --gray-700: #4b5563; --gray-800: #374151; --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.04); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05); --shadow-focus: 0 0 0 3px rgba(93, 116, 242, 0.2); --border-radius: 8px; --transition-speed: 0.2s; font-size: 15px;}
+    /* --- CSS (No changes) --- */
+    :root { --primary: #5d74f2; --primary-light: #ebeffe; --primary-dark: #4a62d8; --success: #31c971; --success-light: #e0fbea; --success-dark: #28a960; --warning: #ffb648; --warning-light: #fff8ec; --danger: #ff5a5a; --danger-light: #ffeded; --gray-100: #f9fafb; --gray-200: #f1f3f9; --gray-300: #e5e7eb; --gray-400: #d1d5db; --gray-500: #9ca3af; --gray-600: #6b7280; --gray-700: #4b5563; --gray-800: #374151; --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.04); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05); --shadow-focus: 0 0 0 3px rgba(93, 116, 242, 0.2); --border-radius: 8px; --transition-speed: 0.2s; font-size: 15px; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: var(--gray-100); color: var(--gray-800); line-height: 1.5; min-height: 100vh; padding: 0; visibility: hidden; }
     body.loaded { visibility: visible; animation: fadeIn 0.3s ease-in; }
@@ -20,7 +20,7 @@
     .logo-img { height: 35px; width: auto; margin-right: 10px;}
     .header-title { color: var(--primary); font-size: 1.3rem; font-weight: 600; margin: 0; }
     .header-logout { margin-left: auto; flex-shrink: 0; }
-    .logout-btn { padding: 5px 10px; font-size: 0.8rem; }
+    .logout-btn { padding: 5px 10px; font-size: 0.8rem; border-radius: var(--border-radius); }
     .card { background: white; border-radius: var(--border-radius); box-shadow: var(--shadow-md); overflow: hidden; margin-bottom: 20px; transition: box-shadow var(--transition-speed) ease; }
     .card:hover { box-shadow: var(--shadow-lg); }
     .card-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-bottom: 1px solid var(--gray-200); }
@@ -74,19 +74,19 @@
 <body > <!-- Body starts hidden -->
   <div class="container">
     <div class="header">
-      <div class="header-main-content">
-          <div class="logo">
-              <img src="./clinique-nakhil-logo-horizontal.webp" alt="MediClinic Logo" class="logo-img"> <!-- UPDATE SRC -->
-          </div>
-          <h1 class="header-title">Médecin</h1>
-      </div>
-      <div class="header-logout">
-         <button onclick="logout()" title="Déconnexion" class="btn btn-outline logout-btn no-print"> <i class="fas fa-sign-out-alt"></i> Déconnexion </button>
-      </div>
+        <div class="header-main-content">
+            <div class="logo">
+                <img src="./clinique-nakhil-logo-horizontal.webp" alt="MediClinic Logo" class="logo-img"> <!-- UPDATE SRC -->
+            </div>
+            <h1 class="header-title">Médecin</h1>
+        </div>
+         <div class="header-logout">
+            <button onclick="logout()" title="Déconnexion" class="btn btn-outline logout-btn no-print"> <i class="fas fa-sign-out-alt"></i> Déconnexion </button>
+         </div>
     </div>
 
     <!-- QR Scanner Card -->
-    <div class="card no-print">
+     <div class="card no-print">
          <div class="card-header"> <h2 class="card-title"> <i class="fas fa-qrcode"></i> Scanner Patient </h2> <div class="card-actions"> <i class="fas fa-camera"></i> </div> </div>
           <div class="card-body">
             <div class="qr-scanner-section">
@@ -114,7 +114,7 @@
       <div class="flex-col">
         <div class="card">
           <div class="card-header"> <h2 class="card-title"> <i class="fas fa-stethoscope"></i> Diagnostic </h2> <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> </div>
-          <div class="card-body" id="diagCardBody" style="opacity: 0.5; pointer-events: none;"> <!-- Added ID and initial disabled state -->
+          <div class="card-body" id="diagCardBody" style="opacity: 0.5; pointer-events: none;"> <!-- Initially disabled -->
             <div class="input-group"> <textarea id="diagnosticInput" placeholder="Entrez le diagnostic..." disabled></textarea> </div>
             <div class="btn-group"> <button class="btn btn-outline" id="startDiagRecordBtn" onclick="startRecording('diagnosis')" disabled> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" id="stopDiagRecordBtn" onclick="stopRecording('diagnosis')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="diagnosisStatus" class="status"></span> </div>
             <div class="btn-group"> <button class="btn btn-success" id="submitDiagBtn" onclick="submitDiagnostic()" disabled> <i class="fas fa-check-circle"></i> Enregistrer </button> </div>
@@ -126,7 +126,7 @@
       <div class="flex-col">
         <div class="card">
           <div class="card-header"> <h2 class="card-title"> <i class="fas fa-prescription-bottle-alt"></i> Prescription </h2> <div class="card-actions"> <i class="fas fa-pills"></i> </div> </div>
-          <div class="card-body" id="prescCardBody" style="opacity: 0.5; pointer-events: none;"> <!-- Added ID and initial disabled state -->
+          <div class="card-body" id="prescCardBody" style="opacity: 0.5; pointer-events: none;"> <!-- Initially disabled -->
             <div class="input-group"> <textarea id="prescriptionInput" placeholder="Entrez la prescription..." disabled></textarea> </div>
             <div class="btn-group"> <button class="btn btn-outline" id="startPrescRecordBtn" onclick="startRecording('prescription')" disabled> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" id="stopPrescRecordBtn" onclick="stopRecording('prescription')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="prescriptionStatus" class="status"></span> </div>
             <div class="btn-group"> <button class="btn btn-primary" id="submitPrescBtn" onclick="submitPrescription()" disabled> <i class="fas fa-robot"></i> Soumettre IA </button> </div>
@@ -167,38 +167,7 @@
     function showMessage(elementId, message, type) { const messageElement = document.getElementById(elementId); if (!messageElement) { console.error(`Msg Elem "${elementId}" not found.`); return; } const statusIcons = {'info':'fas fa-info-circle','success':'fas fa-check-circle','warning':'fas fa-exclamation-triangle','error':'fas fa-times-circle','loading':'fas fa-spinner fa-spin'}; const iconClass = statusIcons[type] || statusIcons['info']; const iconHtml = message ? `<i class="${iconClass} me-2"></i>` : ''; messageElement.innerHTML = message ? `${iconHtml}${message}` : ""; messageElement.style.display = message ? "block" : "none"; messageElement.className = 'message'; if (type === "success") messageElement.classList.add("message-success"); else if (type === "warning") messageElement.classList.add("message-warning"); else if (type === "error") messageElement.classList.add("message-error"); else if (type === "info") messageElement.classList.add("message-info"); if (type === "success" && message && elementId !== 'scanResult') { setTimeout(() => { if (messageElement.innerHTML.includes(message)) { messageElement.style.display = 'none'; } }, 5000); } }
 
     // --- Enable/Disable Doctor Sections ---
-    function enableDoctorSections(enable) {
-        const diagCardBody = document.getElementById('diagCardBody');
-        const prescCardBody = document.getElementById('prescCardBody');
-        // Select ALL relevant inputs/buttons within the cards
-        const elementsToToggle = document.querySelectorAll('#diagCardBody textarea, #diagCardBody button, #prescCardBody textarea, #prescCardBody button, #aiSuggestion input, #aiSuggestion button');
-
-        if (enable) {
-             if(diagCardBody) { diagCardBody.style.opacity = '1'; diagCardBody.style.pointerEvents = 'auto'; }
-             if(prescCardBody) { prescCardBody.style.opacity = '1'; prescCardBody.style.pointerEvents = 'auto'; }
-             elementsToToggle.forEach(el => el ? el.disabled = false : null);
-             // Special handling: Stop buttons might need to be enabled/disabled based on recording state later
-             document.getElementById('stopDiagRecordBtn').disabled = true;
-             document.getElementById('stopPrescRecordBtn').disabled = true;
-        } else {
-            if(diagCardBody) { diagCardBody.style.opacity = '0.5'; diagCardBody.style.pointerEvents = 'none'; }
-            if(prescCardBody) { prescCardBody.style.opacity = '0.5'; prescCardBody.style.pointerEvents = 'none'; }
-            elementsToToggle.forEach(el => el ? el.disabled = true : null);
-            // Clear inputs/status/messages
-            const diagInput = document.getElementById('diagnosticInput');
-            const prescInput = document.getElementById('prescriptionInput');
-            const aiSuggestion = document.getElementById('aiSuggestion');
-            if(diagInput) diagInput.value = '';
-            if(prescInput) prescInput.value = '';
-            if(aiSuggestion) aiSuggestion.style.display = 'none';
-            showMessage('diagMessage', '', '');
-            showMessage('validationMessage', '', '');
-            const diagStatus = document.getElementById('diagnosisStatus');
-            const prescStatus = document.getElementById('prescriptionStatus');
-            if (diagStatus) diagStatus.innerHTML = '';
-            if (prescStatus) prescStatus.innerHTML = '';
-        }
-    }
+    function enableDoctorSections(enable) { const diagCardBody = document.getElementById('diagCardBody'); const prescCardBody = document.getElementById('prescCardBody'); const elementsToToggle = document.querySelectorAll('#diagCardBody textarea, #diagCardBody button, #prescCardBody textarea, #prescCardBody button, #aiSuggestion input, #aiSuggestion button'); if (enable) { if(diagCardBody) { diagCardBody.style.opacity = '1'; diagCardBody.style.pointerEvents = 'auto'; } if(prescCardBody) { prescCardBody.style.opacity = '1'; prescCardBody.style.pointerEvents = 'auto'; } elementsToToggle.forEach(el => el ? el.disabled = false : null); const stopDiag = document.getElementById('stopDiagRecordBtn'); const stopPresc = document.getElementById('stopPrescRecordBtn'); if(stopDiag) stopDiag.disabled = true; if(stopPresc) stopPresc.disabled = true; } else { if(diagCardBody) { diagCardBody.style.opacity = '0.5'; diagCardBody.style.pointerEvents = 'none'; } if(prescCardBody) { prescCardBody.style.opacity = '0.5'; prescCardBody.style.pointerEvents = 'none'; } elementsToToggle.forEach(el => el ? el.disabled = true : null); const diagInput = document.getElementById('diagnosticInput'); const prescInput = document.getElementById('prescriptionInput'); const aiSuggestion = document.getElementById('aiSuggestion'); if(diagInput) diagInput.value = ''; if(prescInput) prescInput.value = ''; if(aiSuggestion) aiSuggestion.style.display = 'none'; showMessage('diagMessage', '', ''); showMessage('validationMessage', '', ''); const diagStatus = document.getElementById('diagnosisStatus'); const prescStatus = document.getElementById('prescriptionStatus'); if (diagStatus) diagStatus.innerHTML = ''; if (prescStatus) prescStatus.innerHTML = ''; } }
 
     // --- Load Patient Function ---
     function loadPatient(ipp) { console.log(`loadPatient CALLED for IPP: ${ipp}`); const el = document.getElementById("patientInfo"); el.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Chargement...'; enableDoctorSections(false); fetchWithAuth(`${BASE_URL}/webhook/doctor-get-patient?ipp=${ipp}`).then(r=>r.json()).then(d=>{if(typeof d!=='object'||!d)throw new Error("Data invalide.");el.innerHTML=`<div class="info-group"><div class="info-label">Nom</div><div class="info-value">${d.nom||'-'}</div></div> <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${d.prenom||'-'}</div></div> <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${d.cin||'-'}</div></div> <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${d.telephone||'-'}</div></div> <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${d.adresse||'-'}</div></div> <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${d.mutuelle||'Aucune'}</div></div>`; enableDoctorSections(true); }).catch(e=>{if(!e.message.startsWith('Auth')){el.innerHTML=`<div class="message message-error" style="display:block;grid-column:1/-1;">Erreur: ${e.message}</div>`;}console.error("Err loadPatient:",e); enableDoctorSections(false);}); }
@@ -218,7 +187,7 @@
 
     // --- QR SCANNER CODE ---
     const scanButton = document.getElementById('scanQrButton'); const scannerContainer = document.getElementById('scanner-container'); const video = document.getElementById('scanner-video'); const scanResultDiv = document.getElementById("scanResult"); let scanning = false; let currentStream = null; let scanTimeout = null;
-    function updateScanStatus(message, type = 'info') { showMessage('scanResult', message, type); }
+    function updateScanStatus(message, type = 'info') { showMessage('scanResult', message, type); } // Use showMessage
     if (scanButton) { scanButton.onclick = async () => { if (!scanning) { try { updateScanStatus(''); scannerContainer.style.display = 'block'; updateScanStatus('Recherche caméra...', 'loading'); currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); video.srcObject = currentStream; await video.play(); updateScanStatus('Caméra prête. Scannez le code.', 'info'); scanButton.innerHTML = '<i class="fas fa-stop-circle"></i> Arrêter Scan'; scanButton.classList.replace('btn-primary','btn-danger'); scanning = true; clearTimeout(scanTimeout); scanTimeout = setTimeout(() => { if (scanning) { updateScanStatus('Aucun code détecté.', 'warning'); stopScanner(); } }, 30000); requestAnimationFrame(tick); } catch (err) { console.error("Cam Err:", err); updateScanStatus(`Err Cam: ${err.message}`, 'error'); stopScanner(); } } else { stopScanner(); updateScanStatus('Scan arrêté.', 'info'); } }; } else { console.warn("Scan button not found."); }
     function stopScanner() { clearTimeout(scanTimeout); if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); } if(video) video.srcObject = null; if(scannerContainer) scannerContainer.style.display = 'none'; if(scanButton) {scanButton.innerHTML = '<i class="fas fa-qrcode"></i> Scanner QR'; scanButton.classList.replace('btn-danger','btn-primary');} scanning = false; currentStream = null; }
     function tick() { if (!scanning || !video || video.videoWidth === 0 || video.readyState < 2) { if (scanning) requestAnimationFrame(tick); return; } const tce = document.createElement('canvas'); tce.height = video.videoHeight; tce.width = video.videoWidth; const tc = tce.getContext("2d",{willReadFrequently:true}); tc.drawImage(video, 0, 0, tce.width, tce.height); try { const id = tc.getImageData(0, 0, tce.width, tce.height); const code = window.jsQR(id.data, id.width, id.height, { inversionAttempts: "dontInvert" }); if (code) { console.log("QR Found:", code.data); stopScanner(); processScannedQrCode(code.data); } else { requestAnimationFrame(tick); } } catch (e) { console.error("Error QR proc:", e); requestAnimationFrame(tick); } }

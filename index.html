@@ -7,10 +7,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
   <style>
-    /* --- CSS --- */
+    /* --- CSS (No changes) --- */
     :root { --primary: #5d74f2; --primary-light: #ebeffe; --primary-dark: #4a62d8; --success: #31c971; --success-light: #e0fbea; --success-dark: #28a960; --warning: #ffb648; --warning-light: #fff8ec; --danger: #ff5a5a; --danger-light: #ffeded; --gray-100: #f9fafb; --gray-200: #f1f3f9; --gray-300: #e5e7eb; --gray-400: #d1d5db; --gray-500: #9ca3af; --gray-600: #6b7280; --gray-700: #4b5563; --gray-800: #374151; --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.04); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05); --shadow-focus: 0 0 0 3px rgba(93, 116, 242, 0.2); --border-radius: 8px; --transition-speed: 0.2s; font-size: 15px; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Inter', sans-serif; background: var(--gray-100); color: var(--gray-800); line-height: 1.5; min-height: 100vh; padding: 0; visibility: hidden; /* Hide initially */ }
+    body { font-family: 'Inter', sans-serif; background: var(--gray-100); color: var(--gray-800); line-height: 1.5; min-height: 100vh; padding: 0; visibility: hidden; }
     body.loaded { visibility: visible; animation: fadeIn 0.3s ease-in; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
@@ -60,11 +60,7 @@
     .message-warning { background: var(--warning-light); color: var(--warning); }
     .message-error { background: var(--danger-light); color: var(--danger); }
     .message-info { background: var(--primary-light); color: var(--primary); border-left: 4px solid var(--primary);}
-    /* Corrected .no-print style */
-    .no-print { } /* Define the class */
-    @media print {
-      .no-print { display: none !important; } /* Apply display:none only when printing */
-    }
+    .no-print { @media print { display: none !important; } }
     #scanner-container { display: none; position: relative; max-width: 300px; margin: 15px auto 0; border: 1px solid var(--gray-300); border-radius: var(--border-radius); overflow: hidden; }
     #scanner-video { display: block; width: 100%; height: auto; }
     .empty-state { text-align: center; padding: 1.5rem; color: var(--gray-500); }
@@ -163,10 +159,10 @@
     let mediaRecorder;
     let audioChunks = [];
     let recordingField = null;
-    // aiData is defined locally in submitPrescription's success path
+    // No global aiData needed
 
     // --- Auth & Helpers ---
-    function fetchWithAuth(url, options={}) { const token = localStorage.getItem('authToken'); if (!token) { console.error('Doctor: No token.'); alert('Session expirée.'); window.location.href = LOGIN_PAGE_URL; return Promise.reject(new Error('Token non trouvé.')); } /* resetSessionTimeout(); */ const headers = { ...options.headers, 'Authorization': `Bearer ${token}` }; if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; } else if (options.body instanceof FormData) { delete headers['Content-Type']; } return fetch(url, { ...options, headers: headers }) .then(response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); alert('Session invalide.'); window.location.href = LOGIN_PAGE_URL; throw new Error(`Auth failed: ${response.status}`); } if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); } return response; }); }
+    function fetchWithAuth(url, options={}) { const token = localStorage.getItem('authToken'); if (!token) { console.error('Doctor: No token.'); alert('Session expirée.'); window.location.href = LOGIN_PAGE_URL; return Promise.reject(new Error('Token non trouvé.')); } /* resetSessionTimeout(); // Add session timeout if needed */ const headers = { ...options.headers, 'Authorization': `Bearer ${token}` }; if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; } else if (options.body instanceof FormData) { delete headers['Content-Type']; } return fetch(url, { ...options, headers: headers }) .then(response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); alert('Session invalide.'); window.location.href = LOGIN_PAGE_URL; throw new Error(`Auth failed: ${response.status}`); } if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); } return response; }); }
     function logout() { localStorage.removeItem('authToken'); alert('Déconnecté.'); window.location.href = LOGIN_PAGE_URL; }
     function showMessage(elementId, message, type) { const messageElement = document.getElementById(elementId); if (!messageElement) { console.error(`Msg Elem "${elementId}" not found.`); return; } const statusIcons = {'info':'fas fa-info-circle','success':'fas fa-check-circle','warning':'fas fa-exclamation-triangle','error':'fas fa-times-circle','loading':'fas fa-spinner fa-spin'}; const iconClass = statusIcons[type] || statusIcons['info']; const iconHtml = message ? `<i class="${iconClass} me-2"></i>` : ''; messageElement.innerHTML = message ? `${iconHtml}${message}` : ""; messageElement.style.display = message ? "block" : "none"; messageElement.className = 'message'; if (type === "success") messageElement.classList.add("message-success"); else if (type === "warning") messageElement.classList.add("message-warning"); else if (type === "error") messageElement.classList.add("message-error"); else if (type === "info") messageElement.classList.add("message-info"); if (type === "success" && message && elementId !== 'scanResult') { setTimeout(() => { if (messageElement.innerHTML.includes(message)) { messageElement.style.display = 'none'; } }, 5000); } }
 
@@ -187,8 +183,68 @@
     // --- Form Submission Functions ---
     function submitDiagnostic() { const diag=document.getElementById("diagnosticInput").value;if(!diag||!currentIPP){showMessage("diagMessage",`Diagnostic vide ${!currentIPP?'ou patient?':''}.`,"warning");return;} showMessage("diagMessage","","");fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-diagnostic`,{method:"POST",body:JSON.stringify({ipp:currentIPP,diagnostic:diag})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("diagMessage","<i class='fas fa-check-circle'></i> Diagnostic OK.","success");}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("diagMessage",`<i class='fas fa-exclamation-triangle'></i> Err: ${e.message}`,"error");}console.error("Err submitDiag:",e);});}
 
-    // *** submitPrescription with Date Fix ***
-    function submitPrescription() { const presc=document.getElementById("prescriptionInput").value;if(!presc||!currentIPP){showMessage("validationMessage",`Prescription vide ${!currentIPP?'ou patient?':''}.`,"warning");document.getElementById("aiSuggestion").style.display="none";return;} showMessage("validationMessage","","");document.getElementById("aiSuggestion").style.display="none";fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-prescription`,{method:"POST",body:JSON.stringify({ipp:currentIPP,prescription:presc})}).then(r=>r.json()).then(data=>{console.log("AI Raw:",JSON.stringify(data,null,2)); let suggestionData = null; if (Array.isArray(data) && data.length > 0 && data[0].output) { suggestionData = data[0].output; console.log("Extracted suggestion data (from array):", suggestionData); } else { console.error("Unexpected AI response structure:", data); throw new Error("Réponse IA invalide."); } if (suggestionData) { document.getElementById("aiSuggestion").style.display="block"; document.getElementById("medicament").value=suggestionData.medicament||''; const convertDate = (dateStr) => { if(!dateStr||typeof dateStr!=='string'||!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)){ console.warn(`Invalid AI date format:"${dateStr}"`); return ''; }; const p=dateStr.split('/'); if(p.length!==3) return ''; const month = parseInt(p[0],10); const day = parseInt(p[1],10); const year = parseInt(p[2],10); if(isNaN(month)||isNaN(day)||isNaN(year)||month<1||month>12||day<1||day>31||year<1900){ console.warn(`Invalid date parts from AI: M=${month},D=${day},Y=${year}`); return ''; } const formattedResult = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`; console.log(`convertDate AI Input="${dateStr}", Output="${formattedResult}"`); return formattedResult; }; console.log("Setting start_date from:", suggestionData.start_date); document.getElementById("start_date").value = convertDate(suggestionData.start_date); console.log("Value set to start_date input:", document.getElementById("start_date").value); console.log("Setting end_date from:", suggestionData.end_date); const formattedEndDate = convertDate(suggestionData.end_date); console.log("Formatted end_date:", formattedEndDate); const endDateElement = document.getElementById("end_date"); if (endDateElement) { endDateElement.value = formattedEndDate; console.log("Value set to end_date input:", endDateElement.value); } else { console.error("Could not find end_date input element!"); } if(suggestionData.schedule){document.getElementById("matin").checked=!!suggestionData.schedule.matin; document.getElementById("apres_midi").checked=!!suggestionData.schedule.apres_midi; document.getElementById("soir").checked=!!suggestionData.schedule.soir; document.getElementById("nuit").checked=!!suggestionData.schedule.nuit;} else { document.getElementById("matin").checked=false; document.getElementById("apres_midi").checked=false; document.getElementById("soir").checked=false; document.getElementById("nuit").checked=false; } document.getElementById("aiSuggestion").scrollIntoView({behavior:'smooth'});} else {console.error("Invalid AI structure (no suggestionData):",data);showMessage("validationMessage","<i class='fas fa-exclamation-triangle'></i> Réponse IA invalide.","error");}}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`,"error");}console.error("Err submitPresc:",e);document.getElementById("aiSuggestion").style.display="none";});}
+    // *** CORRECTED submitPrescription with Date Fix ***
+    function submitPrescription() {
+        const presc=document.getElementById("prescriptionInput").value;
+        if(!presc||!currentIPP){showMessage("validationMessage",`Prescription vide ${!currentIPP?'ou patient?':''}.`,"warning");document.getElementById("aiSuggestion").style.display="none";return;}
+        showMessage("validationMessage","","");document.getElementById("aiSuggestion").style.display="none";
+
+        fetchWithAuth(`${BASE_URL}/webhook/doctor-submit-prescription`,{method:"POST",body:JSON.stringify({ipp:currentIPP,prescription:presc})})
+            .then(r=>r.json())
+            .then(data=>{
+                console.log("AI Raw:",JSON.stringify(data,null,2));
+
+                // *** Use ACTUAL Response Structure ***
+                if (data && data.success === true && data.suggestion) {
+                    const suggestionData = data.suggestion; // Access directly
+                    console.log("Extracted suggestion data (from object):", suggestionData);
+
+                    document.getElementById("aiSuggestion").style.display="block";
+                    document.getElementById("medicament").value=suggestionData.medicament||'';
+
+                    // --- Date Conversion Function (Assuming MM/DD/YYYY input from AI) ---
+                    const convertDate = (dateStr) => {
+                         if(!dateStr||typeof dateStr!=='string'||!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)){ console.warn(`Invalid AI date format:"${dateStr}"`); return ''; };
+                         const p=dateStr.split('/'); if(p.length!==3) return '';
+                         const month=parseInt(p[0],10); const day=parseInt(p[1],10); const year=parseInt(p[2],10);
+                         if(isNaN(month)||isNaN(day)||isNaN(year)||month<1||month>12||day<1||day>31||year<1900){ console.warn(`Invalid date parts from AI: M=${month},D=${day},Y=${year}`); return ''; }
+                         const formattedResult = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`; // YYYY-MM-DD
+                         console.log(`convertDate AI Input="${dateStr}", Output="${formattedResult}"`); return formattedResult;
+                    };
+
+                    // Apply Dates with logging
+                    console.log("Setting start_date from:", suggestionData.start_date);
+                    document.getElementById("start_date").value = convertDate(suggestionData.start_date);
+                    console.log("Value set to start_date input:", document.getElementById("start_date").value);
+
+                    console.log("Setting end_date from:", suggestionData.end_date);
+                    document.getElementById("end_date").value = convertDate(suggestionData.end_date); // Apply conversion
+                    console.log("Value set to end_date input:", document.getElementById("end_date").value); // Verify
+
+
+                    if(suggestionData.schedule){
+                        document.getElementById("matin").checked=!!suggestionData.schedule.matin;
+                        document.getElementById("apres_midi").checked=!!suggestionData.schedule.apres_midi;
+                        document.getElementById("soir").checked=!!suggestionData.schedule.soir;
+                        document.getElementById("nuit").checked=!!suggestionData.schedule.nuit;
+                    } else {
+                         document.getElementById("matin").checked=false; document.getElementById("apres_midi").checked=false; document.getElementById("soir").checked=false; document.getElementById("nuit").checked=false;
+                    }
+                    document.getElementById("aiSuggestion").scrollIntoView({behavior:'smooth'});
+
+                } else {
+                    // Throw error if structure is wrong
+                    console.error("Invalid AI suggestion structure in response:", data);
+                    throw new Error("Réponse IA invalide ou structure inattendue.");
+                }
+            })
+            .catch(e=>{ // Catch errors from fetch OR from the throw inside .then
+                 if(!e.message.startsWith('Auth')){ showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`,"error"); }
+                 console.error("Err submitPresc:",e);
+                 document.getElementById("aiSuggestion").style.display="none";
+             });
+    }
+    // *** END CORRECTED submitPrescription ***
 
     function validatePrescription() { const med=document.getElementById("medicament").value,sd=document.getElementById("start_date").value,ed=document.getElementById("end_date").value;if(!med||!sd||!ed||!currentIPP){showMessage("validationMessage",`Champs requis ${!currentIPP?'ou patient?':''}.`,"warning");return;} showMessage("validationMessage","","");const sched={matin:document.getElementById("matin").checked,apres_midi:document.getElementById("apres_midi").checked,soir:document.getElementById("soir").checked,nuit:document.getElementById("nuit").checked};const cvAPI=(dt)=>{if(!dt||!/^\d{4}-\d{2}-\d{2}$/.test(dt))return '';const p=dt.split('-');if(p.length!==3)return '';return `${p[1]}/${p[2]}/${p[0]}`}; /* Assuming API expects MM/DD/YYYY back */ const apiSD=cvAPI(sd),apiED=cvAPI(ed);fetchWithAuth(`${BASE_URL}/webhook/doctor-validate-prescription`,{method:"POST",body:JSON.stringify({ipp:currentIPP,final_prescription:document.getElementById("prescriptionInput").value,start_date:apiSD,end_date:apiED,schedule:sched,medicament_name:med})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("validationMessage","<i class='fas fa-check-circle'></i> Prescription validée.","success");}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err valid: ${e.message}`,"error");}console.error("Err validatePresc:",e);});}
 

@@ -185,40 +185,6 @@
       </div>
   </div>
 
-    <!-- Diagnosis & Prescription Row -->
-    <div class="flex-row">
-      <div class="flex-col">
-        <div class="card">
-          <div class="card-header"> <h2 class="card-title"> <i class="fas fa-stethoscope"></i> Diagnostic </h2> <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> </div>
-          <div class="card-body" id="diagCardBody" style="opacity: 0.5; pointer-events: none;"> <!-- Initially disabled -->
-            <div class="input-group"> <textarea id="diagnosticInput" placeholder="Entrez le diagnostic..." disabled></textarea> </div>
-            <div class="btn-group"> <button class="btn btn-outline" id="startDiagRecordBtn" onclick="startRecording('diagnosis')" disabled> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" id="stopDiagRecordBtn" onclick="stopRecording('diagnosis')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="diagnosisStatus" class="status"></span> </div>
-            <div class="btn-group"> <button class="btn btn-success" id="submitDiagBtn" onclick="submitDiagnostic()" disabled> <i class="fas fa-check-circle"></i> Enregistrer </button> </div>
-            <div id="diagMessage" class="message"></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex-col">
-        <div class="card">
-          <div class="card-header"> <h2 class="card-title"> <i class="fas fa-prescription-bottle-alt"></i> Prescription </h2> <div class="card-actions"> <i class="fas fa-pills"></i> </div> </div>
-          <div class="card-body" id="prescCardBody" style="opacity: 0.5; pointer-events: none;"> <!-- Initially disabled -->
-            <div class="input-group"> <textarea id="prescriptionInput" placeholder="Entrez la prescription..." disabled></textarea> </div>
-            <div class="btn-group"> <button class="btn btn-outline" id="startPrescRecordBtn" onclick="startRecording('prescription')" disabled> <i class="fas fa-microphone"></i> Démarrer </button> <button class="btn btn-outline" id="stopPrescRecordBtn" onclick="stopRecording('prescription')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="prescriptionStatus" class="status"></span> </div>
-            <div class="btn-group"> <button class="btn btn-primary" id="submitPrescBtn" onclick="submitPrescription()" disabled> <i class="fas fa-robot"></i> Soumettre IA </button> </div>
-            <div id="aiSuggestion" class="ai-suggestion" style="display: none;">
-              <h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3>
-              <div class="input-group"> <label for="medicament">Médicament:</label> <input type="text" id="medicament"/> </div>
-              <div class="input-group"> <label for="start_date">Date début:</label> <input type="date" id="start_date"/> </div>
-              <div class="input-group"> <label for="end_date">Date fin:</label> <input type="date" id="end_date"/> </div>
-              <div class="input-group"> <label>Horaires:</label> <div class="checkbox-wrapper"> <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label> <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> Après-midi</label> <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label> <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label> </div> </div>
-              <div class="btn-group"> <button class="btn btn-success" id="validatePrescBtn" onclick="validatePrescription()"> <i class="fas fa-check-double"></i> Valider </button> </div>
-              <div id="validationMessage" class="message"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
   </div> <!-- End Container -->
 

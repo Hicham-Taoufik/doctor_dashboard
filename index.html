@@ -332,12 +332,12 @@
   <!-- jsQR Library Script -->
   <script src="./jsQR.js"></script>
 
-  <script>
+<script>
     // --- Configuration & Constants ---
     const CONFIG = {
         API_BASE_URL: 'https://workflows.aphelionxinnovations.com',
-        LOGIN_PAGE_URL: 'https://hicham-taoufik.github.io/login/', // Example - Replace if needed
-        QR_TARGET_BASE_URL: 'app://medilink/patient',
+        LOGIN_PAGE_URL: 'https://hicham-taoufik.github.io/login/', // Absolute URL
+        QR_TARGET_BASE_URL: 'app://medilink/patient', // MUST MATCH RECEPTION
         TOKEN_KEY: 'authToken',
         USER_ID_KEY: 'userIdentifier',
         SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
@@ -362,7 +362,7 @@
     let mediaRecorder; let audioChunks = []; let recordingField = null; // For individual recordings
     let isGlobalRecording = false; let globalMediaRecorder; let globalAudioChunks = []; // For global recording
 
-    // DOM Cache (Cache frequently accessed elements)
+    // DOM Cache
     const patientInfoDiv = document.getElementById('patientInfo');
     const nurseDataDisplayDiv = document.getElementById('nurseDataDisplay');
     const consultationForm = document.getElementById('consultationForm');
@@ -395,23 +395,23 @@
         const allElements = document.querySelectorAll('#globalDictationCardBody button, #consultationForm textarea, #consultationForm button, #aiSuggestion input, #aiSuggestion button');
         const allBodies = document.querySelectorAll('#globalDictationCardBody, #diagCardBody, #prescCardBody, #antecCardBody, #traitementCardBody, #exploCardBody, #orientCardBody, #notesCardBody');
         const allTextAreas = document.querySelectorAll('#consultationForm textarea');
-        const allStopButtons = document.querySelectorAll('button[id^="stop"]');
+        const allStopButtons = document.querySelectorAll('button[id^="stop"]'); // Select all stop buttons
         const aiSuggestionDiv = document.getElementById('aiSuggestion');
         const finalSaveButton = document.getElementById('saveAllConsultationBtn');
-        const finalSaveCardBody = finalSaveButton?.parentElement;
+        const finalSaveCardBody = finalSaveButton?.parentElement; // Get parent card body
 
         if (enable && currentVisitId) { // Require visitId to enable
             allBodies.forEach(el => { if (el) { el.style.opacity = '1'; el.style.pointerEvents = 'auto'; }});
             allElements.forEach(el => { if (el) el.disabled = false; });
             allTextAreas.forEach(ta => { if (ta) ta.readOnly = false; });
-            allStopButtons.forEach(btn => { if (btn) btn.disabled = true; });
-            if (aiSuggestionDiv) aiSuggestionDiv.style.display = 'none';
+            allStopButtons.forEach(btn => { if (btn) btn.disabled = true; }); // Keep stop disabled initially
+            if (aiSuggestionDiv) aiSuggestionDiv.style.display = 'none'; // Ensure hidden
             if (finalSaveCardBody) { finalSaveCardBody.style.opacity = '1'; finalSaveCardBody.style.pointerEvents = 'auto'; }
-             if (finalSaveButton) finalSaveButton.disabled = false;
+            if(finalSaveButton) finalSaveButton.disabled = false;
         } else {
             allBodies.forEach(el => { if (el) { el.style.opacity = '0.5'; el.style.pointerEvents = 'none'; } });
             allElements.forEach(el => { if (el) el.disabled = true; });
-            allTextAreas.forEach(ta => { if (ta) { ta.readOnly = true; ta.value = ''; } });
+            allTextAreas.forEach(ta => { if (ta) { ta.readOnly = true; ta.value = ''; } }); // Clear and make readonly
             allStopButtons.forEach(btn => { if (btn) btn.disabled = true; });
             if (aiSuggestionDiv) aiSuggestionDiv.style.display = 'none';
             document.querySelectorAll('.message').forEach(div => { div.innerHTML = ''; div.style.display = 'none'; });
@@ -419,7 +419,7 @@
             isGlobalRecording = false; globalMediaRecorder = null; globalAudioChunks = []; recordingField = null; mediaRecorder = null; audioChunks = [];
             if (enable && !currentVisitId) showMessage('globalRecordMessage', "Visite non active.", 'warning');
             if (finalSaveCardBody) { finalSaveCardBody.style.opacity = '0.5'; finalSaveCardBody.style.pointerEvents = 'none'; }
-            if(finalSaveButton) finalSaveButton.disabled = true;
+            if(finalSaveButton) finalSaveButton.disabled = true; // Ensure disabled
         }
     }
 
@@ -438,7 +438,7 @@
          fetchWithAuth(`${CONFIG.API_BASE_URL}${CONFIG.GET_VISIT_DETAILS_ENDPOINT}?ipp=${ipp}`)
             .then(responseData => {
                  console.log("Doctor Visit Details Response:", responseData);
-                 if (!responseData || !responseData.success || !responseData.patientData || responseData.visitId === undefined || responseData.visitId === null) {
+                 if (!responseData || responseData.success === false || !responseData.patientData || responseData.visitId === undefined || responseData.visitId === null) {
                     throw new Error(responseData.message || "Visite active ou patient introuvable.");
                  }
                  const patientData = responseData.patientData;
@@ -472,20 +472,24 @@
         if (obsDisplay) obsDisplay.innerHTML = obsHtml; if (vitalsDisplay) vitalsDisplay.innerHTML = vitalsHtml; if (nurseDataDisplayDiv) nurseDataDisplayDiv.style.display = 'block';
     }
 
-    // Fetch and populate existing doctor notes for the current visit
+    // --- NEW: Fetch and populate existing doctor notes ---
      async function fetchDoctorNotes(visitId) {
          if (!visitId) return;
          console.log(`Fetching existing doctor notes for Visit ID: ${visitId}`);
          try {
-             // Use the UPDATE endpoint with GET method or create a dedicated GET endpoint
              // **ASSUMPTION:** UPDATE_CONSULTATION_ENDPOINT supports GET with visit_id query param
+             // If not, you need a dedicated endpoint like /doctor/get-consultation-notes
              const response = await fetchWithAuth(`${CONFIG.API_BASE_URL}${CONFIG.UPDATE_CONSULTATION_ENDPOINT}?visit_id=${visitId}`);
-             // Assuming the response structure on GET is { success: true, data: { consultation_object } }
+             // Adjust based on the ACTUAL structure returned by your GET request for consultation data
              if (response && response.success && response.data) {
-                 populateDoctorFields(response.data);
-             } else {
-                 console.log("No existing doctor notes found or failed to fetch for this visit.", response?.message);
-                 populateDoctorFields({}); // Clear fields if no data
+                 populateDoctorFields(response.data); // data should be the consultation object
+             } else if (response && response.success && !response.data) {
+                 console.log("No existing doctor notes found for this visit.");
+                 populateDoctorFields({}); // Clear fields if no data found
+             }
+              else {
+                 console.warn("Failed to fetch doctor notes or no data returned:", response?.message);
+                 populateDoctorFields({}); // Clear fields on failure
              }
          } catch(error) {
              console.error("Failed to fetch doctor notes:", error);
@@ -497,20 +501,24 @@
     // Populate doctor fields from fetched or extracted data
     function populateDoctorFields(notes) {
         console.log("Populating doctor fields with:", notes);
-        if(!notes) notes = {};
+        if(!notes) notes = {}; // Ensure notes is an object
         const fieldsMap = {
-            diagnosticInput: notes.diagnostic,
-            prescriptionInput: notes.ordonnance_medicale || notes.prescriptions, // Use correct key from DB/N8N
-            antecedentsInput: notes.antecedents,
-            traitementInput: notes.traitement_en_cours,
-            explorationInput: notes.prescription_exploration,
-            orientationInput: notes.orientation,
-            notesInput: notes.notes_supplementaires
+            // Map backend field names (keys) to HTML element IDs (values)
+            diagnostic: 'diagnosticInput',
+            ordonnance_medicale: 'prescriptionInput', // or 'prescriptions' depending on DB/N8N save field
+            antecedents: 'antecedentsInput',
+            traitement_en_cours: 'traitementInput',
+            prescription_exploration: 'explorationInput',
+            orientation: 'orientationInput',
+            notes_supplementaires: 'notesInput'
         };
-        Object.entries(fieldsMap).forEach(([id, value]) => {
-            const el = document.getElementById(id);
-            if (el) { el.value = value ?? ''; } // Use nullish coalescing
-             else { console.warn(`Element ID ${id} not found for population.`); }
+        Object.entries(fieldsMap).forEach(([backendKey, elementId]) => {
+            const el = document.getElementById(elementId);
+            if (el) {
+                el.value = notes[backendKey] ?? ''; // Use backendKey to access notes object
+            } else {
+                console.warn(`Element ID ${elementId} not found for population.`);
+            }
         });
         console.log("Doctor fields population attempt complete.");
     }
@@ -530,26 +538,26 @@
      function startRecording(field) { const config = getFieldConfig(field); if (!config) { console.error(`Invalid field: ${field}`); return; } if (!currentIPP || !currentVisitId) { alert("Chargez patient/visite."); return; } if (isGlobalRecording || (mediaRecorder?.state === 'recording')) { alert("Autre enregistrement en cours."); return; } audioChunks = []; recordingField = field; const statusEl = document.getElementById(config.statusId); const startBtn = document.getElementById(config.startBtnId); const stopBtn = document.getElementById(config.stopBtnId); const messageEl = document.getElementById(config.messageId); if(!statusEl || !startBtn || !stopBtn || !messageEl){ console.error(`UI Elements not found for field: ${field}`); return; } showMessage(messageEl.id, '', ''); statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Start...'; statusEl.style.display = 'inline-flex'; startBtn.disabled = true; stopBtn.disabled = false; navigator.mediaDevices.getUserMedia({ audio: true }) .then(stream => { mediaRecorder = new MediaRecorder(stream); mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); }; mediaRecorder.onstop = handleRecordingStop; mediaRecorder.onerror = e => { console.error(`Rec Err (${recordingField}): ${e.error?.name}`); if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err Rec.'; showMessage(messageEl.id, `Err Rec.: ${e.error?.message}`, "error"); startBtn.disabled = false; stopBtn.disabled = true; recordingField = null; mediaRecorder = null; stream.getTracks().forEach(track => track.stop()); }; mediaRecorder.start(); statusEl.innerHTML = '<i class="fas fa-microphone-alt fa-fade" style="color: var(--danger);"></i> REC...'; }).catch(err => { console.error("Mic Err:", err); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Err micro'; showMessage(messageEl.id, "Accès micro impossible: " + err.message, "error"); startBtn.disabled = false; stopBtn.disabled = true; recordingField = null; }); }
      function stopRecording(field) { const config = getFieldConfig(field); if (!config) return; const startBtn = document.getElementById(config.startBtnId); const stopBtn = document.getElementById(config.stopBtnId); if (mediaRecorder?.state === 'recording' && recordingField === field) { mediaRecorder.stop(); } else { console.log(`Stop called for ${field}, not recording.`); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; } }
      function handleRecordingStop() { const currentField = recordingField; if (!currentField) return; const config = getFieldConfig(currentField); if (!config) return; console.log(`Stopped for ${currentField}. Chunks: ${audioChunks.length}`); const statusEl = document.getElementById(config.statusId); const messageEl = document.getElementById(config.messageId); if (audioChunks.length === 0) { if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; showMessage(messageEl.id, "Aucun audio.", "warning"); recordingField = null; mediaRecorder = null; return; } const blob = new Blob(audioChunks, { type: 'audio/webm' }); audioChunks = []; if(statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Transc...'; showMessage(messageEl.id, "Transcription...", "info"); sendAudioToAI(blob, currentField); recordingField = null; mediaRecorder = null; }
-     function sendAudioToAI(blob, field) { const config = getFieldConfig(field); if (!config) return; if (!currentIPP || !currentVisitId) { showMessage(config.messageId, "IPP/Visite manquant.", "error"); return; } const formData = new FormData(); formData.append("audio", blob, `${field}_${currentIPP}.webm`); formData.append("ipp", currentIPP); formData.append("visit_id", currentVisitId); const statusEl = document.getElementById(config.statusId); const messageEl = document.getElementById(config.messageId); const targetTextarea = document.getElementById(config.inputId); if(statusEl) statusEl.innerHTML = '<i class="fas fa-paper-plane"></i> Envoi...'; fetchWithAuth(TRANSCRIBE_FIELD_ENDPOINT, { method: "POST", body: formData }) .then(data => { console.log(`Transc response for ${field}:`, data); let transcript = data?.transcript || data?.text || data?.extractedData?.[config.apiField] || ''; if(data?.success === false) throw new Error(data.message || "Err transc backend"); if(!transcript && data?.success === true && data?.data && typeof data.data === 'string') transcript = data.data; if (!transcript) { console.warn("Transc vide:", data); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; showMessage(messageEl.id, "Transc vide.", "warning"); } else { if(targetTextarea) targetTextarea.value = transcript; if(statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> OK'; showMessage(messageEl.id, '', ''); } }) .catch(e => { if (!e.message.startsWith('Auth')){ if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err'; showMessage(messageEl.id, `Err Transc.: ${e.message}`, "error"); } console.error(`Transc error for ${field}:`, e); }) .finally(() => { setTimeout(() => { if (statusEl?.innerHTML.includes('OK') || statusEl?.innerHTML.includes('Err')) statusEl.innerHTML = ''; }, 4000); }); }
+     function sendAudioToAI(blob, field) { const config = getFieldConfig(field); if (!config) return; if (!currentIPP || !currentVisitId) { showMessage(config.messageId, "IPP/Visite manquant.", "error"); return; } const formData = new FormData(); formData.append("audio", blob, `${field}_${currentIPP}.webm`); formData.append("ipp", currentIPP); formData.append("visit_id", currentVisitId); const statusEl = document.getElementById(config.statusId); const messageEl = document.getElementById(config.messageId); const targetTextarea = document.getElementById(config.inputId); if(statusEl) statusEl.innerHTML = '<i class="fas fa-paper-plane"></i> Envoi...'; fetchWithAuth(CONFIG.TRANSCRIBE_FIELD_ENDPOINT, { method: "POST", body: formData }) .then(data => { console.log(`Transc response for ${field}:`, data); let transcript = data?.transcript || data?.text || data?.extractedData?.[config.apiField] || ''; if(data?.success === false) throw new Error(data.message || "Err transc backend"); if(!transcript && data?.success === true && data?.data && typeof data.data === 'string') transcript = data.data; if (!transcript) { console.warn("Transc vide:", data); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; showMessage(messageEl.id, "Transc vide.", "warning"); } else { if(targetTextarea) targetTextarea.value = transcript; if(statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> OK'; showMessage(messageEl.id, '', ''); } }) .catch(e => { if (!e.message.startsWith('Auth')){ if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err'; showMessage(messageEl.id, `Err Transc.: ${e.message}`, "error"); } console.error(`Transc error for ${field}:`, e); }) .finally(() => { setTimeout(() => { if (statusEl?.innerHTML.includes('OK') || statusEl?.innerHTML.includes('Err')) statusEl.innerHTML = ''; }, 4000); }); }
 
     // --- GLOBAL DICTATION ---
      function startGlobalRecording() { if (!currentIPP || !currentVisitId) { showMessage('globalRecordMessage', "Chargez patient/visite.", "warning"); return; } if (isGlobalRecording || (mediaRecorder?.state === 'recording')) { showMessage('globalRecordMessage', "Autre enregistrement en cours.", "warning"); return; } globalAudioChunks = []; isGlobalRecording = true; const statusEl = document.getElementById('globalRecordStatus'); const startBtn = document.getElementById('startGlobalRecordBtn'); const stopBtn = document.getElementById('stopGlobalRecordBtn'); const messageEl = document.getElementById('globalRecordMessage'); showMessage(messageEl.id, '', ''); statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Démarrage...'; statusEl.style.display = 'inline-flex'; if(startBtn) startBtn.disabled = true; if(stopBtn) stopBtn.disabled = false; navigator.mediaDevices.getUserMedia({ audio: true }) .then(stream => { globalMediaRecorder = new MediaRecorder(stream); globalMediaRecorder.ondataavailable = e => { if (e.data.size > 0) globalAudioChunks.push(e.data); }; globalMediaRecorder.onstop = handleGlobalRecordingStop; globalMediaRecorder.onerror = e => { console.error(`Global Rec Err: ${e.error?.name}`); if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err Enreg.'; showMessage(messageEl.id, `Err Enreg.: ${e.error?.message}`, "error"); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; isGlobalRecording = false; globalMediaRecorder = null; stream.getTracks().forEach(track => track.stop());}; globalMediaRecorder.start(); statusEl.innerHTML = '<i class="fas fa-microphone-alt fa-fade" style="color: var(--danger);"></i> Enregistrement...'; }) .catch(err => { console.error("Global Mic Err:", err); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Err micro'; showMessage(messageEl.id, "Accès micro impossible: " + err.message, "error"); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; isGlobalRecording = false; }); }
      function stopGlobalRecording() { const startBtn = document.getElementById('startGlobalRecordBtn'); const stopBtn = document.getElementById('stopGlobalRecordBtn'); const statusEl = document.getElementById('globalRecordStatus'); if (globalMediaRecorder?.state === 'recording') { if (statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Finalisation...'; globalMediaRecorder.stop(); } else { if(startBtn) startBtn.disabled = false; } if(stopBtn) stopBtn.disabled = true; }
      function handleGlobalRecordingStop() { console.log(`Global stopped. Chunks: ${globalAudioChunks.length}`); const statusEl = document.getElementById('globalRecordStatus'); const startBtn = document.getElementById('startGlobalRecordBtn'); const stopBtn = document.getElementById('stopGlobalRecordBtn'); isGlobalRecording = false; globalMediaRecorder = null; if (globalAudioChunks.length === 0) { if (statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; showMessage('globalRecordMessage', "Aucun audio.", "warning"); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; return; } const blob = new Blob(globalAudioChunks, { type: 'audio/webm' }); globalAudioChunks = []; if (statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement IA...'; showMessage('globalRecordMessage',"Analyse et extraction...", "info"); sendGlobalAudioToBackend(blob); }
-     function sendGlobalAudioToBackend(blob) { if (!currentIPP || !currentVisitId) { showMessage('globalRecordMessage', "Err: Patient/Visite non ID.", "error"); const startBtn = document.getElementById('startGlobalRecordBtn'); if(startBtn) startBtn.disabled = false; return; } const endpoint = GLOBAL_DICTATION_ENDPOINT; const formData = new FormData(); formData.append("audio", blob, `global_dictation_${currentIPP}.webm`); formData.append("ipp", currentIPP); formData.append("visit_id", currentVisitId); const startBtn = document.getElementById('startGlobalRecordBtn'); const statusEl = document.getElementById('globalRecordStatus'); const messageEl = document.getElementById('globalRecordMessage'); fetchWithAuth(endpoint, { method: "POST", body: formData }) .then(data => { console.log("Global processing response:", data); if (data.success && data.extractedData) { showMessage(messageEl.id, `<i class="fas fa-check-circle"></i> ${data.message || 'Dictée traitée.'}`, 'success'); if (statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> OK'; populateDoctorFields(data.extractedData); /* Use populate function */ document.getElementById('diagnosticInput')?.focus(); } else { throw new Error(data.message || "Err backend (données extraites manquantes)."); } }) .catch(e => { console.error("Error global audio:", e); if (!e.message.startsWith('Auth')) { showMessage(messageEl.id, `<i class="fas fa-times-circle"></i> Err Trait.: ${e.message}`, 'error'); if (statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Échec'; } }) .finally(() => { if(startBtn) startBtn.disabled = false; const stopBtn = document.getElementById('stopGlobalRecordBtn'); if (stopBtn) stopBtn.disabled = true; setTimeout(() => { if (statusEl?.innerHTML.includes('OK') || statusEl?.innerHTML.includes('Échec')) statusEl.innerHTML = ''; }, 5000); }); }
+     function sendGlobalAudioToBackend(blob) { if (!currentIPP || !currentVisitId) { showMessage('globalRecordMessage', "Err: Patient/Visite non ID.", "error"); const startBtn = document.getElementById('startGlobalRecordBtn'); if(startBtn) startBtn.disabled = false; return; } const endpoint = CONFIG.GLOBAL_DICTATION_ENDPOINT; const formData = new FormData(); formData.append("audio", blob, `global_dictation_${currentIPP}.webm`); formData.append("ipp", currentIPP); formData.append("visit_id", currentVisitId); const startBtn = document.getElementById('startGlobalRecordBtn'); const statusEl = document.getElementById('globalRecordStatus'); const messageEl = document.getElementById('globalRecordMessage'); fetchWithAuth(endpoint, { method: "POST", body: formData }) .then(data => { console.log("Global processing response:", data); if (data.success && data.extractedData) { showMessage(messageEl.id, `<i class="fas fa-check-circle"></i> ${data.message || 'Dictée traitée.'}`, 'success'); if (statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> OK'; populateDoctorFields(data.extractedData); /* Use populate function */ document.getElementById('diagnosticInput')?.focus(); } else { throw new Error(data.message || "Err backend (données extraites manquantes)."); } }) .catch(e => { console.error("Error global audio:", e); if (!e.message.startsWith('Auth')) { showMessage(messageEl.id, `<i class="fas fa-times-circle"></i> Err Trait.: ${e.message}`, 'error'); if (statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Échec'; } }) .finally(() => { if(startBtn) startBtn.disabled = false; const stopBtn = document.getElementById('stopGlobalRecordBtn'); if (stopBtn) stopBtn.disabled = true; setTimeout(() => { if (statusEl?.innerHTML.includes('OK') || statusEl?.innerHTML.includes('Échec')) statusEl.innerHTML = ''; }, 5000); }); }
 
     // --- SAVING CONSULTATION DATA ---
     function saveIndividualField(fieldName, inputElementId, messageElementId, buttonElementId) { const inputElement = document.getElementById(inputElementId); const textValue = inputElement?.value; const saveButton = document.getElementById(buttonElementId); if (!currentVisitId) { showMessage(messageElementId, "ID Visite manquant.", "error"); return; } const payload = { visit_id: currentVisitId, doctor_identifier: currentUserIdentifier, [fieldName]: textValue ?? null }; showMessage(messageElementId, '<i class="fas fa-spinner fa-spin"></i> Enregistrement...', 'loading'); if(saveButton) saveButton.disabled = true; fetchWithAuth(CONFIG.UPDATE_CONSULTATION_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) }) .then(data => { if (data.success) { showMessage(messageElementId, `<i class="fas fa-check-circle"></i> Enregistré.`, 'success'); } else { throw new Error(data.message || "Échec backend."); } }) .catch(e => { if (!e.message.startsWith('Auth')) showMessage(messageElementId, `<i class="fas fa-times-circle"></i> Erreur: ${e.message}`, 'error'); console.error(`Error saving ${fieldName}:`, e); }) .finally(() => { if(saveButton) saveButton.disabled = false; }); }
     function saveAntecedents() { saveIndividualField('antecedents', 'antecedentsInput', 'antecedentsMessage', 'saveAntecedentsBtn'); }
-    function saveDiagnostic() { saveIndividualField('diagnostic', 'diagnosticInput', 'diagMessage', 'saveDiagnosticBtn'); }
+    function saveDiagnostic() { saveIndividualField('diagnostic', 'diagnosticInput', 'diagMessage', 'saveDiagnosticBtn'); } // Changed button ID
     function saveTraitement() { saveIndividualField('traitement_en_cours', 'traitementInput', 'traitementMessage', 'saveTraitementBtn'); }
-    function saveOrdonnance() { saveIndividualField('ordonnance_medicale', 'prescriptionInput', 'validationMessage', 'savePrescriptionBtn'); }
+    function saveOrdonnance() { saveIndividualField('ordonnance_medicale', 'prescriptionInput', 'validationMessage', 'savePrescriptionBtn'); } // Changed button ID
     function saveExploration() { saveIndividualField('prescription_exploration', 'explorationInput', 'explorationMessage', 'saveExplorationBtn'); }
     function saveOrientation() { saveIndividualField('orientation', 'orientationInput', 'orientationMessage', 'saveOrientationBtn'); }
     function saveNotes() { saveIndividualField('notes_supplementaires', 'notesInput', 'notesMessage', 'saveNotesBtn'); }
 
     // Save All Function (triggered by form submit)
-    function saveAllConsultationData() { if (!currentVisitId) { showMessage('saveConsultationMessage', "Contexte visite manquant.", "error"); return; } const saveButton = document.getElementById('saveAllConsultationBtn'); showMessage('saveConsultationMessage', '<i class="fas fa-spinner fa-spin"></i> Enregistrement complet...', 'loading'); if(saveButton) saveButton.disabled = true; if(!consultationForm) { console.error("Consultation form not found!"); if(saveButton) saveButton.disabled = false; return; } const formData = new FormData(consultationForm); const payload = { visit_id: currentVisitId, doctor_identifier: currentUserIdentifier }; for (const [key, value] of formData.entries()) { payload[key] = value.trim() === '' ? null : value; } console.log("Saving all data:", payload); fetchWithAuth(CONFIG.UPDATE_CONSULTATION_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) }) .then(data => { if (data.success) { showMessage('saveConsultationMessage', `<i class="fas fa-check-circle"></i> Consultation complète enregistrée.`, 'success'); /* Disable form? */ } else { throw new Error(data.message || "Échec backend."); } }) .catch(e => { if (!e.message.startsWith('Auth')) showMessage('saveConsultationMessage', `<i class="fas fa-times-circle"></i> Erreur: ${e.message}`, 'error'); console.error(`Error saving all:`, e); }) .finally(() => { if(saveButton) saveButton.disabled = false; }); }
+    function saveAllConsultationData() { if (!currentVisitId) { showMessage('saveConsultationMessage', "Contexte visite manquant.", "error"); return; } const saveButton = document.getElementById('saveAllConsultationBtn'); showMessage('saveConsultationMessage', '<i class="fas fa-spinner fa-spin"></i> Enregistrement complet...', 'loading'); if(saveButton) saveButton.disabled = true; if(!consultationForm) { console.error("Consultation form not found!"); if(saveButton) saveButton.disabled = false; return; } const formData = new FormData(consultationForm); const payload = { visit_id: currentVisitId, doctor_identifier: currentUserIdentifier }; for (const [key, value] of formData.entries()) { payload[key] = value.trim() === '' ? null : value; } console.log("Saving all data:", payload); fetchWithAuth(CONFIG.UPDATE_CONSULTATION_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) }) .then(data => { if (data.success) { showMessage('saveConsultationMessage', `<i class="fas fa-check-circle"></i> Consultation complète enregistrée.`, 'success'); /* Disable form? Maybe add a 'Close Visit' button? */ } else { throw new Error(data.message || "Échec backend."); } }) .catch(e => { if (!e.message.startsWith('Auth')) showMessage('saveConsultationMessage', `<i class="fas fa-times-circle"></i> Erreur: ${e.message}`, 'error'); console.error(`Error saving all:`, e); }) .finally(() => { if(saveButton) saveButton.disabled = false; }); }
 
     // --- PRESCRIPTION AI ---
     function submitPrescriptionToAI() { const prescInput = document.getElementById("prescriptionInput"); const prescriptionText = prescInput?.value.trim(); const aiSuggestionDiv = document.getElementById("aiSuggestion"); const validationMsgDiv = document.getElementById("validationMessage"); const submitBtn = document.getElementById("submitPrescBtn"); if (!prescriptionText) { showMessage("validationMessage", `Champ prescription vide.`, "warning"); return; } if (!currentIPP || !currentVisitId) { showMessage("validationMessage", `Patient/Visite non chargé.`, "warning"); return; } showMessage("validationMessage", "", ""); aiSuggestionDiv.style.display = "block"; aiSuggestionDiv.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3><div class="message message-info" style="display:block;"><i class="fas fa-spinner fa-spin"></i> Analyse IA en cours...</div>`; if(submitBtn) submitBtn.disabled = true; fetchWithAuth(CONFIG.SUBMIT_PRESCRIPTION_AI_ENDPOINT, { method: "POST", body: JSON.stringify({ ipp: currentIPP, visit_id: currentVisitId, prescription: prescriptionText }) }) .then(data => { console.log("AI Raw:", JSON.stringify(data,null,2)); if (data?.success === true && data.suggestion) { const d = data.suggestion; console.log("Extracted suggestion:", d); aiSuggestionDiv.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3> <div class="input-group"> <label for="medicament">Médicament:</label> <input type="text" id="medicament"/> </div> <div class="input-group"> <label for="start_date">Date début:</label> <input type="date" id="start_date"/> </div> <div class="input-group"> <label for="end_date">Date fin:</label> <input type="date" id="end_date"/> </div> <div class="input-group"> <label>Horaires:</label> <div class="checkbox-wrapper"> <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label> <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> A-M</label> <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label> <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label> </div> </div> <div class="btn-group"> <button type="button" class="btn btn-success" id="validatePrescBtn" onclick="validateAISuggestion()"> <i class="fas fa-check-double"></i> Valider & Enreg. Suggestion </button> </div>`; const convertDate=(s)=>{try{if(!s||typeof s!=='string'||!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s))return '';const p=s.split('/');const m=p[0].padStart(2,'0'),day=p[1].padStart(2,'0'),y=p[2];return`${y}-${m}-${day}`}catch{return''}}; document.getElementById("medicament").value=d.medicament||'';document.getElementById("start_date").value=convertDate(d.start_date);document.getElementById("end_date").value=convertDate(d.end_date); if(d.schedule){document.getElementById("matin").checked=!!d.schedule.matin;document.getElementById("apres_midi").checked=!!d.schedule.apres_midi;document.getElementById("soir").checked=!!d.schedule.soir;document.getElementById("nuit").checked=!!d.schedule.nuit;} aiSuggestionDiv.scrollIntoView({behavior:'smooth'}); } else { throw new Error(data.message || "Réponse IA invalide."); } }).catch(e=>{ if(!e.message.startsWith('Auth')) showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`,"error"); console.error("Err submitPresc:",e); aiSuggestionDiv.style.display="none"; }).finally(() => { if(submitBtn) submitBtn.disabled = false; }); }

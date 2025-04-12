@@ -336,22 +336,25 @@
   <script>
     // --- Configuration & Constants ---
     const CONFIG = {
-        API_BASE_URL: 'https://workflows.aphelionxinnovations.com',
-        LOGIN_PAGE_URL: 'https://hicham-taoufik.github.io/login/', // Replace if needed
-        QR_TARGET_BASE_URL: 'app://medilink/patient',
-        TOKEN_KEY: 'authToken',
-        USER_ID_KEY: 'userIdentifier',
-        SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
-        MESSAGE_DISPLAY_TIME: 5000,
-        TOAST_DISPLAY_TIME: 4000,
-        // API Endpoints
-        GET_VISIT_DETAILS_ENDPOINT: "/webhook/doctor/get-visit-details",
-        GLOBAL_DICTATION_ENDPOINT: "/webhook/process-visit-dictation",
-        UPDATE_CONSULTATION_ENDPOINT: "/webhook/doctor/update-consultation",
-        SUBMIT_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-submit-prescription",
-        VALIDATE_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-validate-prescription",
-        TRANSCRIBE_FIELD_ENDPOINT: GLOBAL_DICTATION_ENDPOINT // Reusing global N8N workflow for individual transcriptions
-    };
+    API_BASE_URL: 'https://workflows.aphelionxinnovations.com',
+    LOGIN_PAGE_URL: 'https://hicham-taoufik.github.io/login/',
+    QR_TARGET_BASE_URL: 'app://medilink/patient',
+    TOKEN_KEY: 'authToken',
+    USER_ID_KEY: 'userIdentifier',
+    SESSION_TIMEOUT: 30 * 60 * 1000,
+    MESSAGE_DISPLAY_TIME: 5000,
+    TOAST_DISPLAY_TIME: 4000,
+    // API Endpoints
+    GET_VISIT_DETAILS_ENDPOINT: "/webhook/doctor/get-visit-details",
+    GLOBAL_DICTATION_ENDPOINT: "/webhook/process-visit-dictation", // Used by sendGlobalAudioToBackend
+    UPDATE_CONSULTATION_ENDPOINT: "/webhook/doctor/update-consultation",
+    SUBMIT_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-submit-prescription",
+    VALIDATE_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-validate-prescription",
+    // --- CORRECTED LINE ---
+    TRANSCRIBE_FIELD_ENDPOINT: "/webhook/process-visit-dictation" // Explicit path, used by sendAudioToAI
+    // --- END CORRECTION ---
+};
+
 
     // --- Globals ---
     let currentIPP = null;

@@ -333,28 +333,25 @@
   <!-- jsQR Library Script -->
   <script src="./jsQR.js"></script>
 
-  <script>
+<script>
     // --- Configuration & Constants ---
     const CONFIG = {
-    API_BASE_URL: 'https://workflows.aphelionxinnovations.com',
-    LOGIN_PAGE_URL: 'https://hicham-taoufik.github.io/login/',
-    QR_TARGET_BASE_URL: 'app://medilink/patient',
-    TOKEN_KEY: 'authToken',
-    USER_ID_KEY: 'userIdentifier',
-    SESSION_TIMEOUT: 30 * 60 * 1000,
-    MESSAGE_DISPLAY_TIME: 5000,
-    TOAST_DISPLAY_TIME: 4000,
-    // API Endpoints
-    GET_VISIT_DETAILS_ENDPOINT: "/webhook/doctor/get-visit-details",
-    GLOBAL_DICTATION_ENDPOINT: "/webhook/process-visit-dictation", // Used by sendGlobalAudioToBackend
-    UPDATE_CONSULTATION_ENDPOINT: "/webhook/doctor/update-consultation",
-    SUBMIT_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-submit-prescription",
-    VALIDATE_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-validate-prescription",
-    // --- CORRECTED LINE ---
-    TRANSCRIBE_FIELD_ENDPOINT: "/webhook/process-visit-dictation" // Explicit path, used by sendAudioToAI
-    // --- END CORRECTION ---
-};
-
+        API_BASE_URL: 'https://workflows.aphelionxinnovations.com',
+        LOGIN_PAGE_URL: 'https://hicham-taoufik.github.io/login/', // Absolute URL
+        QR_TARGET_BASE_URL: 'app://medilink/patient', // MUST MATCH RECEPTION
+        TOKEN_KEY: 'authToken',
+        USER_ID_KEY: 'userIdentifier',
+        SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
+        MESSAGE_DISPLAY_TIME: 5000,
+        TOAST_DISPLAY_TIME: 4000,
+        // API Endpoints
+        GET_VISIT_DETAILS_ENDPOINT: "/webhook/doctor/get-visit-details",
+        GLOBAL_DICTATION_ENDPOINT: "/webhook/process-visit-dictation",
+        UPDATE_CONSULTATION_ENDPOINT: "/webhook/doctor/update-consultation",
+        SUBMIT_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-submit-prescription",
+        VALIDATE_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-validate-prescription",
+        TRANSCRIBE_FIELD_ENDPOINT: "/webhook/process-visit-dictation" // Explicit path, used by sendAudioToAI
+    };
 
     // --- Globals ---
     let currentIPP = null;
@@ -374,7 +371,7 @@
     const scannerContainer = document.getElementById('scanner-container');
     const video = document.getElementById('scanner-video');
     const aiSuggestionDiv = document.getElementById('aiSuggestion');
-    // Add other frequent DOM elements if needed
+    // Add other frequent DOM elements here if needed
 
 
     // --- UTILITY FUNCTIONS ---
@@ -383,14 +380,17 @@
     function showMessage(elementId, message, type = 'info') { const el = document.getElementById(elementId); if (!el) { console.error(`Msg Elem "${elementId}" not found.`); return; } const icons = { 'info':'fas fa-info-circle','success':'fas fa-check-circle','warning':'fas fa-exclamation-triangle','error':'fas fa-times-circle','loading':'fas fa-spinner fa-spin' }; const icon = icons[type] || icons['info']; const iconHtml = message ? `<i class="${icon}" style="margin-right: 6px;"></i>` : ''; el.innerHTML = message ? `${iconHtml}${message}` : ""; el.style.display = message ? "block" : "none"; el.className = 'message'; if (type) el.classList.add(`message-${type}`); if (type === 'success' && message && elementId !== 'scanResult' && !elementId.startsWith('saveConsultationMessage')) { setTimeout(() => { if (el.innerHTML.includes(message)) el.style.display = 'none'; }, CONFIG.MESSAGE_DISPLAY_TIME); } }
 
     // --- AUTH & SESSION ---
+    function redirectToLogin() {
+        window.location.href = CONFIG.LOGIN_PAGE_URL;
+    }
     function fetchWithAuth(url, options = {}) {
-        const token = localStorage.getItem(CONFIG.TOKEN_KEY); if (!token) { console.error('Doctor: No auth token.'); clearDoctorUI(); alert('Session expirée.'); window.location.href = CONFIG.LOGIN_PAGE_URL; return Promise.reject(new Error('Token non trouvé.')); }
+        const token = localStorage.getItem(CONFIG.TOKEN_KEY); if (!token) { console.error('Doctor: No auth token.'); clearDoctorUI(); alert('Session expirée.'); redirectToLogin(); return Promise.reject(new Error('Token non trouvé.')); }
         resetSessionTimeout(); // Reset timeout on activity
         const headers = { ...options.headers, 'Authorization': `Bearer ${token}` }; if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; } else if (options.body instanceof FormData) { delete headers['Content-Type']; }
-        return fetch(url, { ...options, headers: headers }) .then(async response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem(CONFIG.TOKEN_KEY); localStorage.removeItem(CONFIG.USER_ID_KEY); clearDoctorUI(); alert('Session invalide.'); window.location.href = CONFIG.LOGIN_PAGE_URL; throw new Error(`Auth failed: ${response.status}`); } if (!response.ok) { const errorText = await response.text(); console.error(`Doctor: API Error ${response.status} for ${url}: ${errorText || response.statusText}`); throw new Error(`Erreur ${response.status}: ${errorText || response.statusText}`); } const contentType = response.headers.get("content-type"); if (contentType && contentType.includes("application/json")) { const text = await response.text(); try { return JSON.parse(text); } catch (e) { console.warn(`OK response but invalid JSON from ${url}: ${text}`); return { success: true, data: text }; } } else { return response.text().then(text => ({ success: true, data: text })); } }).catch(error => { console.error(`Fetch error for ${url}:`, error); if (!error.message.startsWith('Auth failed')) { showMessage('globalRecordMessage', `Erreur communication: ${error.message}`, 'error'); } throw error; });
+        return fetch(url, { ...options, headers: headers }) .then(async response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem(CONFIG.TOKEN_KEY); localStorage.removeItem(CONFIG.USER_ID_KEY); clearDoctorUI(); alert('Session invalide.'); redirectToLogin(); throw new Error(`Auth failed: ${response.status}`); } if (!response.ok) { const errorText = await response.text(); console.error(`Doctor: API Error ${response.status} for ${url}: ${errorText || response.statusText}`); throw new Error(`Erreur ${response.status}: ${errorText || response.statusText}`); } const contentType = response.headers.get("content-type"); if (contentType && contentType.includes("application/json")) { const text = await response.text(); try { return JSON.parse(text); } catch (e) { console.warn(`OK response but invalid JSON from ${url}: ${text}`); return { success: true, data: text }; } } else { return response.text().then(text => ({ success: true, data: text })); } }).catch(error => { console.error(`Fetch error for ${url}:`, error); if (!error.message.startsWith('Auth failed')) { showMessage('globalRecordMessage', `Erreur communication: ${error.message}`, 'error'); } throw error; });
     }
     function logout() {
-        localStorage.removeItem(CONFIG.TOKEN_KEY); localStorage.removeItem(CONFIG.USER_ID_KEY); clearTimeout(sessionTimeoutId); alert('Déconnecté.'); window.location.href = CONFIG.LOGIN_PAGE_URL;
+        localStorage.removeItem(CONFIG.TOKEN_KEY); localStorage.removeItem(CONFIG.USER_ID_KEY); clearTimeout(sessionTimeoutId); alert('Déconnecté.'); redirectToLogin();
     }
      function resetSessionTimeout() {
         if (sessionTimeoutId) clearTimeout(sessionTimeoutId);
@@ -479,40 +479,33 @@
         if (obsDisplay) obsDisplay.innerHTML = obsHtml; if (vitalsDisplay) vitalsDisplay.innerHTML = vitalsHtml; if (nurseDataDisplayDiv) nurseDataDisplayDiv.style.display = 'block';
     }
 
-    // Fetch and populate existing doctor notes for the current visit
      async function fetchDoctorNotes(visitId) {
          if (!visitId) return;
          console.log(`Fetching existing doctor notes for Visit ID: ${visitId}`);
          try {
-             // **ASSUMPTION:** UPDATE_CONSULTATION_ENDPOINT supports GET with visit_id query param
-             // If not, you need a dedicated endpoint like /doctor/get-consultation-notes
-             // The response needs { success: true, data: { consultation_object_with_notes } }
              const response = await fetchWithAuth(`${CONFIG.API_BASE_URL}${CONFIG.UPDATE_CONSULTATION_ENDPOINT}?visit_id=${visitId}`);
-
              if (response && response.success && response.data) {
-                 populateDoctorFields(response.data); // data should be the consultation object
+                 populateDoctorFields(response.data);
              } else if (response && response.success && !response.data) {
                  console.log("No existing doctor notes found for this visit.");
-                 populateDoctorFields({}); // Clear fields if no data found
+                 populateDoctorFields({});
              } else {
                  console.warn("Failed to fetch doctor notes or unexpected response structure:", response);
-                 populateDoctorFields({}); // Clear fields on failure
+                 populateDoctorFields({});
              }
          } catch(error) {
              console.error("Failed to fetch doctor notes:", error);
              showMessage('globalRecordMessage', `Erreur chargement notes médecin: ${error.message}`, 'error');
-             populateDoctorFields({}); // Clear fields on error
+             populateDoctorFields({});
          }
      }
 
-    // Populate doctor fields from fetched or extracted data
     function populateDoctorFields(notes) {
         console.log("Populating doctor fields with:", notes);
-        if(!notes) notes = {}; // Ensure notes is an object
+        if(!notes) notes = {};
         const fieldsMap = {
-            // Map backend field names (keys from N8N/DB) to HTML element IDs (values)
             diagnostic: 'diagnosticInput',
-            ordonnance_medicale: 'prescriptionInput', // Check if DB uses 'prescriptions'
+            ordonnance_medicale: 'prescriptionInput',
             antecedents: 'antecedentsInput',
             traitement_en_cours: 'traitementInput',
             prescription_exploration: 'explorationInput',
@@ -521,11 +514,8 @@
         };
         Object.entries(fieldsMap).forEach(([backendKey, elementId]) => {
             const el = document.getElementById(elementId);
-            if (el) {
-                el.value = notes[backendKey] ?? ''; // Use ?? '' for safety and clearing
-            } else {
-                console.warn(`Element ID ${elementId} not found for population.`);
-            }
+            if (el) { el.value = notes[backendKey] ?? ''; }
+             else { console.warn(`Element ID ${elementId} not found for population.`); }
         });
         console.log("Doctor fields population attempt complete.");
     }
@@ -554,10 +544,11 @@
 
     // --- SAVING CONSULTATION DATA ---
     function saveIndividualField(fieldName, inputElementId, messageElementId, buttonElementId) { const inputElement = document.getElementById(inputElementId); const textValue = inputElement?.value; const saveButton = document.getElementById(buttonElementId); if (!currentVisitId) { showMessage(messageElementId, "ID Visite manquant.", "error"); return; } const payload = { visit_id: currentVisitId, doctor_identifier: currentUserIdentifier, [fieldName]: textValue ?? null }; showMessage(messageElementId, '<i class="fas fa-spinner fa-spin"></i> Enregistrement...', 'loading'); if(saveButton) saveButton.disabled = true; fetchWithAuth(CONFIG.UPDATE_CONSULTATION_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) }) .then(data => { if (data.success) { showMessage(messageElementId, `<i class="fas fa-check-circle"></i> Enregistré.`, 'success'); } else { throw new Error(data.message || "Échec backend."); } }) .catch(e => { if (!e.message.startsWith('Auth')) showMessage(messageElementId, `<i class="fas fa-times-circle"></i> Erreur: ${e.message}`, 'error'); console.error(`Error saving ${fieldName}:`, e); }) .finally(() => { if(saveButton) saveButton.disabled = false; }); }
+    // Specific save functions now correctly map to the generic function and use correct button IDs
     function saveAntecedents() { saveIndividualField('antecedents', 'antecedentsInput', 'antecedentsMessage', 'saveAntecedentsBtn'); }
-    function saveDiagnostic() { saveIndividualField('diagnostic', 'diagnosticInput', 'diagMessage', 'saveDiagnosticBtn'); }
+    function saveDiagnostic() { saveIndividualField('diagnostic', 'diagnosticInput', 'diagMessage', 'saveDiagnosticBtn'); } // Corrected button ID
     function saveTraitement() { saveIndividualField('traitement_en_cours', 'traitementInput', 'traitementMessage', 'saveTraitementBtn'); }
-    function saveOrdonnance() { saveIndividualField('ordonnance_medicale', 'prescriptionInput', 'validationMessage', 'savePrescriptionBtn'); }
+    function saveOrdonnance() { saveIndividualField('ordonnance_medicale', 'prescriptionInput', 'validationMessage', 'savePrescriptionBtn'); } // Corrected button ID
     function saveExploration() { saveIndividualField('prescription_exploration', 'explorationInput', 'explorationMessage', 'saveExplorationBtn'); }
     function saveOrientation() { saveIndividualField('orientation', 'orientationInput', 'orientationMessage', 'saveOrientationBtn'); }
     function saveNotes() { saveIndividualField('notes_supplementaires', 'notesInput', 'notesMessage', 'saveNotesBtn'); }
@@ -567,10 +558,20 @@
 
     // --- PRESCRIPTION AI ---
     function submitPrescriptionToAI() { const prescInput = document.getElementById("prescriptionInput"); const prescriptionText = prescInput?.value.trim(); const submitBtn = document.getElementById("submitPrescBtn"); if (!prescriptionText) { showMessage("validationMessage", `Champ prescription vide.`, "warning"); return; } if (!currentIPP || !currentVisitId) { showMessage("validationMessage", `Patient/Visite non chargé.`, "warning"); return; } showMessage("validationMessage", "", ""); if (aiSuggestionDiv) { aiSuggestionDiv.style.display = "block"; aiSuggestionDiv.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3><div class="message message-info" style="display:block;"><i class="fas fa-spinner fa-spin"></i> Analyse IA en cours...</div>`; } if(submitBtn) submitBtn.disabled = true; fetchWithAuth(CONFIG.SUBMIT_PRESCRIPTION_AI_ENDPOINT, { method: "POST", body: JSON.stringify({ ipp: currentIPP, visit_id: currentVisitId, prescription: prescriptionText }) }) .then(data => { console.log("AI Raw:", JSON.stringify(data,null,2)); if (data?.success === true && data.suggestion) { const d = data.suggestion; console.log("Extracted suggestion:", d); if(aiSuggestionDiv) { aiSuggestionDiv.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3> <div class="input-group"> <label for="medicament">Médicament:</label> <input type="text" id="medicament"/> </div> <div class="input-group"> <label for="start_date">Date début:</label> <input type="date" id="start_date"/> </div> <div class="input-group"> <label for="end_date">Date fin:</label> <input type="date" id="end_date"/> </div> <div class="input-group"> <label>Horaires:</label> <div class="checkbox-wrapper"> <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label> <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> A-M</label> <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label> <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label> </div> </div> <div class="btn-group"> <button type="button" class="btn btn-success" id="validatePrescBtn" onclick="validateAISuggestion()"> <i class="fas fa-check-double"></i> Valider & Enreg. Suggestion </button> </div>`; const convertDate=(s)=>{try{if(!s||typeof s!=='string'||!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s))return '';const p=s.split('/');const m=p[0].padStart(2,'0'),day=p[1].padStart(2,'0'),y=p[2];return`${y}-${m}-${day}`}catch{return''}}; document.getElementById("medicament").value=d.medicament||'';document.getElementById("start_date").value=convertDate(d.start_date);document.getElementById("end_date").value=convertDate(d.end_date); if(d.schedule){document.getElementById("matin").checked=!!d.schedule.matin;document.getElementById("apres_midi").checked=!!d.schedule.apres_midi;document.getElementById("soir").checked=!!d.schedule.soir;document.getElementById("nuit").checked=!!d.schedule.nuit;} aiSuggestionDiv.scrollIntoView({behavior:'smooth'}); }} else { throw new Error(data.message || "Réponse IA invalide."); } }).catch(e=>{ if(!e.message.startsWith('Auth')) showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`,"error"); console.error("Err submitPresc:",e); if (aiSuggestionDiv) aiSuggestionDiv.style.display="none"; }).finally(() => { if(submitBtn) submitBtn.disabled = false; }); }
-    function validateAISuggestion() { const med=document.getElementById("medicament")?.value.trim();const sd=document.getElementById("start_date")?.value;const ed=document.getElementById("end_date")?.value;const validateBtn=document.getElementById("validatePrescBtn"); if (!med||!sd||!ed) { showMessage("validationMessage","Champs Suggestion requis.","warning"); return; } if (!currentIPP || !currentVisitId) { showMessage("validationMessage","Patient/Visite non chargé.","warning"); return; } showMessage("validationMessage","<i class='fas fa-spinner fa-spin'></i> Enregistrement...", "loading"); if(validateBtn)validateBtn.disabled=true; const sched={matin:document.getElementById("matin").checked,apres_midi:document.getElementById("apres_midi").checked,soir:document.getElementById("soir").checked,nuit:document.getElementById("nuit").checked}; const cvAPI=(dt)=>{if(!dt||!/^\d{4}-\d{2}-\d{2}$/.test(dt))return'';const p=dt.split('-');return`${p[1]}/${p[2]}/${p[0]}`}; const finalPrescText = document.getElementById("prescriptionInput").value; const payload={visit_id: currentVisitId, ipp: currentIPP, final_prescription: finalPrescText, start_date: cvAPI(sd), end_date: cvAPI(ed), schedule: sched, medicament_name: med}; fetchWithAuth(CONFIG.VALIDATE_PRESCRIPTION_AI_ENDPOINT, {method:"POST", body:JSON.stringify(payload)}) .then(data =>{ if(data.success) { showMessage("validationMessage","<i class='fas fa-check-circle'></i> Suggestion validée.", "success"); if (aiSuggestionDiv) aiSuggestionDiv.style.display = 'none'; } else { throw new Error(data.message || "Échec backend validation."); }}) .catch(e=>{if(!e.message.startsWith('Auth'))showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err Valid.: ${e.message}`,"error");console.error("Err validatePresc:",e);}) .finally(()=>{if(validateBtn)validateBtn.disabled=false;}); }
+    function validateAISuggestion() { const med=document.getElementById("medicament")?.value.trim();const sd=document.getElementById("start_date")?.value;const ed=document.getElementById("end_date")?.value;const validateBtn=document.getElementById("validatePrescBtn"); if (!med||!sd||!ed) { showMessage("validationMessage","Champs Suggestion requis.","warning"); return; } if (!currentIPP || !currentVisitId) { showMessage("validationMessage","Patient/Visite non chargé.","warning"); return; } showMessage("validationMessage","<i class='fas fa-spinner fa-spin'></i> Enregistrement...", "loading"); if(validateBtn)validateBtn.disabled=true; const sched={matin:document.getElementById("matin").checked,apres_midi:document.getElementById("apres_midi").checked,soir:document.getElementById("soir").checked,nuit:document.getElementById("nuit").checked}; const cvAPI=(dt)=>{if(!dt||!/^\d{4}-\d{2}-\d{2}$/.test(dt))return'';const p=dt.split('-');return`${p[1]}/${p[2]}/${p[0]}`}; const finalPrescText = document.getElementById("prescriptionInput").value; const payload={visit_id: currentVisitId, ipp: currentIPP, final_prescription: finalPrescText, start_date: cvAPI(sd), end_date: cvAPI(ed), schedule: sched, medicament_name: med}; fetchWithAuth(CONFIG.VALIDATE_PRESCRIPTION_AI_ENDPOINT, {method:"POST", body:JSON.stringify(payload)}) .then(data =>{ if(data.success) { showMessage("validationMessage","<i class='fas fa-check-circle'></i> Suggestion enregistrée.", "success"); if (aiSuggestionDiv) aiSuggestionDiv.style.display = 'none'; } else { throw new Error(data.message || "Échec backend validation."); }}) .catch(e=>{if(!e.message.startsWith('Auth'))showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err Valid.: ${e.message}`,"error");console.error("Err validatePresc:",e);}) .finally(()=>{if(validateBtn)validateBtn.disabled=false;}); }
 
     // --- INITIALIZATION ---
-    function initializeDoctorDashboard() { console.log("Initializing Doctor Dashboard..."); if (!localStorage.getItem(CONFIG.TOKEN_KEY)) { console.log("Doctor: No token. Redirecting."); redirectToLogin(); return; } currentUserIdentifier = localStorage.getItem(CONFIG.USER_ID_KEY) || 'unknown_doctor'; document.body.classList.add('loaded'); console.log("Doctor: Authenticated as", currentUserIdentifier); const urlParams = new URLSearchParams(window.location.search); const ippFromUrl = urlParams.get("ipp"); if (ippFromUrl) { console.log(`IPP ${ippFromUrl} in URL. Loading...`); loadPatientIntoCurrentDashboard(ippFromUrl); } else { console.log("No IPP in URL. Waiting for scan."); clearDoctorUI(); } console.log("Doctor Dashboard Initialized.");
+    function initializeDoctorDashboard() {
+        console.log("Initializing Doctor Dashboard...");
+        if (!localStorage.getItem(CONFIG.TOKEN_KEY)) { console.log("Doctor: No token. Redirecting."); redirectToLogin(); return; }
+        currentUserIdentifier = localStorage.getItem(CONFIG.USER_ID_KEY) || 'unknown_doctor';
+        document.body.classList.add('loaded');
+        console.log("Doctor: Authenticated as", currentUserIdentifier);
+        const urlParams = new URLSearchParams(window.location.search);
+        const ippFromUrl = urlParams.get("ipp");
+        if (ippFromUrl) { console.log(`IPP ${ippFromUrl} in URL. Loading...`); loadPatientIntoCurrentDashboard(ippFromUrl); }
+        else { console.log("No IPP in URL. Waiting for scan."); clearDoctorUI(); }
+        console.log("Doctor Dashboard Initialized.");
         // Setup session timeout listener
         resetSessionTimeout();
         ['mousemove', 'keypress', 'click', 'scroll'].forEach(event => document.addEventListener(event, resetSessionTimeout, { passive: true }));

@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
@@ -7,8 +7,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
   <style>
-    /* --- CSS (No changes) --- */
-    :root { --primary: #5d74f2; --primary-light: #ebeffe; --primary-dark: #4a62d8; --success: #31c971; --success-light: #e0fbea; --success-dark: #28a960; --warning: #ffb648; --warning-light: #fff8ec; --danger: #ff5a5a; --danger-light: #ffeded; --gray-100: #f9fafb; --gray-200: #f1f3f9; --gray-300: #e5e7eb; --gray-400: #d1d5db; --gray-500: #9ca3af; --gray-600: #6b7280; --gray-700: #4b5563; --gray-800: #374151; --shadow-sm: 0 1px 2px rgba(0,0,0,0.05); --shadow-md: 0 4px 6px rgba(0,0,0,0.04); --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05); --shadow-focus: 0 0 0 3px rgba(93, 116, 242, 0.2); --border-radius: 8px; --transition-speed: 0.2s; font-size: 15px; }
+    /* --- CSS --- */
+    :root {
+      --primary: #5d74f2; --primary-light: #ebeffe; --primary-dark: #4a62d8;
+      --success: #31c971; --success-light: #e0fbea; --success-dark: #28a960;
+      --warning: #ffb648; --warning-light: #fff8ec;
+      --danger: #ff5a5a; --danger-light: #ffeded;
+      --gray-100: #f9fafb; --gray-200: #f1f3f9; --gray-300: #e5e7eb;
+      --gray-400: #d1d5db; --gray-500: #9ca3af; --gray-600: #6b7280;
+      --gray-700: #4b5563; --gray-800: #374151;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05);
+      --shadow-focus: 0 0 0 3px rgba(93, 116, 242, 0.2);
+      --border-radius: 8px; --transition-speed: 0.2s; font-size: 15px;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: var(--gray-100); color: var(--gray-800); line-height: 1.5; min-height: 100vh; padding: 0; visibility: hidden; }
     body.loaded { visibility: visible; animation: fadeIn 0.3s ease-in; }
@@ -35,10 +48,14 @@
     .flex-row { display: flex; gap: 25px; margin-bottom: 25px; flex-wrap: wrap; }
     .flex-col { flex: 1; min-width: 320px; }
     label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: var(--gray-600); }
-    textarea, input[type="text"], input[type="date"] { width: 100%; padding: 10px 12px; font-size: 0.9rem; border-radius: var(--border-radius); border: 1px solid var(--gray-300); background: white; transition: all 0.2s ease; font-family: 'Inter', sans-serif; appearance: none; -webkit-appearance: none; -moz-appearance: none; position: relative; }
+    textarea, input[type="text"], input[type="date"], input[type="number"] { /* Added number type */
+      width: 100%; padding: 10px 12px; font-size: 0.9rem; border-radius: var(--border-radius); border: 1px solid var(--gray-300); background: white; transition: all 0.2s ease; font-family: 'Inter', sans-serif; appearance: none; -webkit-appearance: none; -moz-appearance: none; position: relative;
+    }
     input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.6; cursor: pointer; }
-    textarea:focus, input[type="text"]:focus, input[type="date"]:focus { outline: none; border-color: var(--primary); box-shadow: var(--shadow-focus); }
-    textarea { resize: vertical; min-height: 120px; }
+    textarea:focus, input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus {
+      outline: none; border-color: var(--primary); box-shadow: var(--shadow-focus);
+    }
+    textarea { resize: vertical; min-height: 80px; } /* Adjusted default height */
     .input-group { margin-bottom: 15px; }
     .btn-group { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;}
     .btn { padding: 8px 14px; font-size: 0.85rem; font-weight: 500; border-radius: var(--border-radius); border: none; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; width: auto; }
@@ -47,19 +64,21 @@
     .btn-danger { background-color: var(--danger); border-color: var(--danger); color: white; } .btn-danger:hover { background-color: #d3483e; border-color: #d3483e;}
     .btn-outline { background: white; color: var(--primary); border: 1px solid var(--gray-300); } .btn-outline:hover { border-color: var(--primary); background: var(--primary-light); }
     .btn-success { background: var(--success); color: white; } .btn-success:hover { background: var(--success-dark); }
+    .btn-sm { padding: 5px 10px; font-size: 0.75rem; } /* Smaller button */
+    .btn-lg { padding: 12px 24px; font-size: 1rem; } /* Larger button */
     .btn:disabled { background-color: var(--gray-300); cursor: not-allowed; opacity: 0.7; }
     .status { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; color: var(--gray-600); background: var(--gray-200); margin-left: 10px; }
     .checkbox-wrapper { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; }
     .checkbox-item { display: flex; align-items: center; }
     .checkbox-item input[type="checkbox"] { margin-right: 6px; }
-    .ai-suggestion { background: var(--primary-light); border-radius: var(--border-radius); padding: 15px; margin-top: 20px; }
+    .ai-suggestion { background: var(--primary-light); border-radius: var(--border-radius); padding: 15px; margin-top: 20px; display: none; /* Hide initially */}
     .ai-suggestion h3 { font-size: 0.95rem; margin-bottom: 15px; color: var(--primary); display: flex; align-items: center; }
     .ai-suggestion h3 i { margin-right: 8px; }
-    .message { padding: 10px; border-radius: 6px; margin-top: 12px; font-size: 0.85rem; font-weight: 500; display: none; word-break: break-word; }
-    .message-success { background: var(--success-light); color: var(--success); }
-    .message-warning { background: var(--warning-light); color: var(--warning); }
-    .message-error { background: var(--danger-light); color: var(--danger); }
-    .message-info { background: var(--primary-light); color: var(--primary); border-left: 4px solid var(--primary);}
+    .message { padding: 10px; border-radius: 6px; margin-top: 12px; font-size: 0.85rem; font-weight: 500; display: none; word-break: break-word; animation: fadeIn 0.3s ease; }
+    .message-success { background: var(--success-light); color: var(--success-dark); border-left: 4px solid var(--success); }
+    .message-warning { background: var(--warning-light); color: var(--warning); border-left: 4px solid var(--warning); }
+    .message-error { background: var(--danger-light); color: var(--danger); border-left: 4px solid var(--danger); }
+    .message-info, .message-loading { background: var(--primary-light); color: var(--primary-dark); border-left: 4px solid var(--primary); }
     .no-print { @media print { display: none !important; } }
     #scanner-container { display: none; position: relative; max-width: 300px; margin: 15px auto 0; border: 1px solid var(--gray-300); border-radius: var(--border-radius); overflow: hidden; }
     #scanner-video { display: block; width: 100%; height: auto; }
@@ -67,12 +86,19 @@
     .empty-state i { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.6; display: block; }
     .empty-state-message { font-size: 1rem; font-weight: 500; margin-bottom: 0.25rem; }
     .empty-state-description { font-size: 0.85rem; }
+    /* Display fetched nurse data */
+    .nurse-data-display { background-color: var(--gray-100); padding: 1rem; border-radius: var(--border-radius); margin-top: 1rem; border: 1px solid var(--gray-200); }
+    .nurse-data-display h4 { font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--gray-700); border-bottom: 1px solid var(--gray-300); padding-bottom: 0.5rem; }
+    .nurse-data-display p { font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--gray-800); }
+    .nurse-data-display strong { color: var(--gray-600); }
+    hr.section-divider { margin: 20px 0; border: none; border-top: 1px solid var(--gray-200); } /* Simple divider */
     @media (max-width: 768px) { .flex-row { flex-direction: column; gap: 20px; } .patient-info { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 480px) { .header { padding: 12px 0; justify-content: center;} .header-main-content { width: 100%; justify-content: center; margin-bottom: 10px; } .header-logout { width: 100%;} .logout-btn { width: 100%; justify-content: center; } .header-title { font-size: 1.1rem; } .card-body { padding: 12px; } .btn { padding: 8px 12px; font-size: 0.8rem; } .patient-info { grid-template-columns: 1fr; } .btn-group { gap: 6px; } #scanner-container { max-width: 100%; } }
   </style>
 </head>
 <body > <!-- Body starts hidden -->
   <div class="container">
+    <!-- HEADER -->
     <div class="header">
         <div class="header-main-content">
             <div class="logo">
@@ -85,7 +111,7 @@
          </div>
     </div>
 
-    <!-- QR Scanner Card -->
+    <!-- QR SCANNER -->
      <div class="card no-print">
          <div class="card-header"> <h2 class="card-title"> <i class="fas fa-qrcode"></i> Scanner Patient </h2> <div class="card-actions"> <i class="fas fa-camera"></i> </div> </div>
           <div class="card-body">
@@ -94,950 +120,620 @@
                     <button id="scanQrButton" class="btn btn-primary"> <i class="fas fa-qrcode"></i> Scanner QR </button>
                 </div>
                 <div id="scanner-container"> <video id="scanner-video" playsinline></video> </div>
-                <div id="scanResult" class="message message-info" style="margin-top: 10px;"></div> <!-- Scan status message area -->
+                <div id="scanResult" class="message message-info" style="margin-top: 10px;"></div>
             </div>
          </div>
      </div>
 
-    <!-- Patient Info Card -->
+    <!-- PATIENT INFO & NURSE DATA -->
     <div class="card">
-      <div class="card-header"> <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations du Patient </h2> <div class="card-actions"> <i class="fas fa-user"></i> </div> </div>
+      <div class="card-header"> <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations Patient & Visite </h2> <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> </div>
       <div class="card-body">
           <div id="patientInfo" class="patient-info">
-               <div class="empty-state" style="grid-column: 1 / -1;"> <i class="fas fa-qrcode"></i> <div class="empty-state-message">Prêt à scanner</div> <div class="empty-state-description">Utilisez le bouton "Scanner QR" ou chargez un patient via l'URL.</div> </div>
+               <div class="empty-state" style="grid-column: 1 / -1;"> <i class="fas fa-qrcode"></i> <div class="empty-state-message">Prêt à scanner</div> <div class="empty-state-description">Scannez le QR code du patient pour charger les données.</div> </div>
+          </div>
+          <!-- Area to display Nurse Data -->
+          <div id="nurseDataDisplay" class="nurse-data-display" style="display: none;">
+              <h4><i class="fas fa-user-nurse"></i> Données Infirmières</h4>
+              <div id="nurseObservationsDisplay"><p><strong>Observation:</strong> <span>-</span></p></div>
+              <div id="nurseVitalsDisplay"><p><strong>Signes Vitaux (derniers):</strong> <span>-</span></p></div>
           </div>
       </div>
     </div>
+
+    <!-- GLOBAL DICTATION -->
     <div class="card no-print">
       <div class="card-header">
-          <h2 class="card-title">
-              <i class="fas fa-microphone-alt"></i> Dictée Complète de la Visite
-          </h2>
-          <div class="card-actions">
-              <i class="fas fa-notes-medical"></i>
-          </div>
+          <h2 class="card-title"> <i class="fas fa-microphone-alt"></i> Dictée Complète de la Visite </h2> <div class="card-actions"> <i class="fas fa-file-medical-alt"></i> </div>
       </div>
-      <div class="card-body" id="globalDictationCardBody" style="opacity: 0.5; pointer-events: none;"> <!-- Initially disabled -->
+      <div class="card-body" id="globalDictationCardBody" style="opacity: 0.5; pointer-events: none;">
           <p style="font-size: 0.85rem; color: var(--gray-600); margin-bottom: 15px;">
-              Dictez l'ensemble des informations: Antécédents pertinents, Diagnostic, Traitement en cours, Ordonnance, Explorations (Labo/Imagerie), Orientation/Sortie. L'IA extraira les sections.
+              Optionnel: Dictez l'ensemble des informations (Antécédents, Diagnostic, Traitement, Ordonnance, etc.). L'IA tentera de remplir les sections ci-dessous.
           </p>
           <div class="btn-group">
-              <button class="btn btn-success" id="startGlobalRecordBtn" onclick="startGlobalRecording()" disabled>
-                  <i class="fas fa-microphone"></i> Démarrer Dictée
-              </button>
-              <button class="btn btn-danger" id="stopGlobalRecordBtn" onclick="stopGlobalRecording()" disabled>
-                  <i class="fas fa-stop-circle"></i> Arrêter & Traiter
-              </button>
+              <button class="btn btn-success" id="startGlobalRecordBtn" onclick="startGlobalRecording()" disabled> <i class="fas fa-microphone"></i> Démarrer Dictée </button>
+              <button class="btn btn-danger" id="stopGlobalRecordBtn" onclick="stopGlobalRecording()" disabled> <i class="fas fa-stop-circle"></i> Arrêter & Traiter </button>
               <span id="globalRecordStatus" class="status"></span>
           </div>
            <div id="globalRecordMessage" class="message" style="margin-top: 15px;"></div>
-           <!-- Optional: Display full transcript for review -->
-           <!--
-           <div class="input-group" style="margin-top: 15px;">
-               <label for="fullTranscriptReview">Transcription Complète (pour revue):</label>
-               <textarea id="fullTranscriptReview" readonly style="min-height: 100px; background-color: var(--gray-100);"></textarea>
-           </div>
-           -->
       </div>
-  </div>
-  <!-- End NEW: Global Dictation Card -->
-  
-  <!-- Diagnosis & Prescription Row -->
-  <div class="flex-row">
-      <!-- Diagnosis Card (Existing) -->
-      <div class="flex-col">
-          <div class="card">
-            <div class="card-header"> <h2 class="card-title"> <i class="fas fa-stethoscope"></i> Diagnostic </h2> <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> </div>
-            <!-- Add readonly attribute and modified placeholder to textarea -->
-            <div class="card-body" id="diagCardBody" style="opacity: 0.5; pointer-events: none;">
-              <div class="input-group">
-                  <label for="diagnosticInput">Diagnostic:</label> <!-- Simplified label -->
-                  <textarea id="diagnosticInput" placeholder="Saisir ou dicter individuellement, ou sera rempli par la dictée globale..." readonly></textarea>
-              </div>
-              <!-- Keep individual recording buttons -->
-              <div class="btn-group"> <button class="btn btn-outline" id="startDiagRecordBtn" onclick="startRecording('diagnosis')" disabled> <i class="fas fa-microphone"></i> Dictée Diag. </button> <button class="btn btn-outline" id="stopDiagRecordBtn" onclick="stopRecording('diagnosis')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="diagnosisStatus" class="status"></span> </div>
-              <div class="btn-group"> <button class="btn btn-success" id="submitDiagBtn" onclick="submitDiagnostic()" disabled> <i class="fas fa-check-circle"></i> Enregistrer Diag. </button> </div>
-              <div id="diagMessage" class="message"></div>
-            </div>
-          </div>
-        </div>
-  
-      <!-- Prescription Card (Existing) -->
-      <div class="flex-col">
-          <div class="card">
-            <div class="card-header"> <h2 class="card-title"> <i class="fas fa-prescription-bottle-alt"></i> Prescription </h2> <div class="card-actions"> <i class="fas fa-pills"></i> </div> </div>
-             <!-- Add readonly attribute and modified placeholder to textarea -->
-            <div class="card-body" id="prescCardBody" style="opacity: 0.5; pointer-events: none;">
-              <div class="input-group">
-                  <label for="prescriptionInput">Prescription / Ordonnance:</label> <!-- Simplified label -->
-                  <textarea id="prescriptionInput" placeholder="Saisir ou dicter individuellement, ou sera rempli par la dictée globale..." readonly></textarea>
-              </div>
-               <!-- Keep individual recording buttons -->
-              <div class="btn-group"> <button class="btn btn-outline" id="startPrescRecordBtn" onclick="startRecording('prescription')" disabled> <i class="fas fa-microphone"></i> Dictée Presc. </button> <button class="btn btn-outline" id="stopPrescRecordBtn" onclick="stopRecording('prescription')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button> <span id="prescriptionStatus" class="status"></span> </div>
-              <div class="btn-group"> <button class="btn btn-primary" id="submitPrescBtn" onclick="submitPrescription()" disabled> <i class="fas fa-robot"></i> Analyser Ordonnance (IA) </button> </div>
-               <!-- AI Suggestion section remains the same -->
-              <div id="aiSuggestion" class="ai-suggestion" style="display: none;">
-                  <!-- ... existing AI suggestion fields ... -->
-              </div>
-               <div id="validationMessage" class="message"></div> <!-- Moved message div outside suggestion box -->
-            </div>
-          </div>
-      </div>
-  </div>
-
-
-
-    <!-- NEW ROW for Other Extracted Information -->
-    <div class="flex-row">
-
-        <!-- Antecedents & Traitement Card -->
-        <div class="flex-col">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-history"></i> Antécédents / Traitement</h2>
-                    <div class="card-actions"><i class="fas fa-book-medical"></i></div>
-                </div>
-                <div class="card-body" id="antecTrtmCardBody" style="opacity: 0.5; pointer-events: none;">
-                     <div class="input-group">
-                        <label for="antecedentsInput">Antécédents:</label>
-                        <textarea id="antecedentsInput" placeholder="Saisir ou sera rempli par la dictée globale..." style="min-height: 80px;"></textarea>
-                         <!-- Individual Save Button -->
-                         <div class="btn-group">
-                            <button class="btn btn-outline btn-sm" id="saveAntecedentsBtn" onclick="saveAntecedents()" disabled>
-                                <i class="fas fa-save"></i> Enreg. Antécédents
-                            </button>
-                         </div>
-                         <div id="antecedentsMessage" class="message" style="margin-top: 5px;"></div>
-                    </div>
-                     <hr style="margin: 15px 0; border-color: var(--gray-200);">
-                     <div class="input-group">
-                        <label for="traitementInput">Traitement en Cours:</label>
-                        <textarea id="traitementInput" placeholder="Saisir ou sera rempli par la dictée globale..." style="min-height: 80px;"></textarea>
-                         <!-- Individual Save Button -->
-                          <div class="btn-group">
-                            <button class="btn btn-outline btn-sm" id="saveTraitementBtn" onclick="saveTraitement()" disabled>
-                                <i class="fas fa-save"></i> Enreg. Traitement
-                            </button>
-                         </div>
-                         <div id="traitementMessage" class="message" style="margin-top: 5px;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Explorations & Orientation Card -->
-        <div class="flex-col">
-             <div class="card">
-                <div class="card-header">
-                    <h2 class="card-title"><i class="fas fa-flask"></i> Explorations / Orientation</h2>
-                    <div class="card-actions"><i class="fas fa-route"></i></div>
-                </div>
-                 <div class="card-body" id="exploOrientCardBody" style="opacity: 0.5; pointer-events: none;">
-                     <div class="input-group">
-                        <label for="explorationInput">Prescription Exploration:</label>
-                        <textarea id="explorationInput" placeholder="Labo, Imagerie... Saisir ou sera rempli par la dictée globale..." style="min-height: 80px;"></textarea>
-                         <!-- Individual Save Button -->
-                          <div class="btn-group">
-                            <button class="btn btn-outline btn-sm" id="saveExplorationBtn" onclick="saveExploration()" disabled>
-                                <i class="fas fa-save"></i> Enreg. Exploration
-                            </button>
-                         </div>
-                         <div id="explorationMessage" class="message" style="margin-top: 5px;"></div>
-                    </div>
-                     <hr style="margin: 15px 0; border-color: var(--gray-200);">
-                     <div class="input-group">
-                        <label for="orientationInput">Orientation:</label>
-                        <textarea id="orientationInput" placeholder="Sortie, Hospitalisation... Saisir ou sera rempli par la dictée globale..." style="min-height: 80px;"></textarea>
-                         <!-- Individual Save Button -->
-                          <div class="btn-group">
-                            <button class="btn btn-outline btn-sm" id="saveOrientationBtn" onclick="saveOrientation()" disabled>
-                                <i class="fas fa-save"></i> Enreg. Orientation
-                            </button>
-                         </div>
-                         <div id="orientationMessage" class="message" style="margin-top: 5px;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </div>
-    <!-- END NEW ROW -->
 
-    <!-- Notes Supplémentaires Card (Full Width) -->
-     <div class="card">
-        <div class="card-header">
-            <h2 class="card-title"><i class="fas fa-sticky-note"></i> Notes Supplémentaires</h2>
-            <div class="card-actions"><i class="far fa-clipboard"></i></div>
-        </div>
-         <div class="card-body" id="notesCardBody" style="opacity: 0.5; pointer-events: none;">
-             <div class="input-group">
-                <label for="notesInput">Notes:</label>
-                <textarea id="notesInput" placeholder="Saisir ou sera rempli par la dictée globale..." style="min-height: 100px;"></textarea>
-                 <!-- Individual Save Button -->
-                  <div class="btn-group">
-                    <button class="btn btn-outline btn-sm" id="saveNotesBtn" onclick="saveNotes()" disabled>
-                        <i class="fas fa-save"></i> Enreg. Notes
-                    </button>
-                 </div>
-                 <div id="notesMessage" class="message" style="margin-top: 5px;"></div>
+    <!-- DOCTOR SECTIONS (DIAGNOSIS, PRESCRIPTION, ETC.) -->
+    <form id="consultationForm" onsubmit="event.preventDefault(); saveAllConsultationData();"> <!-- Wrap sections in a form -->
+
+        <!-- Diagnosis & Prescription Row -->
+        <div class="flex-row">
+            <!-- Diagnosis Card -->
+            <div class="flex-col">
+                <div class="card">
+                  <div class="card-header"> <h2 class="card-title"> <i class="fas fa-stethoscope"></i> Diagnostic </h2> <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> </div>
+                  <div class="card-body" id="diagCardBody" style="opacity: 0.5; pointer-events: none;">
+                    <div class="input-group">
+                        <label for="diagnosticInput">Diagnostic Principal:</label>
+                        <textarea id="diagnosticInput" name="diagnostic" placeholder="Saisir ou dicter..." readonly></textarea> <!-- Added name -->
+                    </div>
+                    <div class="btn-group"> <!-- Individual Dictation -->
+                        <button type="button" class="btn btn-outline btn-sm" id="startDiagRecordBtn" onclick="startRecording('diagnostic')" disabled> <i class="fas fa-microphone"></i> Dicter </button>
+                        <button type="button" class="btn btn-outline btn-sm" id="stopDiagRecordBtn" onclick="stopRecording('diagnostic')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button>
+                        <span id="diagnosisStatus" class="status"></span>
+                    </div>
+                     <div class="btn-group"> <!-- Individual Save -->
+                         <button type="button" class="btn btn-success btn-sm" id="saveDiagnosticBtn" onclick="saveIndividualField('diagnostic', 'diagnosticInput', 'diagMessage', this.id)" disabled> <i class="fas fa-save"></i> Enregistrer </button>
+                     </div>
+                    <div id="diagMessage" class="message"></div>
+                  </div>
+                </div>
+              </div>
+            <!-- Prescription Card -->
+            <div class="flex-col">
+                <div class="card">
+                  <div class="card-header"> <h2 class="card-title"> <i class="fas fa-prescription-bottle-alt"></i> Prescription / Ordonnance </h2> <div class="card-actions"> <i class="fas fa-pills"></i> </div> </div>
+                  <div class="card-body" id="prescCardBody" style="opacity: 0.5; pointer-events: none;">
+                    <div class="input-group">
+                        <label for="prescriptionInput">Texte de l'Ordonnance:</label>
+                        <textarea id="prescriptionInput" name="ordonnance_medicale" placeholder="Saisir ou dicter..." readonly></textarea> <!-- Added name -->
+                    </div>
+                    <div class="btn-group"> <!-- Individual Dictation -->
+                        <button type="button" class="btn btn-outline btn-sm" id="startPrescRecordBtn" onclick="startRecording('ordonnance_medicale')" disabled> <i class="fas fa-microphone"></i> Dicter </button>
+                        <button type="button" class="btn btn-outline btn-sm" id="stopPrescRecordBtn" onclick="stopRecording('ordonnance_medicale')" disabled> <i class="fas fa-stop-circle"></i> Arrêter </button>
+                        <span id="prescriptionStatus" class="status"></span>
+                    </div>
+                    <div class="btn-group"> <!-- AI Analysis & Manual Save -->
+                        <button type="button" class="btn btn-primary btn-sm" id="submitPrescBtn" onclick="submitPrescriptionToAI()" disabled> <i class="fas fa-robot"></i> Analyser Ordonnance (IA) </button>
+                         <button type="button" class="btn btn-success btn-sm" id="savePrescriptionBtn" onclick="saveIndividualField('ordonnance_medicale', 'prescriptionInput', 'validationMessage', this.id)" disabled> <i class="fas fa-save"></i> Enregistrer Texte </button>
+                    </div>
+                    <!-- AI Suggestion Box -->
+                    <div id="aiSuggestion" class="ai-suggestion">
+                      <h3><i class="fas fa-lightbulb"></i> Suggestion Structurée (IA)</h3>
+                      <div class="input-group"> <label for="medicament">Médicament Suggéré:</label> <input type="text" id="medicament"/> </div>
+                      <div class="input-group"> <label for="start_date">Date début:</label> <input type="date" id="start_date"/> </div>
+                      <div class="input-group"> <label for="end_date">Date fin:</label> <input type="date" id="end_date"/> </div>
+                      <div class="input-group"> <label>Horaires:</label> <div class="checkbox-wrapper"> <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label> <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> Après-midi</label> <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label> <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label> </div> </div>
+                      <div class="btn-group"> <button type="button" class="btn btn-success" id="validatePrescBtn" onclick="validateAISuggestion()"> <i class="fas fa-check-double"></i> Valider & Enregistrer Suggestion </button> </div>
+                    </div>
+                    <div id="validationMessage" class="message"></div>
+                  </div>
+                </div>
             </div>
         </div>
-    </div>
-    <!-- END Notes Card -->
 
-    <!-- Final Save All Button -->
-     <div class="card">
-        <div class="card-body" style="text-align: center;">
-            <button class="btn btn-success btn-lg" id="saveAllConsultationBtn" onclick="saveAllConsultationData()" disabled>
-                <i class="fas fa-save"></i> Enregistrer Toute la Consultation
-            </button>
-             <div id="saveConsultationMessage" class="message" style="margin-top: 15px;"></div>
+        <!-- Antecedents & Traitement Row -->
+        <div class="flex-row">
+            <div class="flex-col">
+                <div class="card">
+                    <div class="card-header"> <h2 class="card-title"><i class="fas fa-history"></i> Antécédents </h2> <div class="card-actions"><i class="fas fa-book-medical"></i></div> </div>
+                    <div class="card-body" id="antecCardBody" style="opacity: 0.5; pointer-events: none;">
+                         <div class="input-group">
+                            <label for="antecedentsInput">Antécédents Pertinents:</label>
+                            <textarea id="antecedentsInput" name="antecedents" placeholder="Saisir ou dicter..." readonly style="min-height: 80px;"></textarea>
+                             <div class="btn-group">
+                                <button type="button" class="btn btn-outline btn-sm" id="startAntecedentsRecordBtn" onclick="startRecording('antecedents')" disabled><i class="fas fa-microphone"></i> Dicter</button>
+                                <button type="button" class="btn btn-outline btn-sm" id="stopAntecedentsRecordBtn" onclick="stopRecording('antecedents')" disabled><i class="fas fa-stop-circle"></i> Arrêter</button>
+                                <span id="antecedentsStatus" class="status"></span>
+                                <button type="button" class="btn btn-success btn-sm" id="saveAntecedentsBtn" onclick="saveIndividualField('antecedents', 'antecedentsInput', 'antecedentsMessage', this.id)" disabled> <i class="fas fa-save"></i> Enregistrer </button>
+                             </div>
+                             <div id="antecedentsMessage" class="message" style="margin-top: 5px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-col">
+                <div class="card">
+                    <div class="card-header"> <h2 class="card-title"><i class="fas fa-capsules"></i> Traitement en Cours </h2> <div class="card-actions"><i class="fas fa-sync-alt"></i></div> </div>
+                     <div class="card-body" id="traitementCardBody" style="opacity: 0.5; pointer-events: none;">
+                         <div class="input-group">
+                            <label for="traitementInput">Traitement Chronique / en Cours:</label>
+                            <textarea id="traitementInput" name="traitement_en_cours" placeholder="Saisir ou dicter..." readonly style="min-height: 80px;"></textarea>
+                              <div class="btn-group">
+                                <button type="button" class="btn btn-outline btn-sm" id="startTraitementRecordBtn" onclick="startRecording('traitement_en_cours')" disabled><i class="fas fa-microphone"></i> Dicter</button>
+                                <button type="button" class="btn btn-outline btn-sm" id="stopTraitementRecordBtn" onclick="stopRecording('traitement_en_cours')" disabled><i class="fas fa-stop-circle"></i> Arrêter</button>
+                                <span id="traitement_en_coursStatus" class="status"></span> <!-- Note status ID matches field name -->
+                                <button type="button" class="btn btn-success btn-sm" id="saveTraitementBtn" onclick="saveIndividualField('traitement_en_cours', 'traitementInput', 'traitementMessage', this.id)" disabled> <i class="fas fa-save"></i> Enregistrer </button>
+                             </div>
+                             <div id="traitementMessage" class="message" style="margin-top: 5px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    <!-- END Final Save All Button -->
-      </div> <!-- End Container -->
+
+        <!-- Explorations & Orientation Row -->
+        <div class="flex-row">
+            <div class="flex-col">
+                 <div class="card">
+                    <div class="card-header"> <h2 class="card-title"><i class="fas fa-flask"></i> Prescription Exploration </h2> <div class="card-actions"><i class="fas fa-vial"></i></div> </div>
+                     <div class="card-body" id="exploCardBody" style="opacity: 0.5; pointer-events: none;">
+                         <div class="input-group">
+                            <label for="explorationInput">Examens Complémentaires:</label>
+                            <textarea id="explorationInput" name="prescription_exploration" placeholder="Labo, Imagerie... Saisir ou dicter..." readonly style="min-height: 80px;"></textarea>
+                             <div class="btn-group">
+                                <button type="button" class="btn btn-outline btn-sm" id="startExplorationRecordBtn" onclick="startRecording('prescription_exploration')" disabled><i class="fas fa-microphone"></i> Dicter</button>
+                                <button type="button" class="btn btn-outline btn-sm" id="stopExplorationRecordBtn" onclick="stopRecording('prescription_exploration')" disabled><i class="fas fa-stop-circle"></i> Arrêter</button>
+                                <span id="prescription_explorationStatus" class="status"></span>
+                                <button type="button" class="btn btn-success btn-sm" id="saveExplorationBtn" onclick="saveIndividualField('prescription_exploration', 'explorationInput', 'explorationMessage', this.id)" disabled> <i class="fas fa-save"></i> Enregistrer </button>
+                             </div>
+                             <div id="explorationMessage" class="message" style="margin-top: 5px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-col">
+                 <div class="card">
+                    <div class="card-header"> <h2 class="card-title"><i class="fas fa-directions"></i> Orientation / Sortie </h2> <div class="card-actions"><i class="fas fa-route"></i></div> </div>
+                     <div class="card-body" id="orientCardBody" style="opacity: 0.5; pointer-events: none;">
+                         <div class="input-group">
+                            <label for="orientationInput">Plan d'Orientation:</label>
+                            <textarea id="orientationInput" name="orientation" placeholder="Sortie, Hospitalisation... Saisir ou dicter..." readonly style="min-height: 80px;"></textarea>
+                              <div class="btn-group">
+                                <button type="button" class="btn btn-outline btn-sm" id="startOrientationRecordBtn" onclick="startRecording('orientation')" disabled><i class="fas fa-microphone"></i> Dicter</button>
+                                <button type="button" class="btn btn-outline btn-sm" id="stopOrientationRecordBtn" onclick="stopRecording('orientation')" disabled><i class="fas fa-stop-circle"></i> Arrêter</button>
+                                <span id="orientationStatus" class="status"></span>
+                                <button type="button" class="btn btn-success btn-sm" id="saveOrientationBtn" onclick="saveIndividualField('orientation', 'orientationInput', 'orientationMessage', this.id)" disabled> <i class="fas fa-save"></i> Enregistrer </button>
+                             </div>
+                             <div id="orientationMessage" class="message" style="margin-top: 5px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Supplémentaires Card -->
+         <div class="card">
+            <div class="card-header"> <h2 class="card-title"><i class="fas fa-sticky-note"></i> Notes Supplémentaires </h2> <div class="card-actions"><i class="far fa-clipboard"></i></div> </div>
+             <div class="card-body" id="notesCardBody" style="opacity: 0.5; pointer-events: none;">
+                 <div class="input-group">
+                    <label for="notesInput">Autres Notes:</label>
+                    <textarea id="notesInput" name="notes_supplementaires" placeholder="Saisir ou dicter..." readonly style="min-height: 100px;"></textarea>
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-outline btn-sm" id="startNotesRecordBtn" onclick="startRecording('notes_supplementaires')" disabled><i class="fas fa-microphone"></i> Dicter</button>
+                        <button type="button" class="btn btn-outline btn-sm" id="stopNotesRecordBtn" onclick="stopRecording('notes_supplementaires')" disabled><i class="fas fa-stop-circle"></i> Arrêter</button>
+                        <span id="notes_supplementairesStatus" class="status"></span>
+                        <button type="button" class="btn btn-success btn-sm" id="saveNotesBtn" onclick="saveIndividualField('notes_supplementaires', 'notesInput', 'notesMessage', this.id)" disabled> <i class="fas fa-save"></i> Enregistrer </button>
+                     </div>
+                     <div id="notesMessage" class="message" style="margin-top: 5px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Final Save All Button -->
+         <div class="card">
+            <div class="card-body" style="text-align: center;">
+                <button type="submit" class="btn btn-success btn-lg" id="saveAllConsultationBtn" disabled> <!-- Changed to type="submit" -->
+                    <i class="fas fa-save"></i> Enregistrer Toute la Consultation
+                </button>
+                 <div id="saveConsultationMessage" class="message" style="margin-top: 15px;"></div>
+            </div>
+        </div>
+
+    </form> <!-- End consultationForm -->
+
+  </div> <!-- End Container -->
+
   <!-- jsQR Library Script -->
   <script src="./jsQR.js"></script> <!-- Ensure path is correct -->
 
-   <!-- jsQR Library Script -->
-   <script src="./jsQR.js"></script> <!-- Ensure path is correct -->
-
-   <script>
-        // --- Configuration & Globals ---
+  <script>
+    // --- Configuration & Globals ---
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
-    const LOGIN_PAGE_URL = 'https://hicham-taoufik.github.io/login/'; // Absolute URL
-    const QR_TARGET_BASE_URL = 'app://medilink/patient'; // MUST MATCH RECEPTION
-    const GET_VISIT_DETAILS_ENDPOINT = `${BASE_URL}/webhook/doctor/get-visit-details`; // Endpoint to load patient, visit, nurse data
-    const GLOBAL_DICTATION_ENDPOINT = `${BASE_URL}/webhook/process-visit-dictation`; // Endpoint to process global audio
-    const UPDATE_CONSULTATION_ENDPOINT = `${BASE_URL}/webhook/doctor/update-consultation`; // Single endpoint for all saves
-    const SUBMIT_PRESCRIPTION_AI_ENDPOINT = `${BASE_URL}/webhook/doctor-submit-prescription`; // For AI parsing of prescription text
-    const VALIDATE_PRESCRIPTION_AI_ENDPOINT = `${BASE_URL}/webhook/doctor-validate-prescription`; // For saving structured AI suggestion
+    const LOGIN_PAGE_URL = 'https://hicham-taoufik.github.io/login/';
+    const QR_TARGET_BASE_URL = 'app://medilink/patient';
 
-    let currentIPP = null;          // Stores the IPP of the currently loaded patient
-    let currentVisitId = null;      // Stores the ID of the active visit
-    let currentUserIdentifier = localStorage.getItem('userIdentifier') || 'unknown_doctor'; // Example: Get logged-in doctor ID
+    // API Endpoints
+    const GET_VISIT_DETAILS_ENDPOINT = `${BASE_URL}/webhook/doctor/get-visit-details`;
+    const GLOBAL_DICTATION_ENDPOINT = `${BASE_URL}/webhook/process-visit-dictation`;
+    const UPDATE_CONSULTATION_ENDPOINT = `${BASE_URL}/webhook/doctor/update-consultation`;
+    const SUBMIT_PRESCRIPTION_AI_ENDPOINT = `${BASE_URL}/webhook/doctor-submit-prescription`;
+    const VALIDATE_PRESCRIPTION_AI_ENDPOINT = `${BASE_URL}/webhook/doctor-validate-prescription`;
+    // Optional: Endpoint for individual field transcription if different from global
+    const TRANSCRIBE_FIELD_ENDPOINT = GLOBAL_DICTATION_ENDPOINT; // Reusing global for now
 
-    // Globals for INDIVIDUAL recording
-    let mediaRecorder;
-    let audioChunks = [];
-    let recordingField = null; // 'diagnosis', 'prescription' // Add more if enabling individual dictation for other fields
+    let currentIPP = null;
+    let currentVisitId = null;
+    let currentUserIdentifier = localStorage.getItem('userIdentifier') || 'unknown_doctor';
 
-    // Globals for GLOBAL recording
-    let isGlobalRecording = false;
-    let globalMediaRecorder;
-    let globalAudioChunks = [];
+    // Recording Globals
+    let mediaRecorder; let audioChunks = []; let recordingField = null;
+    let isGlobalRecording = false; let globalMediaRecorder; let globalAudioChunks = [];
+
+    // DOM Cache (Example for a few elements)
+    const patientInfoDiv = document.getElementById('patientInfo');
+    const nurseDataDisplayDiv = document.getElementById('nurseDataDisplay');
+    // Add other frequently accessed DOM elements here if needed
 
 
-    // --- Auth & Helpers ---
-
-    function fetchWithAuth(url, options = {}) {
-        const token = localStorage.getItem('authToken');
-        if (!token) {
-            console.error('Doctor: No auth token found.');
-            alert('Session expirée. Veuillez vous reconnecter.');
-            window.location.href = LOGIN_PAGE_URL;
-            return Promise.reject(new Error('Token non trouvé.'));
-        }
-        const headers = { ...options.headers, 'Authorization': `Bearer ${token}` };
-        if (options.body && !(options.body instanceof FormData)) {
-            headers['Content-Type'] = 'application/json';
-        } else if (options.body instanceof FormData) {
-            delete headers['Content-Type'];
-        }
-        return fetch(url, { ...options, headers: headers })
-            .then(response => {
-                if (response.status === 401 || response.status === 403) {
-                    console.error('Doctor: Auth error:', response.status);
-                    localStorage.removeItem('authToken');
-                    alert('Session invalide. Reconnexion requise.');
-                    window.location.href = LOGIN_PAGE_URL;
-                    throw new Error(`Authentication failed: ${response.status}`);
-                }
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        console.error(`Doctor: API Error ${response.status} for ${url}: ${text || response.statusText}`);
-                        throw new Error(`Erreur ${response.status}: ${text || response.statusText}`);
-                    });
-                }
-                return response;
-            });
+    // --- UTILITY FUNCTIONS ---
+    function sanitizeInput(input) { /* ... same as before ... */
+        if (input === null || input === undefined) return ""; const temp = document.createElement("div"); temp.textContent = String(input); return temp.innerHTML;
     }
-
-    function logout() {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userIdentifier'); // Also clear user identifier
-        alert('Vous avez été déconnecté.');
-        window.location.href = LOGIN_PAGE_URL;
+    function formatDate(dateString, includeTime = false) { /* ... enhanced date formatting ... */
+        if (!dateString || typeof dateString !== 'string') { return '-'; }
+        try {
+            const dateObj = new Date(dateString);
+            if (isNaN(dateObj.getTime())) { return 'Date Invalide'; }
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' };
+            if (includeTime) {
+                options.hour = '2-digit'; options.minute = '2-digit'; options.timeZone = undefined; // Use local time if showing time
+            }
+            // Format to DD/MM/YYYY HH:MM (if time included)
+            let formatted = dateObj.toLocaleDateString('fr-FR', options);
+            // Simplify if only date needed and input was just date
+            if (!includeTime && dateString.length === 10) {
+                 formatted = formatted.split(',')[0]; // Keep only date part
+            }
+            return formatted;
+        } catch (e) { console.error("Date format error:", e); return 'Err Format'; }
     }
-
-    function showMessage(elementId, message, type) {
-        const messageElement = document.getElementById(elementId);
-        if (!messageElement) { console.error(`showMessage Error: Element ID "${elementId}" not found.`); return; }
+    function showMessage(elementId, message, type = 'info') { /* ... same as before ... */
+        const messageElement = document.getElementById(elementId); if (!messageElement) { console.error(`showMessage Error: Element ID "${elementId}" not found.`); return; }
         const statusIcons = { 'info':'fas fa-info-circle','success':'fas fa-check-circle','warning':'fas fa-exclamation-triangle','error':'fas fa-times-circle','loading':'fas fa-spinner fa-spin' };
-        const iconClass = statusIcons[type] || statusIcons['info'];
-        const iconHtml = message ? `<i class="${iconClass}" style="margin-right: 6px;"></i>` : '';
-        messageElement.innerHTML = message ? `${iconHtml}${message}` : "";
-        messageElement.style.display = message ? "block" : "none";
-        messageElement.className = 'message'; // Reset classes
-         if (type) {
-             messageElement.classList.add(`message-${type}`);
-             if(type === 'info') {
-                 messageElement.style.borderLeft = '4px solid var(--primary)';
-                 messageElement.style.color = 'var(--primary)';
-                 messageElement.style.background = 'var(--primary-light)';
-             }
-         }
-        if (type === "success" && message && elementId !== 'scanResult' && !elementId.startsWith('saveConsultationMessage')) { // Don't auto-hide final save message
-            setTimeout(() => {
-                const currentElement = document.getElementById(elementId);
-                if (currentElement && currentElement.innerHTML.includes(message)) { currentElement.style.display = 'none'; }
-            }, 5000);
-        }
+        const iconClass = statusIcons[type] || statusIcons['info']; const iconHtml = message ? `<i class="${iconClass}" style="margin-right: 6px;"></i>` : '';
+        messageElement.innerHTML = message ? `${iconHtml}${message}` : ""; messageElement.style.display = message ? "block" : "none";
+        messageElement.className = 'message'; if (type) { messageElement.classList.add(`message-${type}`); }
+        if (type === "success" && message && elementId !== 'scanResult' && !elementId.startsWith('saveConsultationMessage')) { setTimeout(() => { const currentElement = document.getElementById(elementId); if (currentElement && currentElement.innerHTML.includes(message)) { currentElement.style.display = 'none'; } }, 5000); }
+    }
+    function fetchWithAuth(url, options = {}) { /* ... same as before ... */
+        const token = localStorage.getItem('authToken'); if (!token) { console.error('Doctor: No auth token.'); clearDoctorUI(); alert('Session expirée.'); window.location.href = LOGIN_PAGE_URL; return Promise.reject(new Error('Token non trouvé.')); }
+        /* resetSessionTimeout(); */ const headers = { ...options.headers, 'Authorization': `Bearer ${token}` }; if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; } else if (options.body instanceof FormData) { delete headers['Content-Type']; }
+        return fetch(url, { ...options, headers: headers }) .then(async response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); localStorage.removeItem('userIdentifier'); clearDoctorUI(); alert('Session invalide.'); window.location.href = LOGIN_PAGE_URL; throw new Error(`Auth failed: ${response.status}`); } if (!response.ok) { const errorText = await response.text(); throw new Error(`Erreur ${response.status}: ${errorText || response.statusText}`); } const contentType = response.headers.get("content-type"); if (contentType && contentType.includes("application/json")) { const text = await response.text(); try { return JSON.parse(text); } catch (e) { console.warn("OK response but invalid JSON", text); return { success: true, data: text }; } } else { return response.text().then(text => ({ success: true, data: text })); } }).catch(error => { console.error(`Fetch error for ${url}:`, error); if (!error.message.startsWith('Auth failed')) { showMessage('globalRecordMessage', `Erreur communication: ${error.message}`, 'error'); } throw error; }); // Propagate error
+    }
+    function logout() { /* ... same as before ... */
+        localStorage.removeItem('authToken'); localStorage.removeItem('userIdentifier');
+        alert('Déconnecté.'); window.location.href = LOGIN_PAGE_URL;
     }
 
+    // --- UI CONTROL ---
+    function enableDoctorSections(enable) { /* ... same as before, ensure all IDs match HTML ... */
+        const allElements = document.querySelectorAll('#globalDictationCardBody button, #diagCardBody textarea, #diagCardBody button, #prescCardBody textarea, #prescCardBody button, #aiSuggestion input, #aiSuggestion button, #antecTrtmCardBody textarea, #antecTrtmCardBody button, #exploOrientCardBody textarea, #exploOrientCardBody button, #notesCardBody textarea, #notesCardBody button, #saveAllConsultationBtn');
+        const allBodies = document.querySelectorAll('#globalDictationCardBody, #diagCardBody, #prescCardBody, #antecTrtmCardBody, #exploOrientCardBody, #notesCardBody');
+        const allTextAreas = document.querySelectorAll('#consultationForm textarea');
+        const allStopButtons = document.querySelectorAll('button[id^="stop"]'); // Select all stop buttons
+        const aiSuggestionDiv = document.getElementById('aiSuggestion');
+        const finalSaveButton = document.getElementById('saveAllConsultationBtn');
 
-    // --- Enable/Disable Doctor Sections (Handles ALL Sections) ---
-
-    function enableDoctorSections(enable) {
-        // Get all relevant card bodies
-        const cardBodies = [
-            document.getElementById('globalDictationCardBody'),
-            document.getElementById('diagCardBody'),
-            document.getElementById('prescCardBody'),
-            document.getElementById('antecTrtmCardBody'),
-            document.getElementById('exploOrientCardBody'),
-            document.getElementById('notesCardBody'),
-            document.getElementById('saveAllConsultationBtn')?.parentElement // Card body containing the final save button
-        ];
-
-        // Get all interactive elements to toggle
-        const elementsToToggle = document.querySelectorAll(
-            // Global Dictation
-            '#globalDictationCardBody button, ' +
-            // Diagnosis
-            '#diagCardBody textarea, #diagCardBody button, ' +
-            // Prescription
-            '#prescCardBody textarea, #prescCardBody button, ' +
-            '#aiSuggestion input, #aiSuggestion button, ' +
-            // Antecedents/Treatment
-            '#antecTrtmCardBody textarea, #antecTrtmCardBody button, ' +
-            // Exploration/Orientation
-            '#exploOrientCardBody textarea, #exploOrientCardBody button, ' +
-            // Notes
-            '#notesCardBody textarea, #notesCardBody button, ' +
-            // Final Save Button
-            '#saveAllConsultationBtn'
-        );
-
-        // Get all textareas to clear/enable/disable
-        const allTextAreas = document.querySelectorAll(
-            '#diagnosticInput, #prescriptionInput, #antecedentsInput, #traitementInput, #explorationInput, #orientationInput, #notesInput'
-        );
-
-        if (enable && currentVisitId) { // Only fully enable if we have a visit context
-            // Enable card bodies
-            cardBodies.forEach(body => { if(body) { body.style.opacity = '1'; body.style.pointerEvents = 'auto'; } });
-
-            // Enable elements
-            elementsToToggle.forEach(el => { if(el) el.disabled = false; });
-
-            // Set initial states for STOP buttons
-            document.getElementById('stopGlobalRecordBtn')?.setAttribute('disabled', 'true');
-            document.getElementById('stopDiagRecordBtn')?.setAttribute('disabled', 'true');
-            document.getElementById('stopPrescRecordBtn')?.setAttribute('disabled', 'true');
-            // Add for other dictation buttons if implemented
-
-            // Make textareas editable
-            allTextAreas.forEach(ta => { if(ta) ta.readOnly = false; });
-
-            // Ensure AI suggestion box is hidden initially
-            document.getElementById('aiSuggestion').style.display = 'none';
-
+        if (enable && currentVisitId) {
+            allBodies.forEach(el => { el.style.opacity = '1'; el.style.pointerEvents = 'auto'; });
+            allElements.forEach(el => el.disabled = false);
+            allTextAreas.forEach(ta => ta.readOnly = false);
+            allStopButtons.forEach(btn => btn.disabled = true); // Disable stop buttons initially
+            if (aiSuggestionDiv) aiSuggestionDiv.style.display = 'none';
+             if (finalSaveButton?.parentElement) { finalSaveButton.parentElement.style.opacity = '1'; finalSaveButton.parentElement.style.pointerEvents = 'auto'; }
         } else {
-            // Disable card bodies
-            cardBodies.forEach(body => { if(body) { body.style.opacity = '0.5'; body.style.pointerEvents = 'none'; } });
-
-            // Disable elements
-            elementsToToggle.forEach(el => { if(el) el.disabled = true; });
-
-            // Clear textareas
-            allTextAreas.forEach(ta => { if(ta) ta.value = ''; });
-
-            // Hide AI suggestion box
-             document.getElementById('aiSuggestion').style.display = 'none';
-
-            // Clear all message areas
-            const messageDivs = document.querySelectorAll('.message');
-            messageDivs.forEach(div => { div.innerHTML = ''; div.style.display = 'none'; div.className='message'; });
-
-            // Clear all status indicators
-            const statusSpans = document.querySelectorAll('.status');
-            statusSpans.forEach(span => { span.innerHTML = ''; });
-
-            // Reset recording states
-            isGlobalRecording = false; globalMediaRecorder = null; globalAudioChunks = [];
-            recordingField = null; mediaRecorder = null; audioChunks = [];
-
-             // Show warning if enabling failed due to missing visitId
-             if (enable && !currentVisitId) {
-                 showMessage('globalRecordMessage', "Impossible d'activer les sections: Contexte de la visite manquant.", 'warning');
-             }
+            allBodies.forEach(el => { el.style.opacity = '0.5'; el.style.pointerEvents = 'none'; });
+            allElements.forEach(el => el.disabled = true);
+            allTextAreas.forEach(ta => { ta.readOnly = true; ta.value = ''; }); // Clear and make readonly
+            allStopButtons.forEach(btn => btn.disabled = true);
+            if (aiSuggestionDiv) aiSuggestionDiv.style.display = 'none';
+            const messageDivs = document.querySelectorAll('.message'); messageDivs.forEach(div => { div.innerHTML = ''; div.style.display = 'none'; });
+            const statusSpans = document.querySelectorAll('.status'); statusSpans.forEach(span => span.innerHTML = '');
+            isGlobalRecording = false; globalMediaRecorder = null; globalAudioChunks = []; recordingField = null; mediaRecorder = null; audioChunks = [];
+            if (enable && !currentVisitId) showMessage('globalRecordMessage', "Visite non active.", 'warning');
+             if (finalSaveButton?.parentElement) { finalSaveButton.parentElement.style.opacity = '0.5'; finalSaveButton.parentElement.style.pointerEvents = 'none'; }
         }
     }
 
+    function clearDoctorUI() {
+        currentIPP = null; currentVisitId = null;
+        enableDoctorSections(false); // Disable & clear sections
+        if (patientInfoDiv) patientInfoDiv.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><i class="fas fa-qrcode"></i><div class="empty-state-message">Prêt à scanner</div><div class="empty-state-description">Scannez le QR code.</div></div>`;
+        if (nurseDataDisplayDiv) nurseDataDisplayDiv.style.display = 'none'; // Hide nurse data
+        try { const url = new URL(window.location); url.searchParams.delete('ipp'); window.history.replaceState({}, '', url); } catch (e) { }
+    }
 
-    // --- Load Patient & Visit Function ---
 
+    // --- DATA LOADING ---
     function loadPatientVisitData(ipp) {
-        console.log(`loadPatientVisitData: Fetching data for IPP: ${ipp}`);
-        const patientInfoDiv = document.getElementById("patientInfo");
-        // Add placeholders for nurse data display if you have them, e.g.:
-        // const nurseObsDiv = document.getElementById("nurseObservationsDisplay");
-        patientInfoDiv.innerHTML = '<div style="grid-column: 1 / -1; text-align: center;"><i class="fas fa-spinner fa-spin"></i> Chargement patient...</div>';
-        // if(nurseObsDiv) nurseObsDiv.innerHTML = '<div style="text-align: center;"><i class="fas fa-spinner fa-spin"></i> Chargement observations...</div>';
+        console.log(`Loading Doctor Visit Data for IPP: ${ipp}`);
+        if (!patientInfoDiv || !ipp) { clearDoctorUI(); return; }
+        patientInfoDiv.innerHTML = `<div style="grid-column: 1 / -1; text-align: center;"><i class="fas fa-spinner fa-spin"></i> Chargement patient/visite...</div>`;
+        if (nurseDataDisplayDiv) nurseDataDisplayDiv.style.display = 'none';
+        enableDoctorSections(false);
 
-
-        fetchWithAuth(`${GET_VISIT_DETAILS_ENDPOINT}?ipp=${ipp}`) // Use the correct endpoint
-            .then(r => r.json())
+        fetchWithAuth(`${GET_VISIT_DETAILS_ENDPOINT}?ipp=${ipp}`)
             .then(responseData => {
-                // Expecting { success: true, patientData: {...}, visitId: ..., nurseObservations: {...} }
-                if (!responseData.success || !responseData.patientData || responseData.visitId === undefined) { // Check for visitId specifically
-                    throw new Error(responseData.message || "Réponse invalide ou visite non trouvée pour le chargement des données.");
-                }
-                console.log("loadPatientVisitData: Data received", responseData);
-
-                const patientData = responseData.patientData;
-                currentVisitId = responseData.visitId; // Store the visit ID
-                const nurseObservations = responseData.nurseObservations || {};
-
-                console.log("Stored Visit ID:", currentVisitId);
-
-                // --- Display Patient Demographics ---
-                const formatDate = (dateString) => { /* ... date formatting logic ... */
-                    if (!dateString || typeof dateString !== 'string') { return '-'; }
-                     try { const dateObj = new Date(dateString); if (isNaN(dateObj.getTime())) { return 'Date Invalide'; } return dateObj.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' }); } catch (e) { return 'Err Format'; }
-                 };
-                patientInfoDiv.innerHTML = `
-                    <div class="info-group"><div class="info-label">Nom</div><div class="info-value">${patientData.nom || '-'}</div></div>
-                    <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${patientData.prenom || '-'}</div></div>
-                    <div class="info-group"><div class="info-label">IPP</div><div class="info-value">${patientData.ipp || ipp}</div></div>
-                    <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${patientData.cin || '-'}</div></div>
-                    <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${patientData.telephone || '-'}</div></div>
-                    <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${patientData.adresse || '-'}</div></div>
-                    <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${patientData.mutuelle || 'Aucune'}</div></div>
-                    <div class="info-group"><div class="info-label">Naissance</div><div class="info-value">${formatDate(patientData.date_naissance)}</div></div>
-                    <div class="info-group"><div class="info-label">Sexe</div><div class="info-value">${patientData.sexe === 'M' ? 'Homme' : (patientData.sexe === 'F' ? 'Femme' : '-')}</div></div>
-                `;
-
-                // --- Display Nurse Observations (Example - Requires HTML elements) ---
-                // if(nurseObsDiv) {
-                //     nurseObsDiv.innerHTML = `
-                //         <h4>Observations Infirmière</h4>
-                //         <p><strong>Motif:</strong> ${nurseObservations.chief_complaint || '-'}</p>
-                //         <p><strong>Temp:</strong> ${nurseObservations.temperature || '-'}°C</p>
-                //         <p><strong>TA:</strong> ${nurseObservations.blood_pressure_systolic || '-'}/${nurseObservations.blood_pressure_diastolic || '-'}</p>
-                //         <p><strong>FC:</strong> ${nurseObservations.heart_rate || '-'}/min</p>
-                //         <p><strong>SpO2:</strong> ${nurseObservations.oxygen_saturation || '-'}%</p>
-                //         <p><strong>Notes:</strong> ${nurseObservations.nurse_notes || '-'}</p>
-                //     `;
-                // } else { console.warn("Nurse observation display area not found."); }
-
-                // Enable sections now that data is loaded AND we have a visitId
-                 if (currentVisitId !== null) {
-                    enableDoctorSections(true);
-                    console.log("loadPatientVisitData: Sections enabled for Visit ID:", currentVisitId);
-                 } else {
-                    // Handle case where backend didn't return a valid visit ID
-                    console.error("loadPatientVisitData: No valid visitId received from backend.");
-                     showMessage('globalRecordMessage', "Erreur: Impossible de charger le contexte de la visite active.", 'error');
-                    enableDoctorSections(false); // Keep sections disabled
+                console.log("Doctor Visit Details Response:", responseData);
+                 if (!responseData || responseData.success === false || !responseData.patientData || responseData.visitId === undefined || responseData.visitId === null) {
+                    throw new Error(responseData.message || "Visite active ou patient introuvable.");
                  }
+                const patientData = responseData.patientData;
+                currentIPP = patientData.ipp;
+                currentVisitId = responseData.visitId;
+                const nurseObservations = responseData.nurseObservations || {};
+                const vitalSigns = responseData.vitalSigns || {};
 
+                console.log(`Data Loaded - IPP: ${currentIPP}, Visit ID: ${currentVisitId}`);
+                // Populate Patient Info
+                patientInfoDiv.innerHTML = `
+                    <div class="info-group"><div class="info-label">Nom</div><div class="info-value">${sanitizeInput(patientData.nom)}</div></div>
+                    <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${sanitizeInput(patientData.prenom)}</div></div>
+                    <div class="info-group"><div class="info-label">IPP</div><div class="info-value">${sanitizeInput(currentIPP)}</div></div>
+                    <div class="info-group"><div class="info-label">Visite ID</div><div class="info-value" style="font-weight:bold;">${sanitizeInput(currentVisitId)}</div></div>
+                    <div class="info-group"><div class="info-label">Naissance</div><div class="info-value">${formatDate(patientData.date_naissance)}</div></div>
+                    <div class="info-group"><div class="info-label">Sexe</div><div class="info-value">${sanitizeInput(patientData.sexe === 'M' ? 'Homme' : 'Femme')}</div></div>
+                     <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${sanitizeInput(patientData.telephone || '-')}</div></div>
+                    <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${sanitizeInput(patientData.mutuelle || 'Aucune')}</div></div>
+                `;
+                // Populate Nurse Data Display
+                displayNurseData(nurseObservations, vitalSigns);
+
+                 // TODO: Fetch and populate existing DOCTOR notes for this visitId
+                 // fetchDoctorNotes(currentVisitId).then(notes => populateDoctorFields(notes));
+
+                enableDoctorSections(true);
+                showMessage('globalRecordMessage', `Patient ${patientData.prenom} ${patientData.nom} chargé (Visite ID: ${currentVisitId}).`, 'success');
             })
-            .catch(e => {
-                if (!e.message.startsWith('Auth')) {
-                    patientInfoDiv.innerHTML = `<div class="message message-error" style="display:block; grid-column:1/-1;"><i class="fas fa-exclamation-triangle"></i> Erreur chargement données visite: ${e.message}</div>`;
-                    // if(nurseObsDiv) nurseObsDiv.innerHTML = ''; // Clear nurse obs area on error
-                }
-                console.error("Error in loadPatientVisitData:", e);
-                enableDoctorSections(false); // Keep sections disabled on error
-                currentVisitId = null; // Ensure visitId is reset on error
+            .catch(err => {
+                 console.error("Error loading doctor visit data:", err);
+                 patientInfoDiv.innerHTML = `<div class="message message-error" style="display:block; grid-column: 1 / -1;">❌ Erreur chargement visite: ${err.message}</div>`;
+                 clearDoctorUI();
             });
     }
 
+    function displayNurseData(observations, vitals) {
+        const obsDisplay = document.getElementById('nurseObservationsDisplay');
+        const vitalsDisplay = document.getElementById('nurseVitalsDisplay');
+        let obsHtml = '<p><strong>Observation:</strong> <span>Aucune</span></p>';
+        let vitalsHtml = '<p><strong>Signes Vitaux (derniers):</strong> <span>Aucun</span></p>';
 
-    // --- Audio Recording Functions ---
-    // ... (startRecording, stopRecording, handleRecordingStop, sendAudioToAI - these handle INDIVIDUAL dictation) ...
-    // ... (startGlobalRecording, stopGlobalRecording, handleGlobalRecordingStop, sendGlobalAudioToBackend - these handle GLOBAL dictation & POPULATE fields) ...
-    // --- These functions are complex, ensure they are copied correctly from previous answers ---
-    // --- Make sure sendAudioToAI populates the correct individual textarea ---
-    // --- Make sure sendGlobalAudioToBackend populates ALL textareas (antecedentsInput, diagnosticInput, etc.) ---
+        if (observations && observations.observation_text) {
+            obsHtml = `<p><strong>Observation (${formatDate(observations.observation_date_time, true)}):</strong> ${sanitizeInput(observations.observation_text)}</p>`;
+        }
 
-     /**
-      * Starts recording audio for a specific field (diagnosis or prescription).
-      * @param {'diagnosis' | 'prescription' | 'antecedents' | 'traitement' | 'exploration' | 'orientation' | 'notes'} field - The target field.
-      */
+        if (vitals && vitals.timestamp) {
+            let vitalsParts = [`<span style="font-size:0.8em;">(${formatDate(vitals.timestamp, true)})</span>`];
+            if (vitals.temperature) vitalsParts.push(`Temp: ${vitals.temperature}°C`);
+            if (vitals.tension_systolic && vitals.tension_diastolic) vitalsParts.push(`TA: ${vitals.tension_systolic}/${vitals.tension_diastolic}`);
+            if (vitals.heart_rate) vitalsParts.push(`FC: ${vitals.heart_rate}/min`);
+            if (vitals.spo2) vitalsParts.push(`SpO₂: ${vitals.spo2}%`);
+            if (vitalsParts.length > 1) { // Only show if there's more than just the timestamp placeholder
+                 vitalsHtml = `<p><strong>Signes Vitaux (derniers):</strong> ${vitalsParts.join(', ')}</p>`;
+            }
+        }
+
+        if (obsDisplay) obsDisplay.innerHTML = obsHtml;
+        if (vitalsDisplay) vitalsDisplay.innerHTML = vitalsHtml;
+        if (nurseDataDisplayDiv) nurseDataDisplayDiv.style.display = 'block'; // Show the section
+    }
+
+    // --- QR SCANNER ---
+     let scanning = false; let currentStream = null; let scanTimeout = null;
+     const scanButton = document.getElementById('scanQrButton'); const scannerContainer = document.getElementById('scanner-container'); const video = document.getElementById('scanner-video');
+     function updateScanStatus(message, type = 'info') { showMessage('scanResult', message, type); }
+     if (scanButton) { scanButton.onclick = async () => { if (!scanning) { try { updateScanStatus('', 'info'); if(!scannerContainer || !video) throw new Error("Scanner elements missing."); scannerContainer.style.display = 'block'; updateScanStatus('Recherche caméra...', 'loading'); currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); video.srcObject = currentStream; await video.play(); updateScanStatus('Caméra prête. Scannez.', 'info'); scanButton.innerHTML = '<i class="fas fa-stop-circle"></i> Arrêter Scan'; scanButton.classList.replace('btn-primary','btn-danger'); scanning = true; clearTimeout(scanTimeout); scanTimeout = setTimeout(() => { if (scanning) { updateScanStatus('Aucun code détecté.', 'warning'); stopScanner(); } }, 30000); requestAnimationFrame(tick); } catch (err) { console.error("Cam/Scan Err:", err); updateScanStatus(`Err Cam: ${err.message}`, 'error'); stopScanner(); } } else { stopScanner(); updateScanStatus('Scan arrêté.', 'info'); } }; } else { console.warn("Scan button not found."); }
+     function stopScanner() { clearTimeout(scanTimeout); scanning = false; if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); currentStream = null; } if(video) video.srcObject = null; if(scannerContainer) scannerContainer.style.display = 'none'; if(scanButton) {scanButton.innerHTML = '<i class="fas fa-qrcode"></i> Scanner QR'; scanButton.classList.replace('btn-danger','btn-primary');} console.log("Scanner stopped."); }
+     function tick() { if (!scanning || !video || video.readyState < video.HAVE_ENOUGH_DATA || !currentStream) { if (scanning) requestAnimationFrame(tick); return; } const canvasElement = document.createElement('canvas'); canvasElement.height = video.videoHeight; canvasElement.width = video.videoWidth; const canvas = canvasElement.getContext("2d",{willReadFrequently:true}); canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height); try { const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height); const code = window.jsQR?.(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" }); if (code?.data) { console.log("QR Found:", code.data); stopScanner(); processScannedQrCode(code.data); } else { requestAnimationFrame(tick); } } catch (e) { console.error("QR proc err:", e); requestAnimationFrame(tick); } }
+     function processScannedQrCode(scannedUrl) { clearTimeout(scanTimeout); updateScanStatus('Code détecté. Traitement...', 'loading'); try { if (!scannedUrl || !scannedUrl.startsWith(QR_TARGET_BASE_URL)) throw new Error('QR Code non reconnu.'); const url = new URL(scannedUrl); const ippFromQr = url.searchParams.get('ipp'); if (ippFromQr) { updateScanStatus(`Patient IPP ${ippFromQr} trouvé. Chargement...`, 'success'); loadPatientIntoCurrentDashboard(ippFromQr); } else { throw new Error('IPP manquant.'); } } catch (e) { console.error("QR process err:", e); updateScanStatus(`Err QR: ${e.message}`, 'error'); setTimeout(() => { updateScanStatus('', ''); }, 5000); clearDoctorUI(); } }
+     function loadPatientIntoCurrentDashboard(ipp) { console.log(`Loading patient ${ipp} into Doctor dashboard`); currentIPP = ipp; try { const newUrl = new URL(window.location); newUrl.searchParams.set('ipp', ipp); window.history.replaceState({}, '', newUrl); } catch(e) { console.error("History API err:", e); } console.log("Resetting UI for new patient visit..."); if (mediaRecorder?.state === 'recording') stopRecording(recordingField); if (globalMediaRecorder?.state === 'recording') stopGlobalRecording(); currentVisitId = null; enableDoctorSections(false); if(document.getElementById('aiSuggestion')) document.getElementById('aiSuggestion').style.display = 'none'; setTimeout(() => { showMessage('scanResult', '', ''); }, 4000); console.log("Calling loadPatientVisitData..."); loadPatientVisitData(ipp); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+    // --- AUDIO RECORDING (Both Individual & Global) ---
+
+    function getFieldConfig(field) {
+        // Maps field name (used in JS/HTML) to details needed for UI/API
+         const configMap = {
+             diagnostic: { inputId: 'diagnosticInput', statusId: 'diagnosisStatus', messageId: 'diagMessage', startBtnId: 'startDiagRecordBtn', stopBtnId: 'stopDiagRecordBtn', apiField: 'diagnostic' },
+             ordonnance_medicale: { inputId: 'prescriptionInput', statusId: 'prescriptionStatus', messageId: 'validationMessage', startBtnId: 'startPrescRecordBtn', stopBtnId: 'stopPrescRecordBtn', apiField: 'ordonnance_medicale' },
+             antecedents: { inputId: 'antecedentsInput', statusId: 'antecedentsStatus', messageId: 'antecedentsMessage', startBtnId: 'startAntecedentsRecordBtn', stopBtnId: 'stopAntecedentsRecordBtn', apiField: 'antecedents' },
+             traitement_en_cours: { inputId: 'traitementInput', statusId: 'traitement_en_coursStatus', messageId: 'traitementMessage', startBtnId: 'startTraitementRecordBtn', stopBtnId: 'stopTraitementRecordBtn', apiField: 'traitement_en_cours' },
+             prescription_exploration: { inputId: 'explorationInput', statusId: 'prescription_explorationStatus', messageId: 'explorationMessage', startBtnId: 'startExplorationRecordBtn', stopBtnId: 'stopExplorationRecordBtn', apiField: 'prescription_exploration' },
+             orientation: { inputId: 'orientationInput', statusId: 'orientationStatus', messageId: 'orientationMessage', startBtnId: 'startOrientationRecordBtn', stopBtnId: 'stopOrientationRecordBtn', apiField: 'orientation' },
+             notes_supplementaires: { inputId: 'notesInput', statusId: 'notes_supplementairesStatus', messageId: 'notesMessage', startBtnId: 'startNotesRecordBtn', stopBtnId: 'stopNotesRecordBtn', apiField: 'notes_supplementaires' }
+         };
+         return configMap[field];
+     }
+
      function startRecording(field) {
-        const fieldIdMap = {
-            diagnosis: 'diagnosticInput', prescription: 'prescriptionInput',
-            antecedents: 'antecedentsInput', traitement: 'traitementInput',
-            exploration: 'explorationInput', orientation: 'orientationInput', notes: 'notesInput'
-        };
-        const statusIdMap = {
-             diagnosis: 'diagnosisStatus', prescription: 'prescriptionStatus',
-             antecedents: 'antecedentsStatus', traitement: 'traitementStatus', // Need to add these spans to HTML
-             exploration: 'explorationStatus', orientation: 'orientationStatus', notes: 'notesStatus'
-         };
-        const messageIdMap = {
-            diagnosis: 'diagMessage', prescription: 'validationMessage',
-            antecedents: 'antecedentsMessage', traitement: 'traitementMessage', // Need to add these divs to HTML
-            exploration: 'explorationMessage', orientation: 'orientationMessage', notes: 'notesMessage'
-         };
-         const startBtnId = `start${field.charAt(0).toUpperCase() + field.slice(1)}RecordBtn`; // e.g., startAntecedentsRecordBtn
-         const stopBtnId = `stop${field.charAt(0).toUpperCase() + field.slice(1)}RecordBtn`; // e.g., stopAntecedentsRecordBtn
+        const config = getFieldConfig(field);
+        if (!config) { console.error(`Invalid field for recording: ${field}`); return; }
+        if (!currentIPP || !currentVisitId) { alert("Veuillez charger un patient et une visite active."); return; }
+        if (isGlobalRecording || (mediaRecorder && mediaRecorder.state === 'recording')) { alert("Un autre enregistrement est en cours."); return; }
 
+        audioChunks = []; recordingField = field; // Store the specific field being recorded
 
-         if (!currentIPP || !currentVisitId) { alert("Veuillez charger un patient et une visite active."); return; }
-         if (isGlobalRecording || (mediaRecorder && mediaRecorder.state === 'recording')) { alert("Un autre enregistrement est en cours."); return; }
+        const statusEl = document.getElementById(config.statusId);
+        const startBtn = document.getElementById(config.startBtnId);
+        const stopBtn = document.getElementById(config.stopBtnId);
+        const messageEl = document.getElementById(config.messageId);
 
-         audioChunks = [];
-         recordingField = field; // Set the field being recorded
+        if(!statusEl || !startBtn || !stopBtn || !messageEl){ console.error(`UI Elements not found for field: ${field}`); return; }
 
-         const statusEl = document.getElementById(statusIdMap[field]);
-         const startBtn = document.getElementById(startBtnId);
-         const stopBtn = document.getElementById(stopBtnId);
-         const messageEl = document.getElementById(messageIdMap[field]);
+        showMessage(messageEl.id, '', ''); // Clear specific message area
+        statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Démarrage...'; statusEl.style.display = 'inline-flex';
+        startBtn.disabled = true; stopBtn.disabled = false;
 
-         if(!statusEl || !startBtn || !stopBtn || !messageEl){ console.error(`Elements not found for field: ${field}`); return; }
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
+                mediaRecorder.onstop = handleRecordingStop; // Use generic handler
+                mediaRecorder.onerror = e => { console.error(`Rec Err (${recordingField}): ${e.error?.name}`); if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err Enreg.'; showMessage(messageEl.id, `Err Enreg.: ${e.error?.message}`, "error"); startBtn.disabled = false; stopBtn.disabled = true; recordingField = null; mediaRecorder = null; stream.getTracks().forEach(track => track.stop()); };
+                mediaRecorder.start();
+                statusEl.innerHTML = '<i class="fas fa-microphone-alt fa-fade" style="color: var(--danger);"></i> REC...';
+            }).catch(err => { console.error("Mic Err:", err); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Err micro'; showMessage(messageEl.id, "Accès micro impossible: " + err.message, "error"); startBtn.disabled = false; stopBtn.disabled = true; recordingField = null; });
+    }
 
-         showMessage(messageEl.id, '', '');
-         statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Démarrage...';
-         statusEl.style.display = 'inline-flex';
-         startBtn.disabled = true;
-         stopBtn.disabled = false;
+     function stopRecording(field) {
+        const config = getFieldConfig(field); if (!config) return;
+        const startBtn = document.getElementById(config.startBtnId); const stopBtn = document.getElementById(config.stopBtnId);
+        if (mediaRecorder && mediaRecorder.state === 'recording' && recordingField === field) {
+            mediaRecorder.stop(); // onstop handles UI
+        } else { console.log(`Stop called for ${field}, but not recording.`); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; }
+    }
 
-         navigator.mediaDevices.getUserMedia({ audio: true })
-             .then(stream => {
-                 mediaRecorder = new MediaRecorder(stream);
-                 mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-                 mediaRecorder.onstop = handleRecordingStop; // Generic stop handler
-                 mediaRecorder.onerror = e => {
-                     console.error(`Rec Err (${recordingField}): ${e.error?.name || e.error}`);
-                     if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err Enreg.';
-                     showMessage(messageEl.id, `Err Enreg.: ${e.error?.message || e.error?.name || 'Inconnue'}`, "error");
-                     startBtn.disabled = false;
-                     stopBtn.disabled = true;
-                     recordingField = null; mediaRecorder = null;
-                 };
-                 mediaRecorder.start();
-                 statusEl.innerHTML = '<i class="fas fa-microphone-alt fa-fade" style="color: var(--danger);"></i> REC...';
-             })
-             .catch(err => {
-                 console.error("Mic Err:", err);
-                 if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Err micro';
-                 showMessage(messageEl.id, "Accès micro impossible: " + err.message, "error");
-                 startBtn.disabled = false;
-                 stopBtn.disabled = true;
-                 recordingField = null;
-             });
+    function handleRecordingStop() { // Generic handler for individual fields
+        const currentField = recordingField; if (!currentField) { console.error("Stop handler called without recordingField!"); return; }
+        const config = getFieldConfig(currentField); if (!config) return;
+        console.log(`Stopped individual recording for ${currentField}. Chunks: ${audioChunks.length}`);
+        const statusEl = document.getElementById(config.statusId); const messageEl = document.getElementById(config.messageId);
+        if (audioChunks.length === 0) { console.warn("No audio."); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; showMessage(messageEl.id, "Aucun audio.", "warning"); recordingField = null; mediaRecorder = null; return; }
+        const blob = new Blob(audioChunks, { type: 'audio/webm' }); audioChunks = [];
+        if(statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Transc...'; showMessage(messageEl.id, "Transcription...", "info");
+        sendAudioToAI(blob, currentField); // Pass field to transcription
+        recordingField = null; mediaRecorder = null;
+    }
+
+     function sendAudioToAI(blob, field) { // Sends individual audio for transcription
+        const config = getFieldConfig(field); if (!config) return;
+        if (!currentIPP || !currentVisitId) { showMessage(config.messageId, "IPP/Visite manquant.", "error"); return; }
+        const formData = new FormData(); formData.append("audio", blob, `${field}_${currentIPP}.webm`);
+        // Add ipp/visit if transcription endpoint needs it
+        // formData.append("ipp", currentIPP); formData.append("visit_id", currentVisitId);
+        const statusEl = document.getElementById(config.statusId); const messageEl = document.getElementById(config.messageId); const targetTextarea = document.getElementById(config.inputId);
+
+        if(statusEl) statusEl.innerHTML = '<i class="fas fa-paper-plane"></i> Envoi...';
+        // Use a dedicated transcription endpoint if available, otherwise adapt parsing from global
+        fetchWithAuth(TRANSCRIBE_FIELD_ENDPOINT, { method: "POST", body: formData })
+            .then(data => {
+                console.log(`Transcription response for ${field}:`, data);
+                // Adapt this based on ACTUAL response format of your endpoint
+                let transcript = data?.transcript || data?.text || data?.extractedData?.[config.apiField] || '';
+                 if (data?.success === false) throw new Error(data.message || "Erreur transcription backend");
+                if (!transcript && data?.success === true && data?.data) transcript = data.data; // Handle simple text response
+
+                if (!transcript) { console.warn("Transc vide:", data); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; showMessage(messageEl.id, "Transc vide.", "warning"); }
+                else { if(targetTextarea) targetTextarea.value = transcript; if(statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> OK'; showMessage(messageEl.id, '', ''); }
+            })
+            .catch(e => { if (!e.message.startsWith('Auth')){ if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err'; showMessage(messageEl.id, `Err Transc.: ${e.message}`, "error"); } console.error(`Transc error for ${field}:`, e); })
+            .finally(() => { setTimeout(() => { if (statusEl?.innerHTML.includes('OK') || statusEl?.innerHTML.includes('Err')) statusEl.innerHTML = ''; }, 4000); });
+    }
+
+    // --- GLOBAL DICTATION ---
+     function startGlobalRecording() { /* ... same as before, check !currentVisitId ... */
+        if (!currentIPP || !currentVisitId) { showMessage('globalRecordMessage', "Chargez patient/visite.", "warning"); return; } if (isGlobalRecording || (mediaRecorder && mediaRecorder.state === 'recording')) { showMessage('globalRecordMessage', "Autre enregistrement en cours.", "warning"); return; } globalAudioChunks = []; isGlobalRecording = true; const statusEl = document.getElementById('globalRecordStatus'); const startBtn = document.getElementById('startGlobalRecordBtn'); const stopBtn = document.getElementById('stopGlobalRecordBtn'); const messageEl = document.getElementById('globalRecordMessage'); showMessage(messageEl.id, '', ''); statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Démarrage...'; statusEl.style.display = 'inline-flex'; if(startBtn) startBtn.disabled = true; if(stopBtn) stopBtn.disabled = false; navigator.mediaDevices.getUserMedia({ audio: true }) .then(stream => { globalMediaRecorder = new MediaRecorder(stream); globalMediaRecorder.ondataavailable = e => { if (e.data.size > 0) globalAudioChunks.push(e.data); }; globalMediaRecorder.onstop = handleGlobalRecordingStop; globalMediaRecorder.onerror = e => { console.error(`Global Rec Err: ${e.error?.name}`); if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err Enreg.'; showMessage(messageEl.id, `Err Enreg.: ${e.error?.message}`, "error"); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; isGlobalRecording = false; globalMediaRecorder = null; stream.getTracks().forEach(track => track.stop());}; globalMediaRecorder.start(); statusEl.innerHTML = '<i class="fas fa-microphone-alt fa-fade" style="color: var(--danger);"></i> Enregistrement...'; }) .catch(err => { console.error("Global Mic Err:", err); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Err micro'; showMessage(messageEl.id, "Accès micro impossible: " + err.message, "error"); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; isGlobalRecording = false; });
      }
-
-     function stopRecording(field) { // Field passed from button onclick
-          const startBtnId = `start${field.charAt(0).toUpperCase() + field.slice(1)}RecordBtn`;
-          const stopBtnId = `stop${field.charAt(0).toUpperCase() + field.slice(1)}RecordBtn`;
-          const statusId = `${field}Status`;
-          const statusEl = document.getElementById(statusId);
-
-         if (mediaRecorder && mediaRecorder.state === 'recording' && recordingField === field) {
-             console.log(`Stopping individual recording for ${field}`);
-              if (statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Arrêt...';
-             mediaRecorder.stop(); // Triggers handleRecordingStop
-         } else {
-             console.log(`Stop called for ${field}, but not recording or wrong field.`);
-         }
-          const startBtn = document.getElementById(startBtnId);
-          const stopBtn = document.getElementById(stopBtnId);
-          if(startBtn) startBtn.disabled = false;
-          if(stopBtn) stopBtn.disabled = true;
+     function stopGlobalRecording() { /* ... same as before ... */
+        const startBtn = document.getElementById('startGlobalRecordBtn'); const stopBtn = document.getElementById('stopGlobalRecordBtn'); const statusEl = document.getElementById('globalRecordStatus'); if (globalMediaRecorder && globalMediaRecorder.state === 'recording') { if (statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Finalisation...'; globalMediaRecorder.stop(); } else { if(startBtn) startBtn.disabled = false; } if(stopBtn) stopBtn.disabled = true;
      }
-
-      function handleRecordingStop() { // Generic handler
-         const currentField = recordingField; // Field that was being recorded
-         if (!currentField) { console.error("handleRecordingStop: recordingField is not set!"); return; }
-
-         const fieldIdMap = { diagnosis: 'diagnosticInput', prescription: 'prescriptionInput', antecedents: 'antecedentsInput', traitement: 'traitementInput', exploration: 'explorationInput', orientation: 'orientationInput', notes: 'notesInput' };
-         const statusIdMap = { diagnosis: 'diagnosisStatus', prescription: 'prescriptionStatus', antecedents: 'antecedentsStatus', traitement: 'traitementStatus', exploration: 'explorationStatus', orientation: 'orientationStatus', notes: 'notesStatus' };
-         const messageIdMap = { diagnosis: 'diagMessage', prescription: 'validationMessage', antecedents: 'antecedentsMessage', traitement: 'traitementMessage', exploration: 'explorationMessage', orientation: 'orientationMessage', notes: 'notesMessage' };
-
-         console.log(`Stopped for ${currentField}. Chunks: ${audioChunks.length}`);
-         const statusEl = document.getElementById(statusIdMap[currentField]);
-         const messageEl = document.getElementById(messageIdMap[currentField]);
-
-         if (audioChunks.length === 0) {
-             console.warn("No audio recorded.");
-             if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide';
-             showMessage(messageEl.id, "Aucun audio.", "warning");
-             recordingField = null; mediaRecorder = null; return;
-         }
-
-         const blob = new Blob(audioChunks, { type: 'audio/webm' });
-         audioChunks = [];
-
-         if(statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Transc...';
-         showMessage(messageEl.id, "Transcription...", "info");
-
-         sendAudioToAI(blob, currentField); // Pass field
-
-         recordingField = null; mediaRecorder = null; // Reset state
+     function handleGlobalRecordingStop() { /* ... same as before ... */
+        console.log(`Global stopped. Chunks: ${globalAudioChunks.length}`); const statusEl = document.getElementById('globalRecordStatus'); const startBtn = document.getElementById('startGlobalRecordBtn'); const stopBtn = document.getElementById('stopGlobalRecordBtn'); isGlobalRecording = false; globalMediaRecorder = null; if (globalAudioChunks.length === 0) { if (statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; showMessage('globalRecordMessage', "Aucun audio.", "warning"); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; return; } const blob = new Blob(globalAudioChunks, { type: 'audio/webm' }); globalAudioChunks = []; if (statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement IA...'; showMessage('globalRecordMessage',"Analyse et extraction...", "info"); sendGlobalAudioToBackend(blob);
      }
-
-      function sendAudioToAI(blob, field) { // For individual transcriptions
-          // THIS NEEDS A BACKEND ENDPOINT THAT JUST TRANSCRIBES
-          // Or reuse the global one and ignore extraction? Reusing GLOBAL_DICTATION_ENDPOINT for now.
-         const endpoint = GLOBAL_DICTATION_ENDPOINT; // Re-use global? Or need specific ones?
-         const formData = new FormData();
-         formData.append("audio", blob, `${field}_${currentIPP || 'unknown'}.webm`);
-         formData.append("ipp", currentIPP || '');
-
-          const fieldIdMap = { diagnosis: 'diagnosticInput', prescription: 'prescriptionInput', antecedents: 'antecedentsInput', traitement: 'traitementInput', exploration: 'explorationInput', orientation: 'orientationInput', notes: 'notesInput' };
-          const statusIdMap = { diagnosis: 'diagnosisStatus', prescription: 'prescriptionStatus', antecedents: 'antecedentsStatus', traitement: 'traitementStatus', exploration: 'explorationStatus', orientation: 'orientationStatus', notes: 'notesStatus' };
-          const messageIdMap = { diagnosis: 'diagMessage', prescription: 'validationMessage', antecedents: 'antecedentsMessage', traitement: 'traitementMessage', exploration: 'explorationMessage', orientation: 'orientationMessage', notes: 'notesMessage' };
-
-         const statusEl = document.getElementById(statusIdMap[field]);
-         const messageEl = document.getElementById(messageIdMap[field]);
-         const targetTextarea = document.getElementById(fieldIdMap[field]);
-
-         if(statusEl) statusEl.innerHTML = '<i class="fas fa-paper-plane"></i> Envoi...';
-
-         fetchWithAuth(endpoint, { method: "POST", body: formData })
-             .then(r => r.json())
-             .then(data => {
-                 console.log(`Transcription response for ${field}:`, data);
-                  // If using global endpoint, need data.extractedData. Need just transcript.
-                  // Assuming a simpler response { success: true, transcript: "..." } for this hypothetical endpoint
-                  // OR parse from extractedData if reusing global one. Let's assume simple response for now:
-                 let transcript = data.transcript || (data.extractedData ? data.extractedData[field] : null); // Adapt based on actual endpoint response
-
-                 if (!transcript) {
-                     console.warn("Transcript empty:", data);
-                     if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide';
-                     showMessage(messageEl.id, "Transcription vide.", "warning");
-                 } else {
-                     if(targetTextarea) targetTextarea.value = transcript;
-                     if(statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> OK';
-                     showMessage(messageEl.id, '', ''); // Clear msg
-                 }
-             })
-             .catch(e => {
-                 if (!e.message.startsWith('Auth')){
-                     if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err';
-                      showMessage(messageEl.id, `Err Transc.: ${e.message}`, "error");
-                 }
-                 console.error(`Transc. error for ${field}:`, e);
-             })
-              .finally(() => { setTimeout(() => { if (statusEl?.innerHTML.includes('OK') || statusEl?.innerHTML.includes('Err')) statusEl.innerHTML = ''; }, 4000); });
+     function sendGlobalAudioToBackend(blob) { /* ... same logic to populate ALL fields ... */
+        if (!currentIPP || !currentVisitId) { showMessage('globalRecordMessage', "Err: Patient/Visite non ID.", "error"); const startBtn = document.getElementById('startGlobalRecordBtn'); if(startBtn) startBtn.disabled = false; return; }
+        const endpoint = GLOBAL_DICTATION_ENDPOINT; const formData = new FormData(); formData.append("audio", blob, `global_dictation_${currentIPP}.webm`); formData.append("ipp", currentIPP); formData.append("visit_id", currentVisitId);
+        const startBtn = document.getElementById('startGlobalRecordBtn'); const statusEl = document.getElementById('globalRecordStatus'); const messageEl = document.getElementById('globalRecordMessage');
+        fetchWithAuth(endpoint, { method: "POST", body: formData })
+            .then(data => { // fetchWithAuth now parses JSON
+                console.log("Global processing response:", data);
+                if (data.success && data.extractedData) {
+                    showMessage(messageEl.id, `<i class="fas fa-check-circle"></i> ${data.message || 'Dictée traitée.'}`, 'success');
+                    if (statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> OK';
+                    // Populate ALL fields based on extracted data
+                    const fieldsMap = {
+                        diagnosticInput: data.extractedData.diagnostic,
+                        prescriptionInput: data.extractedData.ordonnance_medicale,
+                        antecedentsInput: data.extractedData.antecedents,
+                        traitementInput: data.extractedData.traitement_en_cours,
+                        explorationInput: data.extractedData.prescription_exploration,
+                        orientationInput: data.extractedData.orientation,
+                        notesInput: data.extractedData.notes_supplementaires
+                    };
+                    Object.entries(fieldsMap).forEach(([id, value]) => {
+                        const el = document.getElementById(id);
+                        if (el) { el.value = value ?? ''; } // Use ?? '' for safety
+                    });
+                    document.getElementById('diagnosticInput')?.focus(); // Focus first field
+                } else { throw new Error(data.message || "Err backend (données extraites manquantes)."); }
+            })
+            .catch(e => { console.error("Error global audio:", e); if (!e.message.startsWith('Auth')) { showMessage(messageEl.id, `<i class="fas fa-times-circle"></i> Err Trait.: ${e.message}`, 'error'); if (statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Échec'; } })
+            .finally(() => { if(startBtn) startBtn.disabled = false; const stopBtn = document.getElementById('stopGlobalRecordBtn'); if (stopBtn) stopBtn.disabled = true; setTimeout(() => { if (statusEl?.innerHTML.includes('OK') || statusEl?.innerHTML.includes('Échec')) statusEl.innerHTML = ''; }, 5000); });
      }
 
 
-    // --- Global Recording Functions ---
-    // ... startGlobalRecording, stopGlobalRecording, handleGlobalRecordingStop ...
-    // --- These are complex, ensure they are copied correctly from previous response ---
-     function startGlobalRecording() { /* ... Copy from previous ... */
-         if (!currentIPP || !currentVisitId) { showMessage('globalRecordMessage', "Chargez patient/visite.", "warning"); return; }
-         if (isGlobalRecording || (mediaRecorder && mediaRecorder.state === 'recording')) { showMessage('globalRecordMessage', "Autre enregistrement en cours.", "warning"); return; }
-         globalAudioChunks = []; isGlobalRecording = true;
-         const statusEl = document.getElementById('globalRecordStatus'); const startBtn = document.getElementById('startGlobalRecordBtn'); const stopBtn = document.getElementById('stopGlobalRecordBtn'); const messageEl = document.getElementById('globalRecordMessage');
-         showMessage(messageEl.id, '', ''); statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Démarrage...'; statusEl.style.display = 'inline-flex'; if(startBtn) startBtn.disabled = true; if(stopBtn) stopBtn.disabled = false;
-         navigator.mediaDevices.getUserMedia({ audio: true }) .then(stream => { globalMediaRecorder = new MediaRecorder(stream); globalMediaRecorder.ondataavailable = e => { if (e.data.size > 0) globalAudioChunks.push(e.data); }; globalMediaRecorder.onstop = handleGlobalRecordingStop; globalMediaRecorder.onerror = e => { console.error(`Global Rec Err: ${e.error?.name}`); if(statusEl) statusEl.innerHTML = '<i class="fas fa-times-circle"></i> Err Enreg.'; showMessage(messageEl.id, `Err Enreg.: ${e.error?.message}`, "error"); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; isGlobalRecording = false; globalMediaRecorder = null; }; globalMediaRecorder.start(); statusEl.innerHTML = '<i class="fas fa-microphone-alt fa-fade" style="color: var(--danger);"></i> Enregistrement...'; }) .catch(err => { console.error("Global Mic Err:", err); if(statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Err micro'; showMessage(messageEl.id, "Accès micro impossible: " + err.message, "error"); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; isGlobalRecording = false; });
-     }
-     function stopGlobalRecording() { /* ... Copy from previous ... */
-          const startBtn = document.getElementById('startGlobalRecordBtn'); const stopBtn = document.getElementById('stopGlobalRecordBtn'); const statusEl = document.getElementById('globalRecordStatus');
-          if (globalMediaRecorder && globalMediaRecorder.state === 'recording') { if (statusEl) statusEl.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Finalisation...'; globalMediaRecorder.stop(); } else { if(startBtn) startBtn.disabled = false; } if(stopBtn) stopBtn.disabled = true;
-     }
-      function handleGlobalRecordingStop() { /* ... Copy from previous ... */
-          console.log(`Global stopped. Chunks: ${globalAudioChunks.length}`); const statusEl = document.getElementById('globalRecordStatus'); const startBtn = document.getElementById('startGlobalRecordBtn'); const stopBtn = document.getElementById('stopGlobalRecordBtn'); isGlobalRecording = false; globalMediaRecorder = null; if (globalAudioChunks.length === 0) { if (statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> Vide'; showMessage('globalRecordMessage', "Aucun audio.", "warning"); if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; return; } const blob = new Blob(globalAudioChunks, { type: 'audio/webm' }); globalAudioChunks = []; if (statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement IA...'; showMessage('globalRecordMessage',"Analyse et extraction...", "info"); sendGlobalAudioToBackend(blob);
-     }
-
-
-    // --- Send Global Audio & Populate ---
-     function sendGlobalAudioToBackend(blob) { /* ... Copy from previous, ensure it populates ALL textareas ... */
-         if (!currentIPP || !currentVisitId) { showMessage('globalRecordMessage', "Err: Patient/Visite non ID.", "error"); const startBtn = document.getElementById('startGlobalRecordBtn'); if(startBtn) startBtn.disabled = false; return; }
-         const endpoint = GLOBAL_DICTATION_ENDPOINT; const formData = new FormData(); formData.append("audio", blob, `global_dictation_${currentIPP}.webm`); formData.append("ipp", currentIPP); formData.append("visit_id", currentVisitId); // Send visit_id too
-         const startBtn = document.getElementById('startGlobalRecordBtn'); const statusEl = document.getElementById('globalRecordStatus'); const messageEl = document.getElementById('globalRecordMessage');
-         fetchWithAuth(endpoint, { method: "POST", body: formData }) .then(r => r.json()) .then(data => { console.log("Global processing response:", data); if (data.success && data.extractedData) { showMessage(messageEl.id, `<i class="fas fa-check-circle"></i> ${data.message || 'Dictée traitée.'}`, 'success'); if (statusEl) statusEl.innerHTML = '<i class="fas fa-check"></i> OK'; const fields = { diagnosticInput: data.extractedData.diagnostic, prescriptionInput: data.extractedData.ordonnance_medicale, antecedentsInput: data.extractedData.antecedents, traitementInput: data.extractedData.traitement_en_cours, explorationInput: data.extractedData.prescription_exploration, orientationInput: data.extractedData.orientation, notesInput: data.extractedData.notes_supplementaires }; Object.entries(fields).forEach(([id, value]) => { const el = document.getElementById(id); if (el) { el.value = value !== undefined ? value : ''; } }); document.getElementById('diagnosticInput')?.focus(); } else { throw new Error(data.message || "Err backend."); } }) .catch(e => { console.error("Error global audio:", e); if (!e.message.startsWith('Auth')) { showMessage(messageEl.id, `<i class="fas fa-times-circle"></i> Err Trait.: ${e.message}`, 'error'); if (statusEl) statusEl.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Échec'; } }) .finally(() => { if(startBtn) startBtn.disabled = false; const stopBtn = document.getElementById('stopGlobalRecordBtn'); if (stopBtn) stopBtn.disabled = true; setTimeout(() => { if (statusEl?.innerHTML.includes('OK') || statusEl?.innerHTML.includes('Échec')) statusEl.innerHTML = ''; }, 5000); });
-     }
-
-
-    // --- Individual Save Functions ---
-
-    /**
-     * Generic function to save data for a specific field.
-     * @param {string} fieldName - The key name matching the payload expected by the backend (e.g., 'antecedents').
-     * @param {string} inputElementId - The ID of the textarea element.
-     * @param {string} messageElementId - The ID of the message display element.
-     * @param {string} buttonElementId - The ID of the save button for this field.
-     */
+    // --- SAVING CONSULTATION DATA ---
     function saveIndividualField(fieldName, inputElementId, messageElementId, buttonElementId) {
-        const inputElement = document.getElementById(inputElementId);
-        const textValue = inputElement?.value?.trim();
+        const inputElement = document.getElementById(inputElementId); const textValue = inputElement?.value; // Don't trim if whitespace matters
         const saveButton = document.getElementById(buttonElementId);
+        if (!currentVisitId) { showMessage(messageElementId, "ID Visite manquant.", "error"); return; }
 
-        if (!currentVisitId) { showMessage(messageElementId, "Contexte visite manquant.", "error"); return; }
-        if (!currentIPP) { showMessage(messageElementId, "Patient non chargé.", "warning"); return; }
-        // Allow saving empty fields to clear them
-        // if (!textValue) { showMessage(messageElementId, "Champ vide.", "warning"); return; }
-
-        const doctorIdentifier = localStorage.getItem('userIdentifier') || 'unknown_doctor';
-
-        // Create payload with only the field being saved
-        const payload = {
-            visit_id: currentVisitId,
-            // doctor_identifier: doctorIdentifier, // Uncomment if tracking doctor
-            [fieldName]: textValue // Dynamically set the key and value
-        };
-
+        const payload = { visit_id: currentVisitId, [fieldName]: textValue ?? null }; // Send null if empty/undefined
         showMessage(messageElementId, '<i class="fas fa-spinner fa-spin"></i> Enregistrement...', 'loading');
         if(saveButton) saveButton.disabled = true;
 
-        fetchWithAuth(UPDATE_CONSULTATION_ENDPOINT, { // Use the single update endpoint
-            method: 'POST',
-            body: JSON.stringify(payload)
-        })
-        .then(response => {
-            if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                showMessage(messageElementId, `<i class="fas fa-check-circle"></i> Enregistré.`, 'success');
-            } else {
-                throw new Error(data.message || "Échec backend.");
-            }
-        })
-        .catch(e => {
-            console.error(`Error saving ${fieldName}:`, e);
-            if (!e.message.startsWith('Auth')) {
-                showMessage(messageElementId, `<i class="fas fa-times-circle"></i> Erreur: ${e.message}`, 'error');
-            }
-        })
-        .finally(() => {
-            if(saveButton) saveButton.disabled = false;
-        });
+        fetchWithAuth(UPDATE_CONSULTATION_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) })
+            .then(data => { if (data.success) { showMessage(messageElementId, `<i class="fas fa-check-circle"></i> Enregistré.`, 'success'); } else { throw new Error(data.message || "Échec backend."); } })
+            .catch(e => { if (!e.message.startsWith('Auth')) showMessage(messageElementId, `<i class="fas fa-times-circle"></i> Erreur: ${e.message}`, 'error'); console.error(`Error saving ${fieldName}:`, e); })
+            .finally(() => { if(saveButton) saveButton.disabled = false; });
     }
 
-    // --- Specific functions calling the generic save function ---
+    // Specific save function calls (no changes needed here)
     function saveAntecedents() { saveIndividualField('antecedents', 'antecedentsInput', 'antecedentsMessage', 'saveAntecedentsBtn'); }
-    function saveDiagnostic() { saveIndividualField('diagnostic', 'diagnosticInput', 'diagMessage', 'submitDiagBtn'); } // Reusing submitDiagBtn ID
+    function saveDiagnostic() { saveIndividualField('diagnostic', 'diagnosticInput', 'diagMessage', 'saveDiagnosticBtn'); } // Changed button ID to match HTML
     function saveTraitement() { saveIndividualField('traitement_en_cours', 'traitementInput', 'traitementMessage', 'saveTraitementBtn'); }
-    function saveOrdonnance() { saveIndividualField('ordonnance_medicale', 'prescriptionInput', 'validationMessage', 'validatePrescBtn'); } // Needs separate button maybe? Reusing validate for now.
+    function saveOrdonnance() { saveIndividualField('ordonnance_medicale', 'prescriptionInput', 'validationMessage', 'savePrescriptionBtn'); } // Changed button ID
     function saveExploration() { saveIndividualField('prescription_exploration', 'explorationInput', 'explorationMessage', 'saveExplorationBtn'); }
     function saveOrientation() { saveIndividualField('orientation', 'orientationInput', 'orientationMessage', 'saveOrientationBtn'); }
     function saveNotes() { saveIndividualField('notes_supplementaires', 'notesInput', 'notesMessage', 'saveNotesBtn'); }
 
-    // --- Save All Function ---
+    // Save All Function (triggered by form submit)
     function saveAllConsultationData() {
          if (!currentVisitId) { showMessage('saveConsultationMessage', "Contexte visite manquant.", "error"); return; }
-         if (!currentIPP) { showMessage('saveConsultationMessage', "Patient non chargé.", "warning"); return; }
-
          const saveButton = document.getElementById('saveAllConsultationBtn');
          showMessage('saveConsultationMessage', '<i class="fas fa-spinner fa-spin"></i> Enregistrement complet...', 'loading');
          if(saveButton) saveButton.disabled = true;
 
-         const doctorIdentifier = localStorage.getItem('userIdentifier') || 'unknown_doctor';
+         const form = document.getElementById('consultationForm');
+         const formData = new FormData(form); // Easily get all form data
+         const payload = { visit_id: currentVisitId };
+         // Convert FormData to plain object
+         for (const [key, value] of formData.entries()) {
+             payload[key] = value.trim() === '' ? null : value; // Send null for empty fields
+         }
+         // Add doctor identifier if needed
+         // payload.doctor_identifier = currentUserIdentifier;
 
-         // Gather data from ALL fields
-         const payload = {
-            visit_id: currentVisitId,
-            // doctor_identifier: doctorIdentifier, // Uncomment if tracking
-            antecedents: document.getElementById('antecedentsInput')?.value || null,
-            diagnostic: document.getElementById('diagnosticInput')?.value || null,
-            traitement_en_cours: document.getElementById('traitementInput')?.value || null,
-            ordonnance_medicale: document.getElementById('prescriptionInput')?.value || null, // Maps to 'prescriptions'
-            prescription_exploration: document.getElementById('explorationInput')?.value || null,
-            orientation: document.getElementById('orientationInput')?.value || null,
-            notes_supplementaires: document.getElementById('notesInput')?.value || null
-         };
+         console.log("Saving all consultation data:", payload);
 
-          fetchWithAuth(UPDATE_CONSULTATION_ENDPOINT, { // Use the single update endpoint
-            method: 'POST',
-            body: JSON.stringify(payload)
-        })
-        .then(response => {
-            if (!response.ok) { return response.text().then(text => { throw new Error(`Erreur ${response.status}: ${text || response.statusText}`); }); }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                showMessage('saveConsultationMessage', `<i class="fas fa-check-circle"></i> Consultation complète enregistrée.`, 'success');
-                // Maybe disable all save buttons now? Or offer a "New Consultation" button?
-            } else {
-                throw new Error(data.message || "Échec backend.");
-            }
-        })
-        .catch(e => {
-            console.error(`Error saving all consultation data:`, e);
-            if (!e.message.startsWith('Auth')) {
-                showMessage('saveConsultationMessage', `<i class="fas fa-times-circle"></i> Erreur: ${e.message}`, 'error');
-            }
-        })
-        .finally(() => {
-            if(saveButton) saveButton.disabled = false;
-        });
-
+         fetchWithAuth(UPDATE_CONSULTATION_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) })
+            .then(data => { if (data.success) { showMessage('saveConsultationMessage', `<i class="fas fa-check-circle"></i> Consultation complète enregistrée.`, 'success'); /* Disable form? */ } else { throw new Error(data.message || "Échec backend."); } })
+            .catch(e => { if (!e.message.startsWith('Auth')) showMessage('saveConsultationMessage', `<i class="fas fa-times-circle"></i> Erreur: ${e.message}`, 'error'); console.error(`Error saving all:`, e); })
+            .finally(() => { if(saveButton) saveButton.disabled = false; });
     }
 
-
-    // --- Prescription AI Suggestion Functions (Modified slightly) ---
-
-    function submitPrescription() { // Renamed: Now just triggers AI analysis
-        const prescInput = document.getElementById("prescriptionInput");
-        const prescriptionText = prescInput.value.trim();
-        const aiSuggestionDiv = document.getElementById("aiSuggestion");
-        const validationMsgDiv = document.getElementById("validationMessage");
-        const submitBtn = document.getElementById("submitPrescBtn"); // The "Analyser" button
-
-        if (!prescriptionText) { showMessage("validationMessage", `Champ prescription vide.`, "warning"); return; }
-        if (!currentIPP) { showMessage("validationMessage", `Patient non chargé.`, "warning"); return; }
-
-        showMessage("validationMessage", "", "");
-        aiSuggestionDiv.style.display = "block";
-        aiSuggestionDiv.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3><div class="message message-info" style="display:block;"><i class="fas fa-spinner fa-spin"></i> Analyse IA en cours...</div>`;
-        if(submitBtn) submitBtn.disabled = true;
-
-        fetchWithAuth(SUBMIT_PRESCRIPTION_AI_ENDPOINT, { // Use specific endpoint for this AI feature
-             method: "POST",
-             body: JSON.stringify({ ipp: currentIPP, prescription: prescriptionText })
-        })
-        .then(r => r.json())
-        .then(data => { /* ... Copy the existing logic to parse AI suggestion and populate the box ... */
-             console.log("AI Suggestion Raw Response:", JSON.stringify(data, null, 2));
-             if (data && data.success === true && data.suggestion) {
-                 const suggestionData = data.suggestion; console.log("Extracted suggestion data:", suggestionData);
-                 aiSuggestionDiv.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3> <div class="input-group"> <label for="medicament">Médicament:</label> <input type="text" id="medicament"/> </div> <div class="input-group"> <label for="start_date">Date début:</label> <input type="date" id="start_date"/> </div> <div class="input-group"> <label for="end_date">Date fin:</label> <input type="date" id="end_date"/> </div> <div class="input-group"> <label>Horaires:</label> <div class="checkbox-wrapper"> <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label> <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> Après-midi</label> <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label> <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label> </div> </div> <div class="btn-group"> <button class="btn btn-success" id="validatePrescBtn" onclick="validatePrescription()"> <i class="fas fa-check-double"></i> Valider & Enregistrer Suggestion </button> </div>`;
-                 document.getElementById("medicament").value = suggestionData.medicament || '';
-                 const convertDate = (dateStr) => { if(!dateStr || typeof dateStr !== 'string' || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)){ return ''; } const p=dateStr.split('/'); if(p.length !== 3) return ''; const month = String(p[0]).padStart(2,'0'); const day = String(p[1]).padStart(2,'0'); const year = p[2]; if (isNaN(parseInt(month)) || isNaN(parseInt(day)) || isNaN(parseInt(year)) || +month<1 || +month>12 || +day<1 || +day>31 || +year<1900) { return ''; } return `${year}-${month}-${day}`; };
-                 document.getElementById("start_date").value = convertDate(suggestionData.start_date); document.getElementById("end_date").value = convertDate(suggestionData.end_date);
-                 if(suggestionData.schedule){ document.getElementById("matin").checked = !!suggestionData.schedule.matin; document.getElementById("apres_midi").checked = !!suggestionData.schedule.apres_midi; document.getElementById("soir").checked = !!suggestionData.schedule.soir; document.getElementById("nuit").checked = !!suggestionData.schedule.nuit; } else { document.getElementById("matin").checked = false; document.getElementById("apres_midi").checked = false; document.getElementById("soir").checked = false; document.getElementById("nuit").checked = false; }
-                 aiSuggestionDiv.scrollIntoView({ behavior: 'smooth' });
-             } else { throw new Error(data.message || "Réponse IA invalide."); }
-         })
-        .catch(e => { if(!e.message.startsWith('Auth')){ showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Err Analyse IA: ${e.message}`, "error"); } console.error("Error submitPrescription AI:", e); aiSuggestionDiv.style.display = "none"; })
-        .finally(() => { if(submitBtn) submitBtn.disabled = false; });
+    // --- PRESCRIPTION AI ---
+    function submitPrescriptionToAI() { /* ... same as before ... */
+        const prescInput = document.getElementById("prescriptionInput"); const prescriptionText = prescInput?.value.trim(); const aiSuggestionDiv = document.getElementById("aiSuggestion"); const validationMsgDiv = document.getElementById("validationMessage"); const submitBtn = document.getElementById("submitPrescBtn"); if (!prescriptionText) { showMessage("validationMessage", `Champ prescription vide.`, "warning"); return; } if (!currentIPP) { showMessage("validationMessage", `Patient non chargé.`, "warning"); return; } showMessage("validationMessage", "", ""); aiSuggestionDiv.style.display = "block"; aiSuggestionDiv.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3><div class="message message-info" style="display:block;"><i class="fas fa-spinner fa-spin"></i> Analyse IA en cours...</div>`; if(submitBtn) submitBtn.disabled = true;
+        fetchWithAuth(SUBMIT_PRESCRIPTION_AI_ENDPOINT, { method: "POST", body: JSON.stringify({ ipp: currentIPP, prescription: prescriptionText }) }) .then(data => { console.log("AI Raw:", JSON.stringify(data,null,2)); if (data?.success === true && data.suggestion) { const d = data.suggestion; console.log("Extracted suggestion:", d); aiSuggestionDiv.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3> <div class="input-group"> <label for="medicament">Médicament:</label> <input type="text" id="medicament"/> </div> <div class="input-group"> <label for="start_date">Date début:</label> <input type="date" id="start_date"/> </div> <div class="input-group"> <label for="end_date">Date fin:</label> <input type="date" id="end_date"/> </div> <div class="input-group"> <label>Horaires:</label> <div class="checkbox-wrapper"> <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label> <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> A-M</label> <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label> <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label> </div> </div> <div class="btn-group"> <button type="button" class="btn btn-success" id="validatePrescBtn" onclick="validateAISuggestion()"> <i class="fas fa-check-double"></i> Valider & Enreg. Suggestion </button> </div>`; const convertDate=(s)=>{try{if(!s||typeof s!=='string'||!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s))return '';const p=s.split('/');const m=p[0].padStart(2,'0'),day=p[1].padStart(2,'0'),y=p[2];return`${y}-${m}-${day}`}catch{return''}}; document.getElementById("medicament").value=d.medicament||'';document.getElementById("start_date").value=convertDate(d.start_date);document.getElementById("end_date").value=convertDate(d.end_date); if(d.schedule){document.getElementById("matin").checked=!!d.schedule.matin;document.getElementById("apres_midi").checked=!!d.schedule.apres_midi;document.getElementById("soir").checked=!!d.schedule.soir;document.getElementById("nuit").checked=!!d.schedule.nuit;} aiSuggestionDiv.scrollIntoView({behavior:'smooth'}); } else { throw new Error(data.message || "Réponse IA invalide."); } }).catch(e=>{ if(!e.message.startsWith('Auth')) showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`,"error"); console.error("Err submitPresc:",e); aiSuggestionDiv.style.display="none"; }).finally(() => { if(submitBtn) submitBtn.disabled = false; });
+    }
+    function validateAISuggestion() { /* ... same as before ... */
+        const med=document.getElementById("medicament")?.value.trim();const sd=document.getElementById("start_date")?.value;const ed=document.getElementById("end_date")?.value;const validateBtn=document.getElementById("validatePrescBtn"); if (!med||!sd||!ed) { showMessage("validationMessage","Champs Suggestion requis.","warning"); return; } if (!currentIPP || !currentVisitId) { showMessage("validationMessage","Patient/Visite non chargé.","warning"); return; } showMessage("validationMessage","<i class='fas fa-spinner fa-spin'></i> Enregistrement...", "loading"); if(validateBtn)validateBtn.disabled=true; const sched={matin:document.getElementById("matin").checked,apres_midi:document.getElementById("apres_midi").checked,soir:document.getElementById("soir").checked,nuit:document.getElementById("nuit").checked}; const cvAPI=(dt)=>{if(!dt||!/^\d{4}-\d{2}-\d{2}$/.test(dt))return'';const p=dt.split('-');return`${p[1]}/${p[2]}/${p[0]}`}; const finalPrescText = document.getElementById("prescriptionInput").value; const payload={visit_id: currentVisitId, ipp: currentIPP, final_prescription: finalPrescText, start_date: cvAPI(sd), end_date: cvAPI(ed), schedule: sched, medicament_name: med}; fetchWithAuth(VALIDATE_PRESCRIPTION_AI_ENDPOINT, {method:"POST", body:JSON.stringify(payload)}) .then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})) .then(()=>{showMessage("validationMessage","<i class='fas fa-check-circle'></i> Suggestion validée.", "success"); document.getElementById('aiSuggestion').style.display = 'none'; /* Maybe save main text too? saveOrdonnance(); */ }) .catch(e=>{if(!e.message.startsWith('Auth'))showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err Valid.: ${e.message}`,"error");console.error("Err validatePresc:",e);}) .finally(()=>{if(validateBtn)validateBtn.disabled=false;});
     }
 
-    function validatePrescription() { // Renamed: Saves the structured AI suggestion
-        const medicamentInput = document.getElementById("medicament"); const startDateInput = document.getElementById("start_date"); const endDateInput = document.getElementById("end_date"); const validateBtn = document.getElementById("validatePrescBtn");
-        const med = medicamentInput?.value.trim(); const sd = startDateInput?.value; const ed = endDateInput?.value;
+    // --- INITIALIZATION ---
+    function initializeDoctorDashboard() {
+        console.log("Initializing Doctor Dashboard...");
+        if (!localStorage.getItem(CONFIG.TOKEN_KEY)) { console.log("Doctor: No token. Redirecting."); redirectToLogin(); return; }
+        currentUserIdentifier = localStorage.getItem('userIdentifier') || 'unknown_doctor';
+        document.body.classList.add('loaded'); console.log("Doctor: Authenticated as", currentUserIdentifier);
+        // resetSessionTimeout(); // Add session timeout if needed
+        // ['mousemove', 'keypress', 'click', 'scroll'].forEach(event => document.addEventListener(event, resetSessionTimeout, { passive: true }));
 
-        if (!med || !sd || !ed) { showMessage("validationMessage", "Champs Suggestion requis.", "warning"); return; }
-        if (!currentIPP) { showMessage("validationMessage", "Patient non chargé.", "warning"); return; }
-
-        showMessage("validationMessage", "<i class='fas fa-spinner fa-spin'></i> Enregistrement Suggestion...", "loading");
-        if(validateBtn) validateBtn.disabled = true;
-
-        const schedule = { matin: document.getElementById("matin").checked, apres_midi: document.getElementById("apres_midi").checked, soir: document.getElementById("soir").checked, nuit: document.getElementById("nuit").checked };
-        const convertDateToAPI = (d) => { if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return ''; const p=d.split('-'); return `${p[1]}/${p[2]}/${p[0]}`; }; // YYYY-MM-DD -> MM/DD/YYYY
-        const finalPrescriptionText = document.getElementById("prescriptionInput").value;
-
-        const payload = { ipp: currentIPP, final_prescription: finalPrescriptionText, start_date: convertDateToAPI(sd), end_date: convertDateToAPI(ed), schedule: schedule, medicament_name: med };
-
-        // This likely needs its own endpoint, distinct from saving the consultation text
-        fetchWithAuth(VALIDATE_PRESCRIPTION_AI_ENDPOINT, {
-            method: "POST", body: JSON.stringify(payload)
-        })
-        .then(r => r.ok ? r.json().catch(() => ({})) : r.text().then(t => { throw new Error(t || `Err ${r.status}`) }))
-        .then(() => {
-            showMessage("validationMessage", "<i class='fas fa-check-circle'></i> Suggestion validée.", "success");
-            // We might also want to trigger saving the main prescription text here too using saveOrdonnance()?
-            // saveOrdonnance(); // Or notify user they still need to save the main text?
-        })
-        .catch(e => { if (!e.message.startsWith('Auth')) { showMessage("validationMessage", `<i class='fas fa-exclamation-triangle'></i> Err Validation Suggestion: ${e.message}`, "error"); } console.error("Error validatePrescription:", e); })
-        .finally(() => { if(validateBtn) validateBtn.disabled = false; });
+        const urlParams = new URLSearchParams(window.location.search); const ippFromUrl = urlParams.get("ipp");
+        if (ippFromUrl) { console.log(`IPP ${ippFromUrl} in URL. Loading...`); loadPatientIntoCurrentDashboard(ippFromUrl); }
+        else { console.log("No IPP in URL. Waiting for scan."); clearDoctorUI(); } // Start clean/disabled
+        console.log("Doctor Dashboard Initialized.");
     }
 
+    document.addEventListener('DOMContentLoaded', initializeDoctorDashboard);
 
-    // --- QR SCANNER CODE ---
-    // ... (Full QR Scanner code block remains the same: scanButton, container, video vars, updateScanStatus, stopScanner, tick, processScannedQrCode) ...
-     const scanButton = document.getElementById('scanQrButton'); const scannerContainer = document.getElementById('scanner-container'); const video = document.getElementById('scanner-video'); let scanning = false; let currentStream = null; let scanTimeout = null;
-     function updateScanStatus(message, type = 'info') { showMessage('scanResult', message, type); }
-     if (scanButton) { scanButton.onclick = async () => { if (!scanning) { try { updateScanStatus('', 'info'); if(!scannerContainer || !video) { throw new Error("Scanner elements missing."); } scannerContainer.style.display = 'block'; updateScanStatus('Recherche caméra...', 'loading'); currentStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }); video.srcObject = currentStream; await video.play(); updateScanStatus('Caméra prête. Scannez.', 'info'); scanButton.innerHTML = '<i class="fas fa-stop-circle"></i> Arrêter Scan'; scanButton.classList.replace('btn-primary','btn-danger'); scanning = true; clearTimeout(scanTimeout); scanTimeout = setTimeout(() => { if (scanning) { updateScanStatus('Aucun code détecté.', 'warning'); stopScanner(); } }, 30000); requestAnimationFrame(tick); } catch (err) { console.error("Cam/Scan Err:", err); updateScanStatus(`Err Cam: ${err.message}`, 'error'); stopScanner(); } } else { stopScanner(); updateScanStatus('Scan arrêté.', 'info'); } }; } else { console.warn("Scan button not found."); }
-     function stopScanner() { clearTimeout(scanTimeout); scanning = false; if (currentStream) { currentStream.getTracks().forEach(track => track.stop()); currentStream = null; } if(video) video.srcObject = null; if(scannerContainer) scannerContainer.style.display = 'none'; if(scanButton) {scanButton.innerHTML = '<i class="fas fa-qrcode"></i> Scanner QR'; scanButton.classList.replace('btn-danger','btn-primary');} console.log("Scanner stopped."); }
-     function tick() { if (!scanning || !video || video.readyState < video.HAVE_ENOUGH_DATA || !currentStream) { if (scanning) requestAnimationFrame(tick); return; } const canvasElement = document.createElement('canvas'); canvasElement.height = video.videoHeight; canvasElement.width = video.videoWidth; const canvas = canvasElement.getContext("2d",{willReadFrequently:true}); canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height); try { const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height); const code = window.jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: "dontInvert" }); if (code) { console.log("QR Found:", code.data); stopScanner(); processScannedQrCode(code.data); } else { requestAnimationFrame(tick); } } catch (e) { console.error("QR proc err:", e); requestAnimationFrame(tick); } }
-     function processScannedQrCode(scannedUrl) { clearTimeout(scanTimeout); updateScanStatus('Code détecté. Traitement...', 'loading'); try { if (!scannedUrl || !scannedUrl.startsWith(QR_TARGET_BASE_URL)) { throw new Error('QR Code non reconnu.'); } const url = new URL(scannedUrl); const ippFromQr = url.searchParams.get('ipp'); if (ippFromQr) { updateScanStatus(`Patient IPP ${ippFromQr} trouvé. Chargement...`, 'success'); loadPatientIntoCurrentDashboard(ippFromQr); } else { throw new Error('IPP manquant.'); } } catch (e) { console.error("QR process err:", e); updateScanStatus(`Err QR: ${e.message}`, 'error'); setTimeout(() => { updateScanStatus('', ''); }, 5000); } }
-
-
-    /**
-     * Resets UI and loads data for a newly identified patient.
-     * THIS IS THE MAIN ENTRY POINT AFTER GETTING AN IPP.
-     * @param {string} ipp - The IPP of the patient to load.
-     */
-    function loadPatientIntoCurrentDashboard(ipp) {
-        console.log(`loadPatientIntoCurrentDashboard: Loading patient ${ipp}`);
-        currentIPP = ipp; // Set the global IPP
-
-        // Update URL without reloading page
-        try {
-            const newUrl = new URL(window.location);
-            newUrl.searchParams.set('ipp', ipp);
-            window.history.pushState({ ipp: ipp }, '', newUrl);
-        } catch (e) { console.error("History API error:", e); }
-
-        console.log("Resetting UI for new patient visit...");
-
-        // --- Critical Resets ---
-        // Stop any ongoing recordings FIRST
-        if (mediaRecorder && mediaRecorder.state === 'recording') {
-            console.log("Stopping active individual recording...");
-            stopRecording(recordingField); // Will reset mediaRecorder and recordingField
-        }
-        if (globalMediaRecorder && globalMediaRecorder.state === 'recording') {
-            console.log("Stopping active global recording...");
-            stopGlobalRecording(); // Will reset globalMediaRecorder and isGlobalRecording
-        }
-        // Reset global visit ID
-        currentVisitId = null;
-        // Disable sections (also clears fields, messages, statuses via the updated function)
-        enableDoctorSections(false);
-        // --- End Critical Resets ---
-
-
-        // Clear specific areas not handled by enableDoctorSections(false)
-        if(document.getElementById('aiSuggestion')) document.getElementById('aiSuggestion').style.display = 'none';
-        // Clear scan result message after a delay
-        setTimeout(() => { showMessage('scanResult', '', ''); }, 4000);
-
-        console.log("Calling loadPatientVisitData to fetch data...");
-        // Call function to load Patient AND Visit data (will re-enable sections on success)
-        loadPatientVisitData(ipp);
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-
-    // --- Window Load Event ---
-    window.onload = () => {
-        if (!localStorage.getItem('authToken')) {
-            console.log("Doctor onload: No token, redirecting."); window.location.href = LOGIN_PAGE_URL; return;
-        }
-        currentUserIdentifier = localStorage.getItem('userIdentifier') || 'unknown_doctor'; // Get logged in user ID
-        document.body.classList.add('loaded');
-        console.log("Doctor onload: Authenticated as", currentUserIdentifier);
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const ippFromUrl = urlParams.get("ipp");
-
-        if (ippFromUrl) {
-            console.log(`Doctor onload: IPP found in URL (${ippFromUrl}). Loading...`);
-            loadPatientIntoCurrentDashboard(ippFromUrl); // Use the main loading function
-        } else {
-            console.log("Doctor onload: No IPP in URL. Waiting scan.");
-            const patientInfoDiv = document.getElementById('patientInfo');
-            if (patientInfoDiv) {
-                 patientInfoDiv.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><i class="fas fa-qrcode"></i><div class="empty-state-message">Prêt à scanner</div><div class="empty-state-description">Utilisez le bouton "Scanner QR".</div></div>`;
-             }
-            enableDoctorSections(false); // Start disabled
-        }
-    };
-
-</script>
+   </script>
+</body>
 </html>

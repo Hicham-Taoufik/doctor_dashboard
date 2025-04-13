@@ -1648,11 +1648,11 @@
         ['mousemove', 'keypress', 'click', 'scroll'].forEach(event => {
             document.addEventListener(event, resetSessionTimeout, { passive: true });
         });
-    }
+    } // <--- Make sure this closing brace for initializeDoctorDashboard is present
 
     // --- Start the application ---
-    document.addEventListener('DOMContentLoaded', initializeDoctorDashboard);
+    document.addEventListener('DOMContentLoaded', initializeDoctorDashboard); // <--- Make sure this line is present and correct
 
-   </script>
+   </script> // <--- End of the script block
 </body>
 </html>

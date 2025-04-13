@@ -1,4 +1,3 @@
-<script>
     // --- Configuration & Constants ---
     const CONFIG = {
         API_BASE_URL: 'https://workflows.aphelionxinnovations.com',
@@ -1312,5 +1311,3 @@
 
     // --- Start the application ---
     document.addEventListener('DOMContentLoaded', initializeDoctorDashboard);
-
-   </script>

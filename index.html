@@ -1643,7 +1643,8 @@
         ['mousemove', 'keypress', 'click', 'scroll'].forEach(event => {
             document.addEventListener(event, resetSessionTimeout, { passive: true });
         });
-    } // <-- *** CORRECTED: Added missing closing brace ***
+        } // <-- *** CORRECTED: Added missing closing brace ***
+    } // Add this closing brace to properly close the script block
 
     // --- Start the application ---
     document.addEventListener('DOMContentLoaded', initializeDoctorDashboard);

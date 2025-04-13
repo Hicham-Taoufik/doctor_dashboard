@@ -295,7 +295,90 @@
     function handleRecordingStop(stream) { const field = recordingField; if (!field) { console.warn("handleStop no field."); if(stream) stream.getTracks().forEach(track => track.stop()); return; } const config = getFieldConfig(field); if (!config) { console.error(`Config not found for ${field}`); if(stream) stream.getTracks().forEach(track => track.stop()); return; } console.log(`Stopped for ${field}. Chunks:${audioChunks.length}`); const s=document.getElementById(`${field}Status`); const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn'); const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn'); if(stopBtn) stopBtn.disabled = true; if(audioChunks.length===0){console.warn("No audio.");if(s)s.innerHTML='<i class="fas fa-exclamation-circle"></i> Vide'; if(startBtn) startBtn.disabled = false; setTimeout(() => { if (s?.innerHTML.includes('Vide')) s.innerHTML = ''; }, 4000); } else { const blob=new Blob(audioChunks,{type:'audio/webm'});if(s)s.innerHTML='<i class="fas fa-spinner fa-spin"></i> Transc...';sendAudioToAI(blob,field); audioChunks=[];} recordingField=null; mediaRecorder = null; if(stream) stream.getTracks().forEach(track => track.stop());}
 
     // --- Send Audio Function (Using Specific Endpoints & Visit ID)---
-    function sendAudioToAI(blob,field){ if(!field){console.error("Field missing");return;} const config = getFieldConfig(field); if(!config || !config.apiEndpoint) { console.error(`Config/Endpoint missing for ${field}`); showMessage(config?.messageId || 'scanResult', 'Erreur config endpoint', 'error'); return; } const ep = BASE_URL + config.apiEndpoint; const fd=new FormData();fd.append("audio",blob,`${field}_${currentIPP}_${Date.now()}.webm`); fd.append("ipp", currentIPP); fd.append("visit_id", currentVisitId); /* Include visit_id */ const s=document.getElementById(`${field}Status`); const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn'); const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn'); if(s)s.innerHTML='<i class="fas fa-spinner fa-spin"></i> Envoi...'; fetchWithAuth(ep,{method:"POST",body:fd}).then(r=>r.json()) .then(d=>{ let t = ''; if (d && d.success && typeof d.transcript === 'string') { t = d.transcript; } else { throw new Error(d?.message || 'Format transcription invalide.'); } document.getElementById(field==='diagnosis'?'diagnosticInput':'prescriptionInput').value=t; if(s)s.innerHTML='<i class="fas fa-check"></i> OK'; setTimeout(() => { if (s?.innerHTML.includes('OK')) s.innerHTML = ''; }, 4000); }).catch(e=>{if(!e.message.startsWith('Auth')){if(s)s.innerHTML='<i class="fas fa-times-circle"></i> Err Transc.';showMessage(config.messageId, `Err Transc: ${e.message}`, 'error');}console.error("Transc err:",e);}).finally(()=>{ if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; });}
+       // --- Send Audio Function (Corrected for Array Response) ---
+    function sendAudioToAI(blob,field){
+        if(!field){console.error("Field missing");return;}
+        const config = getFieldConfig(field); // Get config including endpoint
+        if(!config || !config.apiEndpoint) {
+            console.error(`Config or endpoint missing for ${field}`);
+            showMessage(config?.messageId || 'scanResult', 'Erreur config endpoint', 'error');
+            return;
+        }
+
+        const ep = BASE_URL + config.apiEndpoint; // Use specific endpoint
+        const fd=new FormData();
+        fd.append("audio",blob,`${field}_${currentIPP}_${Date.now()}.webm`);
+        fd.append("ipp", currentIPP);
+        fd.append("visit_id", currentVisitId); // Include visit_id
+
+        const s=document.getElementById(`${field}Status`);
+        const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn');
+        const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn');
+
+        if(s)s.innerHTML='<i class="fas fa-spinner fa-spin"></i> Envoi...';
+
+        fetchWithAuth(ep,{method:"POST",body:fd})
+            .then(r=>r.json()) // Expect JSON response (which is an array)
+            .then(responseData => { // Use responseData for clarity
+                console.log(`Raw Transc response ${field}:`, JSON.stringify(responseData)); // Log the raw array/object
+
+                let transcript = '';
+                let resultObject = null;
+
+                // *** START CORRECTION FOR ARRAY RESPONSE ***
+                // Check if responseData is an array and has at least one element
+                if (Array.isArray(responseData) && responseData.length > 0) {
+                    resultObject = responseData[0]; // Get the first object from the array
+                    console.log(`Processing first element of array for ${field}:`, resultObject);
+                } else if (typeof responseData === 'object' && responseData !== null && !Array.isArray(responseData)) {
+                    // Optional: Handle if backend sometimes returns just the object
+                    console.log(`Processing direct object response for ${field}:`, responseData);
+                    resultObject = responseData;
+                } else {
+                     // Handle empty array or non-object/non-array response
+                     console.warn(`Unexpected response format (not array or object) for ${field}:`, responseData);
+                     throw new Error('Format de réponse transcription inattendu.');
+                }
+
+                // Now, check the properties of the extracted object
+                if (resultObject && resultObject.success === true && typeof resultObject.transcript === 'string') {
+                    transcript = resultObject.transcript;
+                    console.log(`Transcript extracted for ${field}: "${transcript.substring(0,50)}..."`)
+                } else {
+                    // Handle cases where the object exists but success is false or transcript is missing/wrong type
+                    console.warn(`Transcription failed or invalid object format inside array for ${field}:`, resultObject);
+                    throw new Error(resultObject?.message || 'Transcription échouée ou format invalide.');
+                }
+                // *** END CORRECTION FOR ARRAY RESPONSE ***
+
+                // Populate the relevant textarea
+                document.getElementById(field==='diagnosis'?'diagnosticInput':'prescriptionInput').value = transcript;
+
+                // Update status indicator
+                if(s)s.innerHTML='<i class="fas fa-check"></i> OK';
+                setTimeout(() => { if (s?.innerHTML.includes('OK')) s.innerHTML = ''; }, 4000); // Clear status after delay
+
+            })
+            .catch(e=>{ // Catch errors from fetch OR from the .then block
+                if(!e.message.startsWith('Auth')){
+                    if(s)s.innerHTML='<i class="fas fa-times-circle"></i> Err Transc.';
+                    // Show error message in the specific field's message area
+                    showMessage(config.messageId, `Err Transc: ${e.message}`, 'error');
+                }
+                console.error("Transc err:",e);
+            })
+            .finally(()=>{ // Always re-enable buttons
+                 if(startBtn) startBtn.disabled = false;
+                 if(stopBtn) stopBtn.disabled = true;
+                 // Clear status indicator if it's showing an error after timeout
+                 setTimeout(() => {
+                    const currentStatusHTML = s?.innerHTML;
+                    if (currentStatusHTML && currentStatusHTML.includes('Err Transc')) {
+                         if(s) s.innerHTML = '';
+                    }
+                 }, 5000);
+            });
+    }
     function getFieldConfig(field) { const map = { diagnosis: { apiEndpoint: TRANSCRIBE_DIAGNOSIS_ENDPOINT, messageId: 'diagMessage' }, prescription: { apiEndpoint: TRANSCRIBE_PRESCRIPTION_ENDPOINT, messageId: 'validationMessage' } }; return map[field]; }
 
     // --- Form Submission Functions (Updated to use visitId) ---

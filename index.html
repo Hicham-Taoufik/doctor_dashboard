@@ -207,7 +207,6 @@
     function sanitizeInput(input) { if (input === null || input === undefined) return ""; const temp = document.createElement("div"); temp.textContent = String(input); return temp.innerHTML; }
     function formatDate(dateString, includeTime = false) { if (!dateString || typeof dateString !== 'string') { return '-'; } try { const dateObj = new Date(dateString); if (isNaN(dateObj.getTime())) { return 'Date Invalide'; } const options = { year: 'numeric', month: '2-digit', day: '2-digit' }; let resolvedTimeZone = 'UTC'; if (includeTime) { options.hour = '2-digit'; options.minute = '2-digit'; resolvedTimeZone = undefined; } options.timeZone = resolvedTimeZone; let formatted = dateObj.toLocaleString('fr-FR', options); if (!includeTime && dateString.includes('T')) { formatted = dateObj.toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' }); } else if (!includeTime && dateString.length <= 10) { const parts = dateString.split(/[-/]/); if (parts.length === 3 && !dateString.includes('T')) { formatted = `${parts[2].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[0]}`; } } return formatted; } catch (e) { console.error("Date format error:", dateString, e); return 'Err Format'; } }
 
-
     // --- Enable/Disable Doctor Sections ---
     function enableDoctorSections(enable) { const diagCardBody = document.getElementById('diagCardBody'); const prescCardBody = document.getElementById('prescCardBody'); const elementsToToggle = document.querySelectorAll('#diagCardBody textarea, #diagCardBody button, #prescCardBody textarea, #prescCardBody button, #aiSuggestion input, #aiSuggestion button'); if (enable && currentIPP && currentVisitId /* Check visitId too */) { if(diagCardBody) { diagCardBody.style.opacity = '1'; diagCardBody.style.pointerEvents = 'auto'; } if(prescCardBody) { prescCardBody.style.opacity = '1'; prescCardBody.style.pointerEvents = 'auto'; } elementsToToggle.forEach(el => el ? el.disabled = false : null); const stopDiag = document.getElementById('stopDiagRecordBtn'); const stopPresc = document.getElementById('stopPrescRecordBtn'); if(stopDiag) stopDiag.disabled = true; if(stopPresc) stopPresc.disabled = true; } else { if(diagCardBody) { diagCardBody.style.opacity = '0.5'; diagCardBody.style.pointerEvents = 'none'; } if(prescCardBody) { prescCardBody.style.opacity = '0.5'; prescCardBody.style.pointerEvents = 'none'; } elementsToToggle.forEach(el => el ? el.disabled = true : null); const diagInput = document.getElementById('diagnosticInput'); const prescInput = document.getElementById('prescriptionInput'); const aiSuggestion = document.getElementById('aiSuggestion'); if(diagInput) diagInput.value = ''; if(prescInput) prescInput.value = ''; if(aiSuggestion) aiSuggestion.style.display = 'none'; showMessage('diagMessage', '', ''); showMessage('validationMessage', '', ''); const diagStatus = document.getElementById('diagnosisStatus'); const prescStatus = document.getElementById('prescriptionStatus'); if (diagStatus) diagStatus.innerHTML = ''; if (prescStatus) prescStatus.innerHTML = ''; if (mediaRecorder?.state === 'recording') stopRecording(recordingField); recordingField = null; mediaRecorder = null; audioChunks = []; } }
 
@@ -255,22 +254,16 @@
         if (nurseDataDisplayDiv) nurseDataDisplayDiv.style.display = 'none';
         enableDoctorSections(false);
 
-        // ** Use the GET_PATIENT_DATA_ENDPOINT which returns all needed data **
         fetchWithAuth(`${BASE_URL}${GET_PATIENT_DATA_ENDPOINT}?ipp=${ipp}`)
-            .then(responseData => { // Use the full responseData
+            .then(responseData => {
                 console.log("Full Patient Data Response:", responseData);
-                // ** Check structure based on sample response **
                 if (!responseData || responseData.success === false || !responseData.patientData || responseData.visitId === undefined || responseData.visitId === null) { throw new Error(responseData?.message || "Données patient/visite invalides."); }
-
                 const patientData = responseData.patientData;
-                currentVisitId = responseData.visitId; // Store Visit ID
+                currentVisitId = responseData.visitId;
                 const nurseObservations = responseData.nurseObservations || {};
                 const vitalSigns = responseData.vitalSigns || {};
-                currentIPP = ipp; // Store IPP (already passed in)
-
+                currentIPP = ipp;
                 console.log(`Patient Loaded: IPP=${currentIPP}, VisitID=${currentVisitId}`);
-
-                // Populate Patient Info Grid (Using correct field names from sample)
                 patientInfoContainer.innerHTML = `
                     <div class="info-group"><div class="info-label">Nom</div><div class="info-value">${sanitizeInput(patientData.nom||'-')}</div></div>
                     <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${sanitizeInput(patientData.prenom||'-')}</div></div>
@@ -280,7 +273,7 @@
                     <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${sanitizeInput(patientData.telephone||'-')}</div></div>
                     <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${sanitizeInput(patientData.adresse||'-')}</div></div>
                     <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${sanitizeInput(patientData.mutuelle||'Aucune')}</div></div>
-                    <div class="info-group"><div class="info-label">Naissance</div><div class="info-value">${formatDate(patientData.date_naissance)}</div></div> {/* Use global formatDate */}
+                    <div class="info-group"><div class="info-label">Naissance</div><div class="info-value">${formatDate(patientData.date_naissance)}</div></div>
                     <div class="info-group"><div class="info-label">Sexe</div><div class="info-value">${sanitizeInput(patientData.sexe === 'M' ? 'Homme' : patientData.sexe === 'F' ? 'Femme' : '-')}</div></div>
                     `;
                  displayNurseData(nurseObservations, vitalSigns);
@@ -294,7 +287,7 @@
     function stopRecording(field) { const statusEl = document.getElementById(`${field}Status`); if(mediaRecorder&&mediaRecorder.state==='recording' && recordingField === field){console.log(`Stop rec for ${recordingField}`);mediaRecorder.stop(); if(statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Arrêt...';}else{console.log("Not recording or wrong field.");} const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn'); const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn'); if (mediaRecorder?.state !== 'recording') {if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; if(statusEl) statusEl.innerHTML='';} }
     function handleRecordingStop(stream) { const field = recordingField; if (!field) { console.warn("handleStop no field."); if(stream) stream.getTracks().forEach(track => track.stop()); return; } const config = getFieldConfig(field); if (!config) { console.error(`Config not found for ${field}`); if(stream) stream.getTracks().forEach(track => track.stop()); return; } console.log(`Stopped for ${field}. Chunks:${audioChunks.length}`); const s=document.getElementById(`${field}Status`); const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn'); const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn'); if(stopBtn) stopBtn.disabled = true; if(audioChunks.length===0){console.warn("No audio.");if(s)s.innerHTML='<i class="fas fa-exclamation-circle"></i> Vide'; if(startBtn) startBtn.disabled = false; setTimeout(() => { if (s?.innerHTML.includes('Vide')) s.innerHTML = ''; }, 4000); } else { const blob=new Blob(audioChunks,{type:'audio/webm'});if(s)s.innerHTML='<i class="fas fa-spinner fa-spin"></i> Transc...';sendAudioToAI(blob,field); audioChunks=[];} recordingField=null; mediaRecorder = null; if(stream) stream.getTracks().forEach(track => track.stop());}
 
-    // --- Send Audio Function (Using Specific Endpoints & Visit ID, Correct Response Handling)---
+    // --- Send Audio Function (Corrected for Array Response)---
     function sendAudioToAI(blob,field){
         if(!field){console.error("Field missing");return;}
         const config = getFieldConfig(field);
@@ -317,39 +310,30 @@
 
         if(s)s.innerHTML='<i class="fas fa-spinner fa-spin"></i> Envoi...';
 
-        // Use fetchWithAuth which already parses JSON
         fetchWithAuth(ep,{method:"POST",body:fd})
-            .then(responseData => { // responseData is already parsed
+            .then(responseData => {
                 console.log(`Raw Transc response ${field}:`, JSON.stringify(responseData));
-
                 let transcript = '';
                 let resultObject = null;
-
-                // Handle array response [{...}]
                 if (Array.isArray(responseData) && responseData.length > 0) {
                     resultObject = responseData[0];
                     console.log(`Processing first element of array for ${field}:`, resultObject);
                 } else if (typeof responseData === 'object' && responseData !== null && !Array.isArray(responseData)) {
-                    // Handle direct object response (less likely based on sample, but fallback)
                     resultObject = responseData;
-                     console.log(`Processing direct object response for ${field}:`, resultObject);
+                    console.log(`Processing direct object response for ${field}:`, resultObject);
                 } else {
                      throw new Error('Format de réponse transcription inattendu.');
                 }
-
-                // Check the extracted object
                 if (resultObject && resultObject.success === true && typeof resultObject.transcript === 'string') {
                     transcript = resultObject.transcript;
                     console.log(`Transcript extracted for ${field}: "${transcript.substring(0,50)}..."`)
                 } else {
                     throw new Error(resultObject?.message || 'Transcription échouée ou format invalide.');
                 }
-
                 document.getElementById(field==='diagnosis'?'diagnosticInput':'prescriptionInput').value = transcript;
                 if(s)s.innerHTML='<i class="fas fa-check"></i> OK';
-                showMessage(config.messageId, '', 'info'); // Clear error on success
+                showMessage(config.messageId, '', 'info');
                 setTimeout(() => { if (s?.innerHTML.includes('OK')) s.innerHTML = ''; }, 4000);
-
             })
             .catch(e=>{
                 if(!e.message.startsWith('Auth')){
@@ -372,8 +356,126 @@
     function getFieldConfig(field) { const map = { diagnosis: { apiEndpoint: TRANSCRIBE_DIAGNOSIS_ENDPOINT, messageId: 'diagMessage' }, prescription: { apiEndpoint: TRANSCRIBE_PRESCRIPTION_ENDPOINT, messageId: 'validationMessage' } }; return map[field]; }
 
     // --- Form Submission Functions (Updated to use visitId) ---
-    function submitDiagnostic() { const diag=document.getElementById("diagnosticInput").value;if(!diag||!currentIPP||!currentVisitId){showMessage("diagMessage",`Diagnostic vide ou patient/visite non chargé.`,"warning");return;} showMessage("diagMessage","","");const saveButton = document.getElementById('submitDiagBtn'); if(saveButton) saveButton.disabled = true; fetchWithAuth(`${BASE_URL}${UPDATE_DIAGNOSIS_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, /* Use stored visitId */ diagnostic:diag})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("diagMessage","<i class='fas fa-check-circle'></i> Diagnostic Enregistré.","success");}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("diagMessage",`<i class='fas fa-exclamation-triangle'></i> Err Enregistrement: ${e.message}`,"error");}console.error("Err submitDiag:",e);}).finally(()=> { if(saveButton) saveButton.disabled = false; });}
-    function submitPrescription() { const presc=document.getElementById("prescriptionInput").value; const submitBtn = document.getElementById('submitPrescBtn'); if(!presc||!currentIPP||!currentVisitId){showMessage("validationMessage",`Prescription vide ou patient/visite non chargé.`,"warning");aiSuggestionDiv.style.display="none";return;} showMessage("validationMessage","","");aiSuggestionDiv.style.display="none"; if(submitBtn) submitBtn.disabled = true; fetchWithAuth(`${BASE_URL}${SUBMIT_PRESCRIPTION_AI_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, /* Use stored visitId */ prescription:presc})}) .then(r=>r.json()) .then(data=>{ console.log("AI Raw:",JSON.stringify(data,null,2)); if (data && data.success === true && data.suggestion) { const suggestionData = data.suggestion; console.log("Extracted suggestion:", suggestionData); aiSuggestionDiv.style.display="block"; document.getElementById("medicament").value=suggestionData.medicament||''; const convertDate = (dateStr) => { if(!dateStr||typeof dateStr!=='string'||!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)){ console.warn(`Invalid AI date:"${dateStr}"`); return ''; }; const p=dateStr.split('/'); if(p.length!==3) return ''; const month=parseInt(p[0],10); const day=parseInt(p[1],10); const year=parseInt(p[2],10); if(isNaN(month)||isNaN(day)||isNaN(year)||month<1||month>12||day<1||day>31||year<1900){ console.warn(`Invalid date parts: M=${month},D=${day},Y=${year}`); return ''; } return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }; document.getElementById("start_date").value = convertDate(suggestionData.start_date); document.getElementById("end_date").value = convertDate(suggestionData.end_date); if(suggestionData.schedule){ document.getElementById("matin").checked=!!suggestionData.schedule.matin; document.getElementById("apres_midi").checked=!!suggestionData.schedule.apres_midi; document.getElementById("soir").checked=!!suggestionData.schedule.soir; document.getElementById("nuit").checked=!!suggestionData.schedule.nuit; } else { document.getElementById("matin").checked=false; document.getElementById("apres_midi").checked=false; document.getElementById("soir").checked=false; document.getElementById("nuit").checked=false; } aiSuggestionDiv.scrollIntoView({behavior:'smooth'}); } else { throw new Error(data?.message || "Réponse IA invalide."); } }).catch(e=>{ if(!e.message.startsWith('Auth')){ showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`,"error"); } console.error("Err submitPresc:",e); aiSuggestionDiv.style.display="none"; }).finally(()=>{ if(submitBtn) submitBtn.disabled = false; }); }
+    function submitDiagnostic() { const diag=document.getElementById("diagnosticInput").value;if(!diag||!currentIPP||!currentVisitId){showMessage("diagMessage",`Diagnostic vide ou patient/visite non chargé.`,"warning");return;} showMessage("diagMessage","","");const saveButton = document.getElementById('submitDiagBtn'); if(saveButton) saveButton.disabled = true; fetchWithAuth(`${BASE_URL}${UPDATE_DIAGNOSIS_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, diagnostic:diag})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("diagMessage","<i class='fas fa-check-circle'></i> Diagnostic Enregistré.","success");}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("diagMessage",`<i class='fas fa-exclamation-triangle'></i> Err Enregistrement: ${e.message}`,"error");}console.error("Err submitDiag:",e);}).finally(()=> { if(saveButton) saveButton.disabled = false; });}
+
+    // --- submitPrescription Corrected for Nested Array Response ---
+    function submitPrescription() {
+        const presc = document.getElementById("prescriptionInput").value;
+        const submitBtn = document.getElementById('submitPrescBtn');
+        const messageEl = document.getElementById("validationMessage"); // Define for error messages
+        const aiSuggestionContainer = document.getElementById("aiSuggestion"); // Define container
+
+        if (!presc || !currentIPP || !currentVisitId) {
+            showMessage(messageEl.id, `Prescription vide ou patient/visite non chargé.`, "warning");
+            if(aiSuggestionContainer) aiSuggestionContainer.style.display = "none";
+            return;
+        }
+        showMessage(messageEl.id, "", ""); // Clear previous messages
+        if(aiSuggestionContainer) aiSuggestionContainer.style.display = "none"; // Hide initially
+        if (submitBtn) submitBtn.disabled = true;
+
+        // Show loading state inside the suggestion box
+        if (aiSuggestionContainer) {
+            aiSuggestionContainer.style.display = "block"; // Show the box
+            aiSuggestionContainer.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3><div class="message message-loading" style="display:block;"><i class="fas fa-spinner fa-spin"></i> Analyse IA en cours...</div>`; // Loading state
+        }
+
+        fetchWithAuth(`${BASE_URL}${SUBMIT_PRESCRIPTION_AI_ENDPOINT}`, {
+                method: "POST",
+                body: JSON.stringify({ ipp: currentIPP, visit_id: currentVisitId, prescription: presc })
+            })
+            .then(responseData => { // responseData is already parsed by fetchWithAuth
+                console.log("AI Raw Response:", JSON.stringify(responseData, null, 2));
+
+                let suggestionData = null;
+
+                // ** START: Correction for nested array structure [ { "output": {...} } ] **
+                if (Array.isArray(responseData) && responseData.length > 0 && responseData[0].output && typeof responseData[0].output === 'object') {
+                    // Extract the 'output' object from the first element of the array
+                    suggestionData = responseData[0].output;
+                    console.log("Extracted suggestion data (from array[0].output):", suggestionData);
+                }
+                // ** END: Correction for nested array structure **
+                 else {
+                     // Handle cases where the structure is not as expected
+                     console.error("Invalid AI suggestion structure in response:", responseData);
+                     let backendMessage = responseData?.message || responseData?.[0]?.message; // Try to get a message if available
+                     throw new Error(backendMessage || "Réponse IA invalide ou structure inattendue.");
+                 }
+
+                // Check if suggestionData was successfully extracted
+                if (suggestionData) {
+
+                    if(aiSuggestionContainer) {
+                         // Rebuild the suggestion form content
+                         aiSuggestionContainer.innerHTML = `
+                             <h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3>
+                             <div class="input-group"> <label for="medicament">Médicament:</label> <input type="text" id="medicament"/> </div>
+                             <div class="input-group"> <label for="start_date">Date début:</label> <input type="date" id="start_date"/> </div>
+                             <div class="input-group"> <label for="end_date">Date fin:</label> <input type="date" id="end_date"/> </div>
+                             <div class="input-group">
+                                <label>Horaires:</label>
+                                <div class="checkbox-wrapper">
+                                   <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label>
+                                   <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> Après-midi</label>
+                                   <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label>
+                                   <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label>
+                                </div>
+                             </div>
+                             <div class="btn-group">
+                                <button type="button" class="btn btn-success" id="validatePrescBtn" onclick="validatePrescription()">
+                                   <i class="fas fa-check-double"></i> Valider
+                                </button>
+                             </div>`; // Removed extra div
+
+                         // Date conversion function (assuming MM/DD/YYYY input from AI)
+                         const convertDate = (dateStr) => {
+                            if (!dateStr || typeof dateStr !== 'string' || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)) { console.warn(`Invalid AI date format:"${dateStr}"`); return ''; }
+                            const p = dateStr.split('/'); if (p.length !== 3) return '';
+                            const month = parseInt(p[0], 10); const day = parseInt(p[1], 10); const year = parseInt(p[2], 10);
+                            if (isNaN(month) || isNaN(day) || isNaN(year) || month < 1 || month > 12 || day < 1 || day > 31 || year < 1900) { console.warn(`Invalid date parts from AI: M=${month},D=${day},Y=${year}`); return ''; }
+                            return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`; // YYYY-MM-DD
+                         };
+
+                         // Populate the fields
+                         document.getElementById("medicament").value = suggestionData.medicament || '';
+                         document.getElementById("start_date").value = convertDate(suggestionData.start_date);
+                         document.getElementById("end_date").value = convertDate(suggestionData.end_date);
+
+                         if (suggestionData.schedule) {
+                            document.getElementById("matin").checked = !!suggestionData.schedule.matin;
+                            document.getElementById("apres_midi").checked = !!suggestionData.schedule.apres_midi;
+                            document.getElementById("soir").checked = !!suggestionData.schedule.soir;
+                            document.getElementById("nuit").checked = !!suggestionData.schedule.nuit;
+                         } else {
+                            document.getElementById("matin").checked = false; document.getElementById("apres_midi").checked = false; document.getElementById("soir").checked = false; document.getElementById("nuit").checked = false;
+                         }
+
+                         aiSuggestionContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                     } // end if(aiSuggestionContainer)
+
+                } else {
+                    // This case should theoretically be caught by the structure check above, but keep as fallback
+                    console.log("AI ran, but no structured suggestion found or extracted.");
+                     if(aiSuggestionContainer) {
+                          aiSuggestionContainer.innerHTML = `<h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3><p>L'IA n'a pas pu extraire de suggestion structurée.</p>`;
+                          aiSuggestionContainer.style.display = 'block';
+                     }
+                }
+            })
+            .catch(e => { // Catch errors from fetch OR from the throw inside .then
+                if (!e.message.startsWith('Auth')) {
+                    showMessage(messageEl.id, `<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`, "error");
+                }
+                console.error("Err submitPresc:", e);
+                if(aiSuggestionContainer) aiSuggestionContainer.style.display = "none"; // Hide suggestion box on error
+            })
+            .finally(() => {
+                if (submitBtn) submitBtn.disabled = false; // Re-enable button
+            });
+    }
+    // --- END submitPrescription ---
+
     function validatePrescription() { const med=document.getElementById("medicament").value,sd=document.getElementById("start_date").value,ed=document.getElementById("end_date").value; const validateBtn = document.getElementById('validatePrescBtn'); if(!med||!sd||!ed||!currentIPP||!currentVisitId){showMessage("validationMessage",`Champs requis ou patient/visite non chargé.`,"warning");return;} showMessage("validationMessage","",""); if(validateBtn) validateBtn.disabled = true; const sched={matin:document.getElementById("matin").checked,apres_midi:document.getElementById("apres_midi").checked,soir:document.getElementById("soir").checked,nuit:document.getElementById("nuit").checked};const cvAPI=(dt)=>{if(!dt||!/^\d{4}-\d{2}-\d{2}$/.test(dt))return '';const p=dt.split('-');if(p.length!==3)return '';return `${p[1]}/${p[2]}/${p[0]}`}; const apiSD=cvAPI(sd),apiED=cvAPI(ed);fetchWithAuth(`${BASE_URL}${VALIDATE_PRESCRIPTION_AI_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, /* Use stored visitId */ final_prescription:document.getElementById("prescriptionInput").value,start_date:apiSD,end_date:apiED,schedule:sched,medicament_name:med})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("validationMessage","<i class='fas fa-check-circle'></i> Prescription validée.","success"); aiSuggestionDiv.style.display = 'none';}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err valid: ${e.message}`,"error");}console.error("Err validatePresc:",e);}).finally(()=>{ if(validateBtn) validateBtn.disabled = false; });}
 
     // --- QR SCANNER CODE ---

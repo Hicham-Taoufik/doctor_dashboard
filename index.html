@@ -59,7 +59,7 @@
     .message-success { background: var(--success-light); color: var(--success); }
     .message-warning { background: var(--warning-light); color: var(--warning); }
     .message-error { background: var(--danger-light); color: var(--danger); }
-    .message-info { background: var(--primary-light); color: var(--primary); border-left: 4px solid var(--primary);}
+    .message-info, .message-loading { background: var(--primary-light); color: var(--primary); border-left: 4px solid var(--primary);} /* Unified info/loading */
     .no-print { @media print { display: none !important; } }
     #scanner-container { display: none; position: relative; max-width: 300px; margin: 15px auto 0; border: 1px solid var(--gray-300); border-radius: var(--border-radius); overflow: hidden; }
     #scanner-video { display: block; width: 100%; height: auto; }
@@ -67,35 +67,12 @@
     .empty-state i { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.6; display: block; }
     .empty-state-message { font-size: 1rem; font-weight: 500; margin-bottom: 0.25rem; }
     .empty-state-description { font-size: 0.85rem; }
-     /* START: Added Nurse Data Display CSS */
-     .nurse-data-display {
-        background-color: var(--gray-100); /* Light background */
-        padding: 1rem;
-        border-radius: var(--border-radius);
-        margin-top: 1rem; /* Space above */
-        border: 1px solid var(--gray-200); /* Subtle border */
-     }
-     .nurse-data-display h4 {
-        font-size: 0.9rem;
-        margin-bottom: 0.75rem;
-        color: var(--gray-700);
-        border-bottom: 1px solid var(--gray-300); /* Separator line */
-        padding-bottom: 0.5rem;
-        display: flex; /* Align icon */
-        align-items: center;
-     }
-     .nurse-data-display h4 i {
-         margin-right: 8px; /* Space icon */
-         color: var(--primary); /* Optional: Theme icon color */
-     }
-     .nurse-data-display p {
-        font-size: 0.85rem;
-        margin-bottom: 0.4rem;
-        color: var(--gray-800);
-     }
-     .nurse-data-display strong {
-        color: var(--gray-600);
-     }
+    /* START: Added Nurse Data Display CSS */
+     .nurse-data-display { background-color: var(--gray-100); padding: 1rem; border-radius: var(--border-radius); margin-top: 1rem; border: 1px solid var(--gray-200); }
+     .nurse-data-display h4 { font-size: 0.9rem; margin-bottom: 0.75rem; color: var(--gray-700); border-bottom: 1px solid var(--gray-300); padding-bottom: 0.5rem; display: flex; align-items: center; }
+     .nurse-data-display h4 i { margin-right: 8px; color: var(--primary); }
+     .nurse-data-display p { font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--gray-800); }
+     .nurse-data-display strong { color: var(--gray-600); }
      /* END: Added Nurse Data Display CSS */
     @media (max-width: 768px) { .flex-row { flex-direction: column; gap: 20px; } .patient-info { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 480px) { .header { padding: 12px 0; justify-content: center;} .header-main-content { width: 100%; justify-content: center; margin-bottom: 10px; } .header-logout { width: 100%;} .logout-btn { width: 100%; justify-content: center; } .header-title { font-size: 1.1rem; } .card-body { padding: 12px; } .btn { padding: 8px 12px; font-size: 0.8rem; } .patient-info { grid-template-columns: 1fr; } .btn-group { gap: 6px; } #scanner-container { max-width: 100%; } }
@@ -129,24 +106,24 @@
          </div>
      </div>
 
-    <!-- Patient Info Card -->
-    <div class="card">
-      <div class="card-header"> <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations du Patient & Visite</h2> <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> </div>
-      <div class="card-body">
-          <div id="patientInfo" class="patient-info">
-               <div class="empty-state" style="grid-column: 1 / -1;"> <i class="fas fa-qrcode"></i> <div class="empty-state-message">Prêt à scanner</div> <div class="empty-state-description">Utilisez le bouton "Scanner QR" ou chargez un patient via l'URL.</div> </div>
-          </div>
+        <!-- Patient Info Card -->
+        <div class="card">
+          <div class="card-header"> <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations du Patient & Visite</h2> <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> </div>
+          <div class="card-body">
+              <div id="patientInfo" class="patient-info">
+                   <div class="empty-state" style="grid-column: 1 / -1;"> <i class="fas fa-qrcode"></i> <div class="empty-state-message">Prêt à scanner</div> <div class="empty-state-description">Utilisez le bouton "Scanner QR" ou chargez un patient via l'URL.</div> </div>
+              </div>
 
-          <!-- START: Added Nurse Data Display Area -->
-          <div id="nurseDataDisplay" class="nurse-data-display" style="display: none; margin-top: 20px; border-top: 1px solid var(--gray-200); padding-top: 15px;">
-              <h4><i class="fas fa-user-nurse"></i> Données Infirmières</h4>
-              <div id="nurseObservationsDisplay"><p><strong>Observation:</strong> <span>-</span></p></div>
-              <div id="nurseVitalsDisplay"><p><strong>Signes Vitaux (derniers):</strong> <span>-</span></p></div>
-          </div>
-          <!-- END: Added Nurse Data Display Area -->
+              <!-- START: Added Nurse Data Display Area -->
+              <div id="nurseDataDisplay" class="nurse-data-display" style="display: none; margin-top: 20px; border-top: 1px solid var(--gray-200); padding-top: 15px;">
+                  <h4><i class="fas fa-user-nurse"></i> Données Infirmières</h4>
+                  <div id="nurseObservationsDisplay"><p><strong>Observation:</strong> <span>-</span></p></div>
+                  <div id="nurseVitalsDisplay"><p><strong>Signes Vitaux (derniers):</strong> <span>-</span></p></div>
+              </div>
+              <!-- END: Added Nurse Data Display Area -->
 
-      </div>
-    </div>
+          </div>
+        </div>
 
     <!-- Diagnosis & Prescription Row -->
     <div class="flex-row">
@@ -193,18 +170,25 @@
     const BASE_URL = 'https://workflows.aphelionxinnovations.com';
     const LOGIN_PAGE_URL = 'https://hicham-taoufik.github.io/login/';
     const QR_TARGET_BASE_URL = 'app://medilink/patient';
-    const GET_PATIENT_DATA_ENDPOINT = "/webhook/doctor-get-patient"; // Renamed for clarity
-    const UPDATE_DIAGNOSIS_ENDPOINT = "/webhook/doctor-submit-diagnostic"; // Renamed for clarity
+    // CORRECTED Endpoint constant based on sample API response
+    const GET_PATIENT_DATA_ENDPOINT = "/webhook/doctor/get-visit-details";
+    const UPDATE_DIAGNOSIS_ENDPOINT = "/webhook/doctor-submit-diagnostic"; // Keeping separate endpoint for now
     const TRANSCRIBE_DIAGNOSIS_ENDPOINT = "/webhook/transcribe-diagnosis";
     const TRANSCRIBE_PRESCRIPTION_ENDPOINT = "/webhook/transcribe-prescription";
     const SUBMIT_PRESCRIPTION_AI_ENDPOINT = "/webhook/doctor-submit-prescription";
     const VALIDATE_PRESCRIPTION_AI_ENDPOINT = "/webhook/doctor-validate-prescription";
+
 
     let currentIPP = null;
     let currentVisitId = null; // Added Visit ID global
     let mediaRecorder;
     let audioChunks = [];
     let recordingField = null;
+    // *** Added QR Scanner Globals Back ***
+    let scanning = false;
+    let currentStream = null;
+    let scanTimeout = null;
+
 
     // DOM Cache Additions
     const patientInfoDiv = document.getElementById('patientInfo');
@@ -214,6 +198,7 @@
     const video = document.getElementById('scanner-video');
     const aiSuggestionDiv = document.getElementById('aiSuggestion');
 
+
     // --- Auth & Helpers ---
     function fetchWithAuth(url, options={}) { const token = localStorage.getItem('authToken'); if (!token) { console.error('Doctor: No token.'); alert('Session expirée.'); window.location.href = LOGIN_PAGE_URL; return Promise.reject(new Error('Token non trouvé.')); } const headers = { ...options.headers, 'Authorization': `Bearer ${token}` }; if (options.body && !(options.body instanceof FormData)) { headers['Content-Type'] = 'application/json'; } else if (options.body instanceof FormData) { delete headers['Content-Type']; } return fetch(url, { ...options, headers: headers }) .then(async response => { if (response.status === 401 || response.status === 403) { console.error('Doctor: Auth error:', response.status); localStorage.removeItem('authToken'); alert('Session invalide.'); window.location.href = LOGIN_PAGE_URL; throw new Error(`Auth failed: ${response.status}`); } if (!response.ok) { let errorText = response.statusText; try { const errorData = await response.text(); try { const errorJson = JSON.parse(errorData); errorText = errorJson.message || errorData; } catch (parseError) { errorText = errorData || response.statusText; } } catch (readError) { console.warn(`Could not read error body for ${url}:`, readError); } console.error(`Doctor: API Error ${response.status} for ${url}: ${errorText}`); throw new Error(`Erreur ${response.status}: ${errorText}`); } const contentType = response.headers.get("content-type"); if (contentType && contentType.includes("application/json")) { const text = await response.text(); try { return JSON.parse(text); } catch (e) { console.warn(`Invalid JSON from ${url}: ${text}`); return { success: true, data: text, warning: 'Invalid JSON received' }; } } else { const text = await response.text(); return { success: true, data: text }; } }).catch(error => { console.error(`Fetch error for ${url}:`, error); if (!error.message.startsWith('Auth failed')) { const genericMsgEl = document.getElementById('scanResult'); if(genericMsgEl) showMessage(genericMsgEl.id, `Erreur Comm: ${error.message}`, 'error'); } throw error; }); }
     function logout() { localStorage.removeItem('authToken'); alert('Déconnecté.'); window.location.href = LOGIN_PAGE_URL; }
@@ -221,15 +206,16 @@
     function sanitizeInput(input) { if (input === null || input === undefined) return ""; const temp = document.createElement("div"); temp.textContent = String(input); return temp.innerHTML; }
     function formatDate(dateString, includeTime = false) { if (!dateString || typeof dateString !== 'string') { return '-'; } try { const dateObj = new Date(dateString); if (isNaN(dateObj.getTime())) { return 'Date Invalide'; } const options = { year: 'numeric', month: '2-digit', day: '2-digit' }; let resolvedTimeZone = 'UTC'; if (includeTime) { options.hour = '2-digit'; options.minute = '2-digit'; resolvedTimeZone = undefined; } options.timeZone = resolvedTimeZone; let formatted = dateObj.toLocaleString('fr-FR', options); if (!includeTime && dateString.includes('T')) { formatted = dateObj.toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' }); } else if (!includeTime && dateString.length <= 10) { const parts = dateString.split(/[-/]/); if (parts.length === 3 && !dateString.includes('T')) { formatted = `${parts[2].padStart(2,'0')}/${parts[1].padStart(2,'0')}/${parts[0]}`; } } return formatted; } catch (e) { console.error("Date format error:", dateString, e); return 'Err Format'; } }
 
+
     // --- Enable/Disable Doctor Sections ---
     function enableDoctorSections(enable) { const diagCardBody = document.getElementById('diagCardBody'); const prescCardBody = document.getElementById('prescCardBody'); const elementsToToggle = document.querySelectorAll('#diagCardBody textarea, #diagCardBody button, #prescCardBody textarea, #prescCardBody button, #aiSuggestion input, #aiSuggestion button'); if (enable && currentIPP && currentVisitId /* Check visitId too */) { if(diagCardBody) { diagCardBody.style.opacity = '1'; diagCardBody.style.pointerEvents = 'auto'; } if(prescCardBody) { prescCardBody.style.opacity = '1'; prescCardBody.style.pointerEvents = 'auto'; } elementsToToggle.forEach(el => el ? el.disabled = false : null); const stopDiag = document.getElementById('stopDiagRecordBtn'); const stopPresc = document.getElementById('stopPrescRecordBtn'); if(stopDiag) stopDiag.disabled = true; if(stopPresc) stopPresc.disabled = true; } else { if(diagCardBody) { diagCardBody.style.opacity = '0.5'; diagCardBody.style.pointerEvents = 'none'; } if(prescCardBody) { prescCardBody.style.opacity = '0.5'; prescCardBody.style.pointerEvents = 'none'; } elementsToToggle.forEach(el => el ? el.disabled = true : null); const diagInput = document.getElementById('diagnosticInput'); const prescInput = document.getElementById('prescriptionInput'); const aiSuggestion = document.getElementById('aiSuggestion'); if(diagInput) diagInput.value = ''; if(prescInput) prescInput.value = ''; if(aiSuggestion) aiSuggestion.style.display = 'none'; showMessage('diagMessage', '', ''); showMessage('validationMessage', '', ''); const diagStatus = document.getElementById('diagnosisStatus'); const prescStatus = document.getElementById('prescriptionStatus'); if (diagStatus) diagStatus.innerHTML = ''; if (prescStatus) prescStatus.innerHTML = ''; if (mediaRecorder?.state === 'recording') stopRecording(recordingField); recordingField = null; mediaRecorder = null; audioChunks = []; } }
 
      // --- Function to clear UI (including nurse data) ---
      function clearDoctorUI() {
         currentIPP = null;
-        currentVisitId = null;
+        currentVisitId = null; // Clear visit ID as well
         if (patientInfoDiv) patientInfoDiv.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><i class="fas fa-qrcode"></i><div class="empty-state-message">Prêt à scanner</div><div class="empty-state-description">Utilisez le bouton "Scanner QR".</div></div>`;
-        if (nurseDataDisplayDiv) nurseDataDisplayDiv.style.display = 'none';
+        if (nurseDataDisplayDiv) nurseDataDisplayDiv.style.display = 'none'; // Hide nurse data
         const diagInput = document.getElementById('diagnosticInput');
         const prescInput = document.getElementById('prescriptionInput');
         if (diagInput) diagInput.value = '';
@@ -238,7 +224,7 @@
         showMessage('diagMessage', '', ''); showMessage('validationMessage', '', '');
         const diagStatus = document.getElementById('diagnosisStatus'); const prescStatus = document.getElementById('prescriptionStatus');
         if (diagStatus) diagStatus.innerHTML = ''; if (prescStatus) prescStatus.innerHTML = '';
-        enableDoctorSections(false);
+        enableDoctorSections(false); // Disable fields
         try { const url = new URL(window.location); url.searchParams.delete('ipp'); window.history.replaceState({}, '', url); } catch (e) { console.error("History API error:", e); }
         console.log("Doctor UI cleared.");
      }
@@ -268,9 +254,11 @@
         if (nurseDataDisplayDiv) nurseDataDisplayDiv.style.display = 'none';
         enableDoctorSections(false);
 
+        // *** Using the Corrected Endpoint ***
         fetchWithAuth(`${BASE_URL}${GET_PATIENT_DATA_ENDPOINT}?ipp=${ipp}`)
             .then(responseData => {
                 console.log("Full Patient Data Response:", responseData);
+                 // ** Use the structure from the sample response **
                 if (!responseData || responseData.success === false || !responseData.patientData || responseData.visitId === undefined || responseData.visitId === null) { throw new Error(responseData?.message || "Données patient/visite invalides."); }
                 const patientData = responseData.patientData;
                 currentVisitId = responseData.visitId; // Store Visit ID
@@ -278,8 +266,23 @@
                 const vitalSigns = responseData.vitalSigns || {};
                 currentIPP = ipp; // Store IPP
                 console.log(`Patient Loaded: IPP=${currentIPP}, VisitID=${currentVisitId}`);
+
+                // Use correct date format function
                 const formatDateDisplay = (dateString) => { if (!dateString || typeof dateString !== 'string') return '-'; try { const d=new Date(dateString); if(isNaN(d.getTime())) return 'Date Invalide'; return d.toLocaleDateString('fr-FR',{year:'numeric',month:'long',day:'numeric',timeZone:'UTC'}); } catch(e){ return 'Err Format';}};
-                patientInfoContainer.innerHTML = `<div class="info-group"><div class="info-label">Nom</div><div class="info-value">${sanitizeInput(patientData.nom||'-')}</div></div> <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${sanitizeInput(patientData.prenom||'-')}</div></div> <div class="info-group"><div class="info-label">IPP</div><div class="info-value">${sanitizeInput(currentIPP)}</div></div> <div class="info-group"><div class="info-label">Visite ID</div><div class="info-value" style="font-weight:bold;">${sanitizeInput(currentVisitId)}</div></div> <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${sanitizeInput(patientData.cin||'-')}</div></div> <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${sanitizeInput(patientData.telephone||'-')}</div></div> <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${sanitizeInput(patientData.adresse||'-')}</div></div> <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${sanitizeInput(patientData.mutuelle||'Aucune')}</div></div> <div class="info-group"><div class="info-label">Naissance</div><div class="info-value">${formatDateDisplay(patientData.date_naissance)}</div></div> <div class="info-group"><div class="info-label">Sexe</div><div class="info-value">${sanitizeInput(patientData.sexe === 'M' ? 'Homme' : patientData.sexe === 'F' ? 'Femme' : '-')}</div></div>`;
+
+                // Populate Patient Info Grid (Including Visit ID, using patientData fields)
+                patientInfoContainer.innerHTML = `
+                    <div class="info-group"><div class="info-label">Nom</div><div class="info-value">${sanitizeInput(patientData.nom||'-')}</div></div>
+                    <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${sanitizeInput(patientData.prenom||'-')}</div></div>
+                    <div class="info-group"><div class="info-label">IPP</div><div class="info-value">${sanitizeInput(currentIPP)}</div></div>
+                    <div class="info-group"><div class="info-label">Visite ID</div><div class="info-value" style="font-weight:bold;">${sanitizeInput(currentVisitId)}</div></div>
+                    <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${sanitizeInput(patientData.cin||'-')}</div></div>
+                    <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${sanitizeInput(patientData.telephone||'-')}</div></div>
+                    <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${sanitizeInput(patientData.adresse||'-')}</div></div>
+                    <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${sanitizeInput(patientData.mutuelle||'Aucune')}</div></div>
+                    <div class="info-group"><div class="info-label">Naissance</div><div class="info-value">${formatDate(patientData.date_naissance)}</div></div>
+                    <div class="info-group"><div class="info-label">Sexe</div><div class="info-value">${sanitizeInput(patientData.sexe === 'M' ? 'Homme' : patientData.sexe === 'F' ? 'Femme' : '-')}</div></div>
+                    `;
                  displayNurseData(nurseObservations, vitalSigns);
                  enableDoctorSections(true);
             })
@@ -291,14 +294,14 @@
     function stopRecording(field) { const statusEl = document.getElementById(`${field}Status`); if(mediaRecorder&&mediaRecorder.state==='recording' && recordingField === field){console.log(`Stop rec for ${recordingField}`);mediaRecorder.stop(); if(statusEl) statusEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Arrêt...';}else{console.log("Not recording or wrong field.");} const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn'); const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn'); if (mediaRecorder?.state !== 'recording') {if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; if(statusEl) statusEl.innerHTML='';} }
     function handleRecordingStop(stream) { const field = recordingField; if (!field) { console.warn("handleStop no field."); if(stream) stream.getTracks().forEach(track => track.stop()); return; } const config = getFieldConfig(field); if (!config) { console.error(`Config not found for ${field}`); if(stream) stream.getTracks().forEach(track => track.stop()); return; } console.log(`Stopped for ${field}. Chunks:${audioChunks.length}`); const s=document.getElementById(`${field}Status`); const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn'); const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn'); if(stopBtn) stopBtn.disabled = true; if(audioChunks.length===0){console.warn("No audio.");if(s)s.innerHTML='<i class="fas fa-exclamation-circle"></i> Vide'; if(startBtn) startBtn.disabled = false; setTimeout(() => { if (s?.innerHTML.includes('Vide')) s.innerHTML = ''; }, 4000); } else { const blob=new Blob(audioChunks,{type:'audio/webm'});if(s)s.innerHTML='<i class="fas fa-spinner fa-spin"></i> Transc...';sendAudioToAI(blob,field); audioChunks=[];} recordingField=null; mediaRecorder = null; if(stream) stream.getTracks().forEach(track => track.stop());}
 
-    // --- Send Audio Function (Using Specific Endpoints)---
-    function sendAudioToAI(blob,field){ if(!field){console.error("Field missing");return;} const config = getFieldConfig(field); if(!config || !config.apiEndpoint) { console.error(`Config/Endpoint missing for ${field}`); showMessage(config?.messageId || 'scanResult', 'Erreur config endpoint', 'error'); return; } const ep = BASE_URL + config.apiEndpoint; const fd=new FormData();fd.append("audio",blob,`${field}_${currentIPP}_${Date.now()}.webm`); fd.append("ipp", currentIPP); fd.append("visit_id", currentVisitId); const s=document.getElementById(`${field}Status`); const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn'); const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn'); if(s)s.innerHTML='<i class="fas fa-spinner fa-spin"></i> Envoi...'; fetchWithAuth(ep,{method:"POST",body:fd}).then(r=>r.json()) .then(d=>{ let t = ''; if (d && d.success && typeof d.transcript === 'string') { t = d.transcript; } else { throw new Error(d?.message || 'Format transcription invalide.'); } document.getElementById(field==='diagnosis'?'diagnosticInput':'prescriptionInput').value=t; if(s)s.innerHTML='<i class="fas fa-check"></i> OK'; setTimeout(() => { if (s?.innerHTML.includes('OK')) s.innerHTML = ''; }, 4000); }).catch(e=>{if(!e.message.startsWith('Auth')){if(s)s.innerHTML='<i class="fas fa-times-circle"></i> Err Transc.';showMessage(config.messageId, `Err Transc: ${e.message}`, 'error');}console.error("Transc err:",e);}).finally(()=>{ if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; });}
+    // --- Send Audio Function (Using Specific Endpoints & Visit ID)---
+    function sendAudioToAI(blob,field){ if(!field){console.error("Field missing");return;} const config = getFieldConfig(field); if(!config || !config.apiEndpoint) { console.error(`Config/Endpoint missing for ${field}`); showMessage(config?.messageId || 'scanResult', 'Erreur config endpoint', 'error'); return; } const ep = BASE_URL + config.apiEndpoint; const fd=new FormData();fd.append("audio",blob,`${field}_${currentIPP}_${Date.now()}.webm`); fd.append("ipp", currentIPP); fd.append("visit_id", currentVisitId); /* Include visit_id */ const s=document.getElementById(`${field}Status`); const startBtn = document.getElementById(field === 'diagnosis' ? 'startDiagRecordBtn' : 'startPrescRecordBtn'); const stopBtn = document.getElementById(field === 'diagnosis' ? 'stopDiagRecordBtn' : 'stopPrescRecordBtn'); if(s)s.innerHTML='<i class="fas fa-spinner fa-spin"></i> Envoi...'; fetchWithAuth(ep,{method:"POST",body:fd}).then(r=>r.json()) .then(d=>{ let t = ''; if (d && d.success && typeof d.transcript === 'string') { t = d.transcript; } else { throw new Error(d?.message || 'Format transcription invalide.'); } document.getElementById(field==='diagnosis'?'diagnosticInput':'prescriptionInput').value=t; if(s)s.innerHTML='<i class="fas fa-check"></i> OK'; setTimeout(() => { if (s?.innerHTML.includes('OK')) s.innerHTML = ''; }, 4000); }).catch(e=>{if(!e.message.startsWith('Auth')){if(s)s.innerHTML='<i class="fas fa-times-circle"></i> Err Transc.';showMessage(config.messageId, `Err Transc: ${e.message}`, 'error');}console.error("Transc err:",e);}).finally(()=>{ if(startBtn) startBtn.disabled = false; if(stopBtn) stopBtn.disabled = true; });}
     function getFieldConfig(field) { const map = { diagnosis: { apiEndpoint: TRANSCRIBE_DIAGNOSIS_ENDPOINT, messageId: 'diagMessage' }, prescription: { apiEndpoint: TRANSCRIBE_PRESCRIPTION_ENDPOINT, messageId: 'validationMessage' } }; return map[field]; }
 
     // --- Form Submission Functions (Updated to use visitId) ---
-    function submitDiagnostic() { const diag=document.getElementById("diagnosticInput").value;if(!diag||!currentIPP||!currentVisitId){showMessage("diagMessage",`Diagnostic vide ou patient/visite non chargé.`,"warning");return;} showMessage("diagMessage","","");const saveButton = document.getElementById('submitDiagBtn'); if(saveButton) saveButton.disabled = true; fetchWithAuth(`${BASE_URL}${UPDATE_DIAGNOSIS_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, diagnostic:diag})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("diagMessage","<i class='fas fa-check-circle'></i> Diagnostic Enregistré.","success");}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("diagMessage",`<i class='fas fa-exclamation-triangle'></i> Err Enregistrement: ${e.message}`,"error");}console.error("Err submitDiag:",e);}).finally(()=> { if(saveButton) saveButton.disabled = false; });}
-    function submitPrescription() { const presc=document.getElementById("prescriptionInput").value; const submitBtn = document.getElementById('submitPrescBtn'); if(!presc||!currentIPP||!currentVisitId){showMessage("validationMessage",`Prescription vide ou patient/visite non chargé.`,"warning");aiSuggestionDiv.style.display="none";return;} showMessage("validationMessage","","");aiSuggestionDiv.style.display="none"; if(submitBtn) submitBtn.disabled = true; fetchWithAuth(`${BASE_URL}${SUBMIT_PRESCRIPTION_AI_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, prescription:presc})}) .then(r=>r.json()) .then(data=>{ console.log("AI Raw:",JSON.stringify(data,null,2)); if (data && data.success === true && data.suggestion) { const suggestionData = data.suggestion; console.log("Extracted suggestion:", suggestionData); aiSuggestionDiv.style.display="block"; document.getElementById("medicament").value=suggestionData.medicament||''; const convertDate = (dateStr) => { if(!dateStr||typeof dateStr!=='string'||!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)){ console.warn(`Invalid AI date:"${dateStr}"`); return ''; }; const p=dateStr.split('/'); if(p.length!==3) return ''; const month=parseInt(p[0],10); const day=parseInt(p[1],10); const year=parseInt(p[2],10); if(isNaN(month)||isNaN(day)||isNaN(year)||month<1||month>12||day<1||day>31||year<1900){ console.warn(`Invalid date parts: M=${month},D=${day},Y=${year}`); return ''; } return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }; document.getElementById("start_date").value = convertDate(suggestionData.start_date); document.getElementById("end_date").value = convertDate(suggestionData.end_date); if(suggestionData.schedule){ document.getElementById("matin").checked=!!suggestionData.schedule.matin; document.getElementById("apres_midi").checked=!!suggestionData.schedule.apres_midi; document.getElementById("soir").checked=!!suggestionData.schedule.soir; document.getElementById("nuit").checked=!!suggestionData.schedule.nuit; } else { document.getElementById("matin").checked=false; document.getElementById("apres_midi").checked=false; document.getElementById("soir").checked=false; document.getElementById("nuit").checked=false; } aiSuggestionDiv.scrollIntoView({behavior:'smooth'}); } else { throw new Error(data?.message || "Réponse IA invalide."); } }).catch(e=>{ if(!e.message.startsWith('Auth')){ showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`,"error"); } console.error("Err submitPresc:",e); aiSuggestionDiv.style.display="none"; }).finally(()=>{ if(submitBtn) submitBtn.disabled = false; }); }
-    function validatePrescription() { const med=document.getElementById("medicament").value,sd=document.getElementById("start_date").value,ed=document.getElementById("end_date").value; const validateBtn = document.getElementById('validatePrescBtn'); if(!med||!sd||!ed||!currentIPP||!currentVisitId){showMessage("validationMessage",`Champs requis ou patient/visite non chargé.`,"warning");return;} showMessage("validationMessage","",""); if(validateBtn) validateBtn.disabled = true; const sched={matin:document.getElementById("matin").checked,apres_midi:document.getElementById("apres_midi").checked,soir:document.getElementById("soir").checked,nuit:document.getElementById("nuit").checked};const cvAPI=(dt)=>{if(!dt||!/^\d{4}-\d{2}-\d{2}$/.test(dt))return '';const p=dt.split('-');if(p.length!==3)return '';return `${p[1]}/${p[2]}/${p[0]}`}; const apiSD=cvAPI(sd),apiED=cvAPI(ed);fetchWithAuth(`${BASE_URL}${VALIDATE_PRESCRIPTION_AI_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, final_prescription:document.getElementById("prescriptionInput").value,start_date:apiSD,end_date:apiED,schedule:sched,medicament_name:med})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("validationMessage","<i class='fas fa-check-circle'></i> Prescription validée.","success"); aiSuggestionDiv.style.display = 'none';}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err valid: ${e.message}`,"error");}console.error("Err validatePresc:",e);}).finally(()=>{ if(validateBtn) validateBtn.disabled = false; });}
+    function submitDiagnostic() { const diag=document.getElementById("diagnosticInput").value;if(!diag||!currentIPP||!currentVisitId){showMessage("diagMessage",`Diagnostic vide ou patient/visite non chargé.`,"warning");return;} showMessage("diagMessage","","");const saveButton = document.getElementById('submitDiagBtn'); if(saveButton) saveButton.disabled = true; fetchWithAuth(`${BASE_URL}${UPDATE_DIAGNOSIS_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, /* Use stored visitId */ diagnostic:diag})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("diagMessage","<i class='fas fa-check-circle'></i> Diagnostic Enregistré.","success");}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("diagMessage",`<i class='fas fa-exclamation-triangle'></i> Err Enregistrement: ${e.message}`,"error");}console.error("Err submitDiag:",e);}).finally(()=> { if(saveButton) saveButton.disabled = false; });}
+    function submitPrescription() { const presc=document.getElementById("prescriptionInput").value; const submitBtn = document.getElementById('submitPrescBtn'); if(!presc||!currentIPP||!currentVisitId){showMessage("validationMessage",`Prescription vide ou patient/visite non chargé.`,"warning");aiSuggestionDiv.style.display="none";return;} showMessage("validationMessage","","");aiSuggestionDiv.style.display="none"; if(submitBtn) submitBtn.disabled = true; fetchWithAuth(`${BASE_URL}${SUBMIT_PRESCRIPTION_AI_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, /* Use stored visitId */ prescription:presc})}) .then(r=>r.json()) .then(data=>{ console.log("AI Raw:",JSON.stringify(data,null,2)); if (data && data.success === true && data.suggestion) { const suggestionData = data.suggestion; console.log("Extracted suggestion:", suggestionData); aiSuggestionDiv.style.display="block"; document.getElementById("medicament").value=suggestionData.medicament||''; const convertDate = (dateStr) => { if(!dateStr||typeof dateStr!=='string'||!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(dateStr)){ console.warn(`Invalid AI date:"${dateStr}"`); return ''; }; const p=dateStr.split('/'); if(p.length!==3) return ''; const month=parseInt(p[0],10); const day=parseInt(p[1],10); const year=parseInt(p[2],10); if(isNaN(month)||isNaN(day)||isNaN(year)||month<1||month>12||day<1||day>31||year<1900){ console.warn(`Invalid date parts: M=${month},D=${day},Y=${year}`); return ''; } return `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }; document.getElementById("start_date").value = convertDate(suggestionData.start_date); document.getElementById("end_date").value = convertDate(suggestionData.end_date); if(suggestionData.schedule){ document.getElementById("matin").checked=!!suggestionData.schedule.matin; document.getElementById("apres_midi").checked=!!suggestionData.schedule.apres_midi; document.getElementById("soir").checked=!!suggestionData.schedule.soir; document.getElementById("nuit").checked=!!suggestionData.schedule.nuit; } else { document.getElementById("matin").checked=false; document.getElementById("apres_midi").checked=false; document.getElementById("soir").checked=false; document.getElementById("nuit").checked=false; } aiSuggestionDiv.scrollIntoView({behavior:'smooth'}); } else { throw new Error(data?.message || "Réponse IA invalide."); } }).catch(e=>{ if(!e.message.startsWith('Auth')){ showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err AI: ${e.message}`,"error"); } console.error("Err submitPresc:",e); aiSuggestionDiv.style.display="none"; }).finally(()=>{ if(submitBtn) submitBtn.disabled = false; }); }
+    function validatePrescription() { const med=document.getElementById("medicament").value,sd=document.getElementById("start_date").value,ed=document.getElementById("end_date").value; const validateBtn = document.getElementById('validatePrescBtn'); if(!med||!sd||!ed||!currentIPP||!currentVisitId){showMessage("validationMessage",`Champs requis ou patient/visite non chargé.`,"warning");return;} showMessage("validationMessage","",""); if(validateBtn) validateBtn.disabled = true; const sched={matin:document.getElementById("matin").checked,apres_midi:document.getElementById("apres_midi").checked,soir:document.getElementById("soir").checked,nuit:document.getElementById("nuit").checked};const cvAPI=(dt)=>{if(!dt||!/^\d{4}-\d{2}-\d{2}$/.test(dt))return '';const p=dt.split('-');if(p.length!==3)return '';return `${p[1]}/${p[2]}/${p[0]}`}; const apiSD=cvAPI(sd),apiED=cvAPI(ed);fetchWithAuth(`${BASE_URL}${VALIDATE_PRESCRIPTION_AI_ENDPOINT}`,{method:"POST",body:JSON.stringify({ipp:currentIPP, visit_id: currentVisitId, /* Use stored visitId */ final_prescription:document.getElementById("prescriptionInput").value,start_date:apiSD,end_date:apiED,schedule:sched,medicament_name:med})}).then(r=>r.ok?r.json().catch(()=>({})):r.text().then(t=>{throw new Error(t||`Err ${r.status}`)})).then(()=>{showMessage("validationMessage","<i class='fas fa-check-circle'></i> Prescription validée.","success"); aiSuggestionDiv.style.display = 'none';}).catch(e=>{if(!e.message.startsWith('Auth')){showMessage("validationMessage",`<i class='fas fa-exclamation-triangle'></i> Err valid: ${e.message}`,"error");}console.error("Err validatePresc:",e);}).finally(()=>{ if(validateBtn) validateBtn.disabled = false; });}
 
     // --- QR SCANNER CODE ---
     function updateScanStatus(message, type = 'info') { showMessage('scanResult', message, type); }

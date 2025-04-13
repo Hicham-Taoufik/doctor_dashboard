@@ -101,11 +101,24 @@
 
     <!-- Patient Info Card -->
     <div class="card">
-      <div class="card-header"> <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations du Patient </h2> <div class="card-actions"> <i class="fas fa-user"></i> </div> </div>
+      <div class="card-header">
+        <h2 class="card-title"> <i class="fas fa-user-circle"></i> Informations Patient & Visite </h2> <!-- Title updated -->
+        <div class="card-actions"> <i class="fas fa-notes-medical"></i> </div> <!-- Icon updated -->
+      </div>
       <div class="card-body">
+          <!-- Patient Demographics -->
           <div id="patientInfo" class="patient-info">
-               <div class="empty-state" style="grid-column: 1 / -1;"> <i class="fas fa-qrcode"></i> <div class="empty-state-message">Prêt à scanner</div> <div class="empty-state-description">Utilisez le bouton "Scanner QR" ou chargez un patient via l'URL.</div> </div>
+               <div class="empty-state" style="grid-column: 1 / -1;"> <i class="fas fa-qrcode"></i> <div class="empty-state-message">Prêt à scanner</div> <div class="empty-state-description">Utilisez le bouton "Scanner QR".</div> </div>
           </div>
+
+          <!-- Nurse Data Display Area (Added Back) -->
+          <div id="nurseDataDisplay" class="nurse-data-display" style="display: none; margin-top: 20px; border-top: 1px solid var(--gray-200); padding-top: 15px;">
+              <h4><i class="fas fa-user-nurse"></i> Données Infirmières</h4>
+              <div id="nurseObservationsDisplay"><p><strong>Observation:</strong> <span>-</span></p></div>
+              <div id="nurseVitalsDisplay"><p><strong>Signes Vitaux (derniers):</strong> <span>-</span></p></div>
+          </div>
+          <!-- End Nurse Data -->
+
       </div>
     </div>
 

@@ -332,7 +332,6 @@
 
   <!-- jsQR Library Script -->
   <script src="./jsQR.js"></script>
-
 <script>
     // --- Configuration & Constants ---
     const CONFIG = {
@@ -1643,8 +1642,7 @@
         ['mousemove', 'keypress', 'click', 'scroll'].forEach(event => {
             document.addEventListener(event, resetSessionTimeout, { passive: true });
         });
-        } // <-- *** CORRECTED: Added missing closing brace ***
-    } // Add this closing brace to properly close the script block
+    } // <-- *** THIS IS THE CORRECTED CLOSING BRACE ***
 
     // --- Start the application ---
     document.addEventListener('DOMContentLoaded', initializeDoctorDashboard);

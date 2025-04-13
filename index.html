@@ -332,110 +332,27 @@
 
   <!-- jsQR Library Script -->
   <script src="./jsQR.js"></script>
-  <script>
+
+<script>
     // --- Configuration & Constants ---
     const CONFIG = {
-      API_BASE_URL: 'https://workflows.aphelionxinnovations.com',
-      LOGIN_PAGE_URL: 'https://hicham-taoufik.github.io/login/',
-      QR_TARGET_BASE_URL: 'app://medilink/patient',
-      TOKEN_KEY: 'authToken',
-      USER_ID_KEY: 'userIdentifier',
-      SESSION_TIMEOUT: 30 * 60 * 1000,
-      MESSAGE_DISPLAY_TIME: 5000,
-      TOAST_DISPLAY_TIME: 4000,
-      GET_VISIT_DETAILS_ENDPOINT: "/webhook/doctor/get-visit-details",
-      GLOBAL_DICTATION_ENDPOINT: "/webhook/process-visit-dictation",
-      TRANSCRIBE_FIELD_ENDPOINT: "/webhook/process-visit-dictation",
-      UPDATE_CONSULTATION_ENDPOINT: "/webhook/doctor/update-consultation",
-      SUBMIT_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-submit-prescription",
-      VALIDATE_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-validate-prescription"
+        API_BASE_URL: 'https://workflows.aphelionxinnovations.com',
+        LOGIN_PAGE_URL: 'https://hicham-taoufik.github.io/login/', // Absolute URL
+        QR_TARGET_BASE_URL: 'app://medilink/patient', // MUST MATCH RECEPTION
+        TOKEN_KEY: 'authToken',
+        USER_ID_KEY: 'userIdentifier',
+        SESSION_TIMEOUT: 30 * 60 * 1000, // 30 minutes
+        MESSAGE_DISPLAY_TIME: 5000,
+        TOAST_DISPLAY_TIME: 4000,
+        // API Endpoints
+        GET_VISIT_DETAILS_ENDPOINT: "/webhook/doctor/get-visit-details",
+        GLOBAL_DICTATION_ENDPOINT: "/webhook/process-visit-dictation",
+        UPDATE_CONSULTATION_ENDPOINT: "/webhook/doctor/update-consultation",
+        SUBMIT_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-submit-prescription",
+        VALIDATE_PRESCRIPTION_AI_ENDPOINT: "/webhook/doctor-validate-prescription",
+        TRANSCRIBE_FIELD_ENDPOINT: "/webhook/process-visit-dictation" // Explicit path, used by sendAudioToAI
     };
 
-    // --- Authenticated fetch helper ---
-    function fetchWithAuth(url, options = {}) {
-      const token = localStorage.getItem(CONFIG.TOKEN_KEY);
-      if (!token) {
-        alert('Session expirée.');
-        window.location.href = CONFIG.LOGIN_PAGE_URL;
-        return Promise.reject();
-      }
-      options.headers = {
-        ...(options.headers || {}),
-        'Authorization': `Bearer ${token}`
-      };
-      // Let fetch set Content-Type for FormData
-      if (!(options.body instanceof FormData)) {
-        options.headers['Content-Type'] = 'application/json';
-      }
-      return fetch(url, options).then(async res => {
-        if (res.status === 401 || res.status === 403) {
-          alert('Auth error, veuillez vous reconnecter.');
-          localStorage.removeItem(CONFIG.TOKEN_KEY);
-          window.location.href = CONFIG.LOGIN_PAGE_URL;
-          throw new Error('Auth failed');
-        }
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || res.statusText);
-        }
-        const ct = res.headers.get('content-type') || '';
-        return ct.includes('application/json') ? res.json() : res.text().then(t => ({ success: true, data: t }));
-      });
-    }
-
-    // --- Global Dictation ---
-    function sendGlobalAudioToBackend(blob) {
-      const formData = new FormData();
-      formData.append("audio", blob, `global_dictation_${currentIPP}.webm`);
-      formData.append("ipp", currentIPP);
-      formData.append("visit_id", currentVisitId);
-      formData.append("mode", "global");
-
-      const url = CONFIG.API_BASE_URL + CONFIG.GLOBAL_DICTATION_ENDPOINT;
-      console.log("Posting global audio to:", url);
-
-      fetchWithAuth(url, { method: "POST", body: formData })
-        .then(data => {
-          if (data.success && data.extractedData) {
-            populateDoctorFields(data.extractedData);
-            showMessage('globalRecordMessage', 'Dictée complète traitée.', 'success');
-          } else {
-            throw new Error(data.message || "Échec dictée globale");
-          }
-        })
-        .catch(err => {
-          console.error("Global dictation error:", err);
-          showMessage('globalRecordMessage', `Erreur: ${err.message}`, 'error');
-        });
-    }
-
-    // --- Individual Field Dictation ---
-    function sendAudioToAI(blob, field) {
-      const cfg = getFieldConfig(field);
-      const formData = new FormData();
-      formData.append("audio", blob, `${field}_${currentIPP}.webm`);
-      formData.append("ipp", currentIPP);
-      formData.append("visit_id", currentVisitId);
-      formData.append("mode", "individual");
-      formData.append("field", field);
-
-      const url = CONFIG.API_BASE_URL + CONFIG.TRANSCRIBE_FIELD_ENDPOINT;
-      console.log(`Posting ${field} audio to:`, url);
-
-      fetchWithAuth(url, { method: "POST", body: formData })
-        .then(data => {
-          if (data.success && data.transcript != null) {
-            document.getElementById(cfg.inputId).value = data.transcript;
-            showMessage(cfg.messageId, 'Transcription reçue.', 'success');
-          } else {
-            throw new Error(data.message || "Échec transcription");
-          }
-        })
-        .catch(err => {
-          console.error(`Transcription error for ${field}:`, err);
-          showMessage(cfg.messageId, `Err Transc.: ${err.message}`, 'error');
-        });
-    }
     // --- Globals ---
     let currentIPP = null;
     let currentVisitId = null;

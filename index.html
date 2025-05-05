@@ -932,14 +932,6 @@ function convertISOToBackendDate(isoStr) {
 </div>
             </div>
             <div class="input-group">
-              <label for="start_date">Date début (jj/mm/aaaa):</label>
-              <input type="text" class="french-date" id="start_date" placeholder="jj/mm/aaaa" value="${convertToFrenchDate(suggestionData.start_date)}"/>
-            </div>
-            <div class="input-group">
-              <label for="end_date">Date fin (jj/mm/aaaa):</label>
-              <input type="text" class="french-date" id="end_date" placeholder="jj/mm/aaaa" value="${convertToFrenchDate(suggestionData.end_date)}"/>
-            </div>
-            <div class="input-group">
               <label>Horaires:</label>
               <div class="checkbox-wrapper">
                 <label class="checkbox-item"><input type="checkbox" id="matin" ${suggestionData.schedule?.matin?'checked':''}/> Matin</label>

@@ -796,7 +796,16 @@
                          <div class="input-group"> <label for="end_date">Date fin:</label> <input type="date" id="end_date"/> </div>
                          <div class="input-group"> <label>Horaires:</label> <div class="checkbox-wrapper"> <label class="checkbox-item"><input type="checkbox" id="matin"/> Matin</label> <label class="checkbox-item"><input type="checkbox" id="apres_midi"/> A-M</label> <label class="checkbox-item"><input type="checkbox" id="soir"/> Soir</label> <label class="checkbox-item"><input type="checkbox" id="nuit"/> Nuit</label> </div> </div>
                          <div class="btn-group"> <button type="button" class="btn btn-success" id="validatePrescBtn" onclick="validateAISuggestion()"> <i class="fas fa-check-double"></i> Valider & Enregistrer Suggestion </button> </div>`;
-                     const convertDateToInput = (s) => { try { if (!s || typeof s !== 'string' || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) return ''; const p=s.split('/'); return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; } catch { return ''; } };
+const convertDateToInput = (s) => {
+  try {
+    if (!s || typeof s !== 'string' || !/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) return '';
+    const [month, day, year] = s.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // MM/DD/YYYY ➜ YYYY-MM-DD
+  } catch {
+    return '';
+  }
+};
+
                      document.getElementById("medicament").value = d.medicament || '';
                      document.getElementById("start_date").value = convertDateToInput(d.start_date);
                      document.getElementById("end_date").value = convertDateToInput(d.end_date);

@@ -546,19 +546,19 @@
 
     function displayNurseData(observations, vitals){
       const container=document.getElementById('nurseDataDisplay');
-      if ((!observations||!observations.observation_text) && (!vitals||!vitals.timestamp)){
+      if ((!observations||!observations.observationtext) && (!vitals||!vitals.recordedat)){
         container.style.display='none';
         return;
       }
       let obsDateStr='', obsText='';
-      if (observations&&observations.observation_text){
-        obsDateStr = observations.observation_date_time ?
-          `(${formatDate(observations.observation_date_time,true)})` : '';
-        obsText = observations.observation_text;
+      if (observations&&observations.observationtext){
+        obsDateStr = observations.observationdatetime ?
+          `(${formatDate(observations.observationdatetime,true)})` : '';
+        obsText = observations.observationtext;
       }
       let vitalsHTML='';
-      if (vitals&&vitals.timestamp){
-        const vitDate=formatDate(vitals.timestamp,true);
+      if (vitals&&vitals.recordedat){
+        const vitDate=formatDate(vitals.recordedat,true);
         const lines=[];
         if (vitals.temperature!=null){
           lines.push(`
@@ -567,18 +567,18 @@
               <strong>Température:</strong> ${vitals.temperature}°C
             </div>`);
         }
-        if (vitals.tension_systolic!=null&&vitals.tension_diastolic!=null){
+        if (vitals.tensionsystolic!=null&&vitals.tensiondiastolic!=null){
           lines.push(`
             <div class="nurse-vital-line">
               <i class="fas fa-heartbeat" style="margin-right:5px;"></i>
-              <strong>TA:</strong> ${vitals.tension_systolic}/${vitals.tension_diastolic} mmHg
+              <strong>TA:</strong> ${vitals.tensionsystolic}/${vitals.tensiondiastolic} mmHg
             </div>`);
         }
-        if (vitals.heart_rate!=null){
+        if (vitals.heartrate!=null){
           lines.push(`
             <div class="nurse-vital-line">
               <i class="fas fa-heart" style="margin-right:5px;"></i>
-              <strong>FC:</strong> ${vitals.heart_rate}/min
+              <strong>FC:</strong> ${vitals.heartrate}/min
             </div>`);
         }
         if (vitals.spo2!=null){

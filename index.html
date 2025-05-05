@@ -627,16 +627,16 @@
           currentVisitId=data.visitId;
           const p=data.patientData;
           infoDiv.innerHTML=`
-            <div class="info-group"><div class="info-label">Nom</div><div class="info-value">${sanitizeInput(p.nom)}</div></div>
-            <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${sanitizeInput(p.prenom)}</div></div>
+            <div class="info-group"><div class="info-label">Nom</div><div class="info-value">${sanitizeInput(p.firstname)}</div></div>
+            <div class="info-group"><div class="info-label">Prénom</div><div class="info-value">${sanitizeInput(p.lastname)}</div></div>
             <div class="info-group"><div class="info-label">IPP</div><div class="info-value">${sanitizeInput(currentIPP)}</div></div>
             <div class="info-group"><div class="info-label">Visite ID</div><div class="info-value">${sanitizeInput(currentVisitId)}</div></div>
             <div class="info-group"><div class="info-label">CIN</div><div class="info-value">${sanitizeInput(p.cin)}</div></div>
-            <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${sanitizeInput(p.telephone)}</div></div>
-            <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${sanitizeInput(p.adresse)}</div></div>
-            <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${sanitizeInput(p.mutuelle||'Aucune')}</div></div>
-            <div class="info-group"><div class="info-label">Naissance</div><div class="info-value">${formatDate(p.date_naissance)}</div></div>
-            <div class="info-group"><div class="info-label">Sexe</div><div class="info-value">${p.sexe==='M'?'Homme':p.sexe==='F'?'Femme':'-'}</div></div>`;
+            <div class="info-group"><div class="info-label">Téléphone</div><div class="info-value">${sanitizeInput(p.phonenumber)}</div></div>
+            <div class="info-group"><div class="info-label">Adresse</div><div class="info-value">${sanitizeInput(p.address)}</div></div>
+            <div class="info-group"><div class="info-label">Mutuelle</div><div class="info-value">${sanitizeInput(p.insurancename||'Aucune')}</div></div>
+            <div class="info-group"><div class="info-label">Naissance</div><div class="info-value">${formatDate(p.dateofbirth)}</div></div>
+            <div class="info-group"><div class="info-label">Sexe</div><div class="info-value">${p.gender==='M'?'Homme':p.gender==='F'?'Femme':'-'}</div></div>`;
           displayNurseData(data.nurseObservations||{}, data.vitalSigns||{});
           enableDoctorSections(true);
           enableFullDictationSection(true);

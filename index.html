@@ -470,7 +470,17 @@
       const [d,m,y]=frenchDateStr.split('/');
       return `${m}/${d}/${y}`;
     }
+   function convertToISODate(dateStr) {
+  // Converts from "MM/DD/YYYY" to "YYYY-MM-DD"
+  const [month, day, year] = dateStr.split('/');
+  return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+}
 
+function convertISOToBackendDate(isoStr) {
+  // Converts from "YYYY-MM-DD" to "MM/DD/YYYY"
+  const [year, month, day] = isoStr.split('-');
+  return `${month}/${day}/${year}`;
+}
     // Enable/disable sections
     function enableDoctorSections(enable){
       const selectors = [
@@ -908,10 +918,18 @@
           }
           aiDiv.style.display='block';
           aiDiv.innerHTML=`
-            <h3><i class="fas fa-lightbulb"></i> Suggestion IA</h3>
-            <div class="input-group">
-              <label for="medicament">Médicament:</label>
-              <input type="text" id="medicament" value="${suggestionData.medicament||''}"/>
+<div class="input-group">
+  <label for="medicament">Médicament:</label>
+  <input type="text" id="medicament" value="${suggestionData.medicament || ''}"/>
+</div>
+<div class="input-group">
+  <label for="start_date">Date début:</label>
+  <input type="date" id="start_date" value="${convertToISODate(suggestionData.start_date)}"/>
+</div>
+<div class="input-group">
+  <label for="end_date">Date fin:</label>
+  <input type="date" id="end_date" value="${convertToISODate(suggestionData.end_date)}"/>
+</div>
             </div>
             <div class="input-group">
               <label for="start_date">Date début (jj/mm/aaaa):</label>
@@ -960,8 +978,9 @@
       showMessage(messageEl.id,'','');
       validateBtn.disabled=true;
 
-      const backendSD=convertFrenchToBackendDate(frenchSD);
-      const backendED=convertFrenchToBackendDate(frenchED);
+const backendSD = convertISOToBackendDate(frenchSD);
+const backendED = convertISOToBackendDate(frenchED);
+
 
       fetchWithAuth(`${BASE_URL}${VALIDATE_PRESCRIPTION_AI_ENDPOINT}`,{
         method:'POST',
